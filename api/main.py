@@ -86,14 +86,28 @@ app.include_router(api)
 
 
 # ============================================================
-#  Landing page — siempre en "/"
+#  Landing page + activos estáticos del landing
 # ============================================================
 
-_LANDING = Path(__file__).parent.parent / "landing" / "index.html"
+_LANDING_DIR = Path(__file__).parent.parent / "landing"
+_LANDING = _LANDING_DIR / "index.html"
 
 
 @app.get("/", response_class=FileResponse, include_in_schema=False)
 async def serve_landing():
+    return FileResponse(str(_LANDING))
+
+
+# Activos estáticos del landing (favicon.svg, páginas legales HTML, etc.)
+@app.get("/{filename}", response_class=FileResponse, include_in_schema=False)
+async def serve_landing_static(filename: str):
+    """Sirve archivos estáticos del landing — favicon, páginas legales, etc."""
+    # Excluir rutas que pertenecen a otros handlers
+    if filename.startswith(("api", "app", "portal")):
+        return FileResponse(str(_LANDING))
+    requested = _LANDING_DIR / filename
+    if requested.exists() and requested.is_file():
+        return FileResponse(str(requested))
     return FileResponse(str(_LANDING))
 
 
