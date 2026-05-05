@@ -196,7 +196,7 @@ export default function PortalCliente() {
         {/* Nota legal */}
         <div className="bg-gray-100 dark:bg-gray-800/50 rounded-2xl p-4 text-xs text-gray-500 dark:text-gray-400 text-center leading-relaxed">
           Este reporte es de carácter informativo y confidencial. Los montos reflejan contingencias estimadas al día de hoy
-          y no constituyen deuda firme ante la SET. Los valores están expresados en Guaraníes (PYG).
+          y no constituyen deuda firme ante la DNIT. Los valores están expresados en Guaraníes (PYG).
           Informe generado por <strong>Inteliaudit</strong> — {firma.nombre}.
         </div>
       </div>

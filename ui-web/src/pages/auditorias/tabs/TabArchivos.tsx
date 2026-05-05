@@ -18,7 +18,7 @@ interface TipoConfig {
 const TIPOS: TipoConfig[] = [
   { id: 'rg90', label: 'RG 90', desc: 'XLSX con detalle de comprobantes IVA descargado de Marangatú', accept: '.xlsx,.xls', necesitaPeriodo: true, color: 'purple' },
   { id: 'hechauka', label: 'HECHAUKA', desc: 'XLSX con información de terceros (retenciones recibidas)', accept: '.xlsx,.xls', necesitaPeriodo: true, color: 'blue' },
-  { id: 'estado_cuenta', label: 'Estado de cuenta SET', desc: 'PDF descargado de Marangatú con situación fiscal', accept: '.pdf', necesitaPeriodo: false, color: 'orange' },
+  { id: 'estado_cuenta', label: 'Estado de cuenta DNIT', desc: 'PDF descargado de Marangatú con situación fiscal', accept: '.pdf', necesitaPeriodo: false, color: 'orange' },
   { id: 'estados_contables', label: 'Estados contables', desc: 'Balance / cuadro de resultados del ejercicio', accept: '.xlsx,.xls,.csv', necesitaPeriodo: false, color: 'green' },
   { id: 'banco', label: 'Extracto bancario', desc: 'Movimientos bancarios del período', accept: '.xlsx,.xls,.csv,.pdf', necesitaPeriodo: false, color: 'cyan' },
   { id: 'comprobante', label: 'Comprobantes sueltos', desc: 'PDF o XML de comprobantes individuales', accept: '.pdf,.xml,.jpg,.jpeg,.png', necesitaPeriodo: false, color: 'indigo' },

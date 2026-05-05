@@ -92,8 +92,8 @@ export default function ClienteDetail() {
         {[
           { label: 'Actividad', value: cliente.actividad_principal ?? '—' },
           { label: 'Dirección', value: cliente.direccion ?? '—' },
-          { label: 'Email SET', value: cliente.email_dnit ?? '—' },
-          { label: 'Inscripción SET', value: fecha(cliente.fecha_inscripcion) },
+          { label: 'Email DNIT', value: cliente.email_dnit ?? '—' },
+          { label: 'Inscripción DNIT', value: fecha(cliente.fecha_inscripcion) },
         ].map((item, i) => (
           <div key={i} className="card p-4">
             <p className="input-label">{item.label}</p>
@@ -232,7 +232,7 @@ export default function ClienteDetail() {
             Las credenciales se cifran con AES-256 antes de guardarse. Inteliaudit nunca las almacena en texto plano.
           </div>
           <div>
-            <label className="input-label label-required">Usuario SET (RUC o email)</label>
+            <label className="input-label label-required">Usuario DNIT (RUC o email)</label>
             <input className="input-field" placeholder="80012345-6" value={cred.usuario_set} onChange={e => setCred(c => ({ ...c, usuario_set: e.target.value }))} />
           </div>
           <div>

@@ -98,7 +98,7 @@ export default function ClientesList() {
                   <th className="table-cell">Razón social</th>
                   <th className="table-cell hidden md:table-cell">Régimen</th>
                   <th className="table-cell hidden lg:table-cell">Actividad</th>
-                  <th className="table-cell">Estado SET</th>
+                  <th className="table-cell">Estado DNIT</th>
                   <th className="table-cell"></th>
                 </tr>
               </thead>
@@ -172,7 +172,7 @@ export default function ClientesList() {
             <input className="input-field" placeholder="Av. España 123, Asunción" value={form.direccion} onChange={e => set('direccion', e.target.value)} />
           </div>
           <div>
-            <label className="input-label">Email SET</label>
+            <label className="input-label">Email DNIT</label>
             <input className="input-field" type="email" placeholder="contacto@empresa.com.py" value={form.email_dnit} onChange={e => set('email_dnit', e.target.value)} />
           </div>
         </div>
