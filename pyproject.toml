@@ -14,7 +14,7 @@ dependencies = [
     "aiosqlite>=0.20",
     "alembic>=1.13",
     # Config & validación
-    "pydantic>=2.7",
+    "pydantic[email]>=2.7",
     "pydantic-settings>=2.3",
     "python-dotenv>=1.0",
     # Scraping
