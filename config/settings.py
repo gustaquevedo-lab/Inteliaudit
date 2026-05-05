@@ -9,7 +9,18 @@ class Settings(BaseSettings):
     )
 
     # Base de datos
+    # Railway inyecta DATABASE_URL como postgres://... — lo normalizamos a asyncpg
     database_url: str = "sqlite+aiosqlite:///./inteliaudit.db"
+
+    @property
+    def async_database_url(self) -> str:
+        url = self.database_url
+        # Railway / Heroku usan postgres:// — SQLAlchemy asyncpg necesita postgresql+asyncpg://
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgresql://") and "+asyncpg" not in url:
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return url
 
     # Claude API
     anthropic_api_key: str = ""

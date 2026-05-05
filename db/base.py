@@ -7,7 +7,7 @@ from config.settings import settings
 
 
 engine = create_async_engine(
-    settings.database_url,
+    settings.async_database_url,
     echo=settings.debug,
     # Para SQLite: evitar errores de threading en async
     connect_args={"check_same_thread": False} if settings.is_sqlite else {},
