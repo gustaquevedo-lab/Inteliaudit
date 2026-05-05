@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inteliaudit — Dashboard</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ─── Reset & Variables ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --azul:        #2E84F0;
+      --azul-dark:   #1558B0;
+      --verde:       #22C47E;
+      --verde-dark:  #169058;
+      --navy:        #091624;
+      --gris:        #A8B4C8;
+      --border:      #E4EAF4;
+      --bg:          #F5F7FB;
+      --white:       #FFFFFF;
+      --rojo:        #E53E3E;
+      --ambar:       #D97706;
+      --sidebar-w:   240px;
+      --header-h:    60px;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--navy);
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    /* ─── Layout ─── */
+    .app-layout { display: flex; min-height: 100vh; }
+
+    /* ─── Sidebar ─── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+    }
+    .sidebar-logo {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .logo-text { font-size: 22px; font-weight: 700; line-height: 1; }
+    .logo-inteli { color: var(--azul); }
+    .logo-audit { color: var(--verde); font-weight: 400; }
+    .logo-dot { color: var(--verde); }
+    .sidebar-client {
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 11px;
+      color: var(--gris);
+    }
+    .sidebar-client strong { color: white; font-size: 12px; display: block; margin-bottom: 2px; }
+    .sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+    .nav-section { padding: 0 12px; margin-bottom: 8px; }
+    .nav-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gris);
+      padding: 8px 8px 4px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.6);
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s;
+      border: none; background: none; width: 100%; text-align: left;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: white; }
+    .nav-item.active { background: var(--azul); color: white; }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+    .nav-badge {
+      margin-left: auto;
+      background: var(--rojo);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+      min-width: 20px;
+      text-align: center;
+    }
+    .nav-badge.verde { background: var(--verde); }
+
+    /* ─── Main ─── */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+
+    /* ─── Header ─── */
+    .header {
+      height: var(--header-h);
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .header-title { font-size: 16px; font-weight: 600; color: var(--navy); }
+    .header-period {
+      font-size: 12px; color: var(--gris);
+      background: var(--bg);
+      padding: 4px 12px; border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+    .header-actions { display: flex; gap: 10px; }
+    .btn {
+      padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none; transition: all 0.15s; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-primary { background: var(--azul); color: white; }
+    .btn-primary:hover { background: var(--azul-dark); }
+    .btn-secondary { background: var(--bg); color: var(--navy); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: var(--azul); color: var(--azul); }
+    .btn-success { background: var(--verde); color: white; }
+    .btn-success:hover { background: var(--verde-dark); }
+    .btn-danger { background: var(--rojo); color: white; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+    /* ─── Content ─── */
+    .content { padding: 24px 28px; flex: 1; }
+
+    /* ─── Cards de KPI ─── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .kpi-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .kpi-card.azul::before { background: var(--azul); }
+    .kpi-card.verde::before { background: var(--verde); }
+    .kpi-card.rojo::before { background: var(--rojo); }
+    .kpi-card.ambar::before { background: var(--ambar); }
+    .kpi-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gris); margin-bottom: 8px; }
+    .kpi-value { font-size: 24px; font-weight: 700; color: var(--navy); line-height: 1.2; }
+    .kpi-value.rojo { color: var(--rojo); }
+    .kpi-value.verde { color: var(--verde); }
+    .kpi-sub { font-size: 11px; color: var(--gris); margin-top: 4px; }
+
+    /* ─── Tabla de hallazgos ─── */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .section-title { font-size: 15px; font-weight: 600; color: var(--navy); }
+    .filter-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .filter-chip {
+      padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;
+      cursor: pointer; border: 1px solid var(--border); background: var(--white);
+      color: var(--gris); transition: all 0.15s;
+    }
+    .filter-chip.active { background: var(--azul); color: white; border-color: var(--azul); }
+    .card {
+      background: var(--white);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: var(--bg);
+      padding: 10px 16px;
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--gris);
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #FAFBFD; }
+    td { padding: 12px 16px; font-size: 13px; vertical-align: middle; }
+    .td-right { text-align: right; font-variant-numeric: tabular-nums; }
+    .td-mono { font-family: monospace; font-size: 12px; }
+
+    /* ─── Badges de riesgo ─── */
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .badge-alto { background: #FEE2E2; color: var(--rojo); }
+    .badge-medio { background: #FEF3C7; color: var(--ambar); }
+    .badge-bajo { background: #D1FAE5; color: var(--verde-dark); }
+    .badge-pendiente { background: var(--bg); color: var(--gris); }
+    .badge-confirmado { background: #D1FAE5; color: var(--verde-dark); }
+    .badge-descartado { background: var(--bg); color: #ccc; }
+    .badge-sistema { background: #EFF6FF; color: var(--azul); }
+    .badge-auditor { background: #FEF3C7; color: var(--ambar); }
+
+    /* ─── Acciones en tabla ─── */
+    .row-actions { display: flex; gap: 6px; opacity: 0; transition: opacity 0.15s; }
+    tbody tr:hover .row-actions { opacity: 1; }
+
+    /* ─── Panel lateral de detalle ─── */
+    .detail-panel {
+      position: fixed; right: 0; top: 0; bottom: 0;
+      width: 440px;
+      background: var(--white);
+      border-left: 1px solid var(--border);
+      box-shadow: -4px 0 20px rgba(0,0,0,0.08);
+      z-index: 200;
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+    }
+    .detail-panel.open { transform: translateX(0); }
+    .panel-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; justify-content: space-between;
+    }
+    .panel-title { font-size: 15px; font-weight: 600; line-height: 1.3; }
+    .panel-close {
+      background: none; border: none; cursor: pointer;
+      color: var(--gris); font-size: 20px; padding: 2px; line-height: 1;
+    }
+    .panel-close:hover { color: var(--navy); }
+    .panel-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+    .panel-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+    .field-group { margin-bottom: 20px; }
+    .field-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gris); margin-bottom: 6px; }
+    .field-value { font-size: 13px; color: var(--navy); line-height: 1.5; }
+    .field-value.monto { font-size: 18px; font-weight: 700; color: var(--rojo); font-variant-numeric: tabular-nums; }
+    .field-value.legal { font-size: 12px; color: var(--azul-dark); font-style: italic; }
+    textarea.field-input {
+      width: 100%; padding: 10px 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: 13px;
+      resize: vertical; min-height: 80px;
+      outline: none; color: var(--navy);
+      transition: border-color 0.15s;
+    }
+    textarea.field-input:focus { border-color: var(--azul); }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+    /* ─── Upload zone ─── */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: var(--bg);
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--azul);
+      background: #EFF6FF;
+    }
+    .upload-icon { font-size: 32px; margin-bottom: 10px; }
+    .upload-text { font-size: 13px; color: var(--gris); }
+    .upload-text strong { color: var(--azul); }
+
+    /* ─── Modal ─── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(9, 22, 36, 0.5);
+      z-index: 300;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal {
+      background: var(--white);
+      border-radius: 16px;
+      width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-title { font-size: 16px; font-weight: 600; }
+    .modal-body { padding: 24px; }
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-label { font-size: 12px; font-weight: 600; color: var(--gris); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.04em; }
+    .form-input, .form-select {
+      width: 100%; padding: 9px 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: 13px; color: var(--navy);
+      outline: none; transition: border-color 0.15s;
+    }
+    .form-input:focus, .form-select:focus { border-color: var(--azul); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* ─── Empty state ─── */
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--gris); }
+    .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-title { font-size: 16px; font-weight: 600; color: var(--navy); margin-bottom: 8px; }
+    .empty-desc { font-size: 13px; }
+
+    /* ─── Toast ─── */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 400; display: flex; flex-direction: column; gap: 8px; }
+    .toast {
+      background: var(--navy); color: white;
+      padding: 12px 18px; border-radius: 10px;
+      font-size: 13px; font-weight: 500;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      display: flex; align-items: center; gap: 10px;
+      animation: slideIn 0.25s ease;
+    }
+    .toast.success { background: var(--verde-dark); }
+    .toast.error { background: var(--rojo); }
+    @keyframes slideIn { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useCallback, useRef } = React;
+
+    // ─── API Helper ───
+    const API = {
+      base: '/api',
+      async get(path) {
+        const r = await fetch(this.base + path);
+        if (!r.ok) throw new Error(await r.text());
+        return r.json();
+      },
+      async post(path, body) {
+        const r = await fetch(this.base + path, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        if (!r.ok) throw new Error(await r.text());
+        return r.json();
+      },
+      async patch(path, body) {
+        const r = await fetch(this.base + path, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        if (!r.ok) throw new Error(await r.text());
+        return r.json();
+      },
+      async uploadFile(auditoriaId, tipo, periodo, file) {
+        const fd = new FormData();
+        fd.append('tipo', tipo);
+        if (periodo) fd.append('periodo', periodo);
+        fd.append('archivo', file);
+        const r = await fetch(`${this.base}/auditorias/${auditoriaId}/archivos`, {
+          method: 'POST',
+          body: fd,
+        });
+        if (!r.ok) throw new Error(await r.text());
+        return r.json();
+      }
+    };
+
+    // ─── Formatters ───
+    const formatPYG = (n) => {
+      if (!n && n !== 0) return '—';
+      return 'Gs. ' + Number(n).toLocaleString('es-PY');
+    };
+    const RIESGO_BADGE = { alto: 'badge-alto', medio: 'badge-medio', bajo: 'badge-bajo' };
+    const ESTADO_BADGE = { pendiente: 'badge-pendiente', confirmado: 'badge-confirmado', descartado: 'badge-descartado', regularizado: 'badge-confirmado' };
+    const IMPUESTO_COLOR = { IVA: '#2E84F0', IRE: '#7C3AED', RET_IVA: '#DB2777', RET_IRE: '#D97706' };
+
+    // ─── Toast ───
+    function useToast() {
+      const [toasts, setToasts] = useState([]);
+      const show = (msg, type = 'default') => {
+        const id = Date.now();
+        setToasts(t => [...t, { id, msg, type }]);
+        setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3500);
+      };
+      return { toasts, show };
+    }
+
+    function ToastContainer({ toasts }) {
+      return (
+        <div className="toast-container">
+          {toasts.map(t => (
+            <div key={t.id} className={`toast ${t.type}`}>
+              {t.type === 'success' ? '✓' : t.type === 'error' ? '✕' : 'ℹ'} {t.msg}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // ─── Panel de detalle de hallazgo ───
+    function HallazgoPanel({ hallazgo, onClose, onConfirm, onDiscard, toast }) {
+      const [notas, setNotas] = useState(hallazgo?.notas_auditor || '');
+      const [saving, setSaving] = useState(false);
+
+      useEffect(() => {
+        setNotas(hallazgo?.notas_auditor || '');
+      }, [hallazgo?.id]);
+
+      if (!hallazgo) return null;
+
+      const guardarNotas = async () => {
+        setSaving(true);
+        try {
+          await API.patch(`/auditorias/${hallazgo.auditoria_id}/hallazgos/${hallazgo.id}`, { notas_auditor: notas });
+          toast('Notas guardadas', 'success');
+        } catch(e) { toast('Error al guardar', 'error'); }
+        setSaving(false);
+      };
+
+      return (
+        <div className={`detail-panel open`}>
+          <div className="panel-header">
+            <div>
+              <span className={`badge ${RIESGO_BADGE[hallazgo.nivel_riesgo]}`} style={{ marginBottom: 8, display: 'inline-flex' }}>
+                Riesgo {hallazgo.nivel_riesgo}
+              </span>
+              <div className="panel-title">{hallazgo.tipo_hallazgo?.replace(/_/g, ' ')}</div>
+            </div>
+            <button className="panel-close" onClick={onClose}>×</button>
+          </div>
+
+          <div className="panel-body">
+            <div className="field-group">
+              <div className="field-label">Contingencia total estimada</div>
+              <div className="field-value monto">{formatPYG(hallazgo.total_contingencia)}</div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 20 }}>
+              {[
+                ['Impuesto omitido', hallazgo.impuesto_omitido],
+                ['Multa (50%)', hallazgo.multa_estimada],
+                ['Intereses (1%/mes)', hallazgo.intereses_estimados],
+              ].map(([lbl, val]) => (
+                <div key={lbl}>
+                  <div className="field-label">{lbl}</div>
+                  <div className="field-value" style={{ fontWeight: 600 }}>{formatPYG(val)}</div>
+                </div>
+              ))}
+            </div>
+
+            <hr className="divider" />
+
+            <div className="field-group">
+              <div className="field-label">Descripción</div>
+              <div className="field-value">{hallazgo.descripcion}</div>
+            </div>
+
+            {hallazgo.descripcion_tecnica && (
+              <div className="field-group">
+                <div className="field-label">Detalle técnico</div>
+                <div className="field-value" style={{ fontSize: 12 }}>{hallazgo.descripcion_tecnica}</div>
+              </div>
+            )}
+
+            <div className="field-group">
+              <div className="field-label">Base legal</div>
+              <div className="field-value legal">{hallazgo.articulo_legal}</div>
+            </div>
+
+            <div className="field-group">
+              <div className="field-label">Período / Impuesto</div>
+              <div className="field-value">{hallazgo.periodo} — {hallazgo.impuesto}</div>
+            </div>
+
+            <div className="field-group">
+              <div className="field-label">Origen</div>
+              <span className={`badge ${hallazgo.creado_por === 'auditor' ? 'badge-auditor' : 'badge-sistema'}`}>
+                {hallazgo.creado_por === 'auditor' ? '✏ Auditor' : '⚡ Sistema'}
+              </span>
+            </div>
+
+            <hr className="divider" />
+
+            <div className="field-group">
+              <div className="field-label">Notas del auditor</div>
+              <textarea
+                className="field-input"
+                value={notas}
+                onChange={e => setNotas(e.target.value)}
+                placeholder="Agregá observaciones, aclaraciones o evidencia adicional..."
+              />
+              <button className="btn btn-secondary btn-sm" style={{ marginTop: 8 }} onClick={guardarNotas} disabled={saving}>
+                {saving ? 'Guardando...' : '💾 Guardar notas'}
+              </button>
+            </div>
+          </div>
+
+          {hallazgo.estado === 'pendiente' && (
+            <div className="panel-footer">
+              <button className="btn btn-danger btn-sm" onClick={() => onDiscard(hallazgo.id)}>
+                ✕ Descartar
+              </button>
+              <button className="btn btn-success btn-sm" style={{ flex: 1 }} onClick={() => onConfirm(hallazgo.id, notas)}>
+                ✓ Confirmar hallazgo
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ─── Modal nuevo hallazgo manual ───
+    function NuevoHallazgoModal({ auditoriaId, onClose, onCreate, toast }) {
+      const [form, setForm] = useState({
+        impuesto: 'IVA',
+        periodo: '',
+        tipo_hallazgo: '',
+        descripcion: '',
+        articulo_legal: '',
+        base_ajuste: '',
+        impuesto_omitido: '',
+        nivel_riesgo: 'medio',
+        notas_auditor: '',
+      });
+      const [loading, setLoading] = useState(false);
+
+      const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+      const handleCreate = async () => {
+        if (!form.descripcion || !form.tipo_hallazgo || !form.periodo || !form.articulo_legal) {
+          toast('Completá los campos obligatorios', 'error');
+          return;
+        }
+        setLoading(true);
+        try {
+          const body = {
+            ...form,
+            base_ajuste: parseInt(form.base_ajuste) || 0,
+            impuesto_omitido: parseInt(form.impuesto_omitido) || 0,
+          };
+          const h = await API.post(`/auditorias/${auditoriaId}/hallazgos`, body);
+          onCreate(h);
+          toast('Hallazgo creado', 'success');
+          onClose();
+        } catch(e) { toast('Error: ' + e.message, 'error'); }
+        setLoading(false);
+      };
+
+      return (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+          <div className="modal">
+            <div className="modal-header">
+              <div className="modal-title">✏ Nuevo hallazgo manual</div>
+              <button className="panel-close" onClick={onClose}>×</button>
+            </div>
+            <div className="modal-body">
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Impuesto *</label>
+                  <select className="form-select" value={form.impuesto} onChange={e => set('impuesto', e.target.value)}>
+                    {['IVA','IRE','IRP','IDU','RET_IVA','RET_IRE','OTRO'].map(i => <option key={i}>{i}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Período * (YYYY-MM)</label>
+                  <input className="form-input" placeholder="2024-03" value={form.periodo} onChange={e => set('periodo', e.target.value)} />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Tipo de hallazgo *</label>
+                <input className="form-input" placeholder="Ej: IVA_CREDITO_RUC_INACTIVO" value={form.tipo_hallazgo} onChange={e => set('tipo_hallazgo', e.target.value)} />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Descripción *</label>
+                <textarea className="field-input" rows={3} placeholder="Descripción clara del hallazgo..." value={form.descripcion} onChange={e => set('descripcion', e.target.value)} />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Artículo legal *</label>
+                <input className="form-input" placeholder="Art. 95 Ley 6380/2019" value={form.articulo_legal} onChange={e => set('articulo_legal', e.target.value)} />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Base del ajuste (Gs.)</label>
+                  <input className="form-input" type="number" placeholder="0" value={form.base_ajuste} onChange={e => set('base_ajuste', e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Impuesto omitido (Gs.)</label>
+                  <input className="form-input" type="number" placeholder="0" value={form.impuesto_omitido} onChange={e => set('impuesto_omitido', e.target.value)} />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Nivel de riesgo</label>
+                  <select className="form-select" value={form.nivel_riesgo} onChange={e => set('nivel_riesgo', e.target.value)}>
+                    <option value="alto">Alto</option>
+                    <option value="medio">Medio</option>
+                    <option value="bajo">Bajo</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Notas del auditor</label>
+                <textarea className="field-input" rows={2} placeholder="Observaciones adicionales..." value={form.notas_auditor} onChange={e => set('notas_auditor', e.target.value)} />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={onClose}>Cancelar</button>
+              <button className="btn btn-primary" onClick={handleCreate} disabled={loading}>
+                {loading ? 'Creando...' : '+ Crear hallazgo'}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ─── Upload Modal ───
+    function UploadModal({ auditoriaId, onClose, onSuccess, toast }) {
+      const [tipo, setTipo] = useState('rg90');
+      const [periodo, setPeriodo] = useState('');
+      const [file, setFile] = useState(null);
+      const [loading, setLoading] = useState(false);
+      const [dragover, setDragover] = useState(false);
+
+      const handleUpload = async () => {
+        if (!file) { toast('Seleccioná un archivo', 'error'); return; }
+        if (['rg90','hechauka'].includes(tipo) && !periodo) { toast('Ingresá el período (YYYY-MM)', 'error'); return; }
+        setLoading(true);
+        try {
+          const r = await API.uploadFile(auditoriaId, tipo, periodo, file);
+          toast(r.registros_importados ? `${r.registros_importados} registros importados` : 'Archivo subido', 'success');
+          onSuccess(r);
+          onClose();
+        } catch(e) { toast('Error: ' + e.message, 'error'); }
+        setLoading(false);
+      };
+
+      const onDrop = e => { e.preventDefault(); setDragover(false); setFile(e.dataTransfer.files[0]); };
+
+      return (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+          <div className="modal">
+            <div className="modal-header">
+              <div className="modal-title">📎 Subir archivo</div>
+              <button className="panel-close" onClick={onClose}>×</button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Tipo de archivo</label>
+                <select className="form-select" value={tipo} onChange={e => setTipo(e.target.value)}>
+                  <option value="rg90">RG 90 — Comprobantes IVA (XLSX)</option>
+                  <option value="hechauka">HECHAUKA — Info de terceros (XLSX)</option>
+                  <option value="estado_cuenta">Estado de cuenta SET (PDF)</option>
+                  <option value="estados_contables">Estados contables (XLSX)</option>
+                  <option value="banco">Movimientos bancarios (XLSX/CSV)</option>
+                  <option value="logo_cliente">Logo del cliente (PNG/JPG)</option>
+                  <option value="comprobante">Comprobante individual (PDF/XML)</option>
+                  <option value="otro">Otro documento de evidencia</option>
+                </select>
+              </div>
+
+              {['rg90','hechauka'].includes(tipo) && (
+                <div className="form-group">
+                  <label className="form-label">Período (YYYY-MM)</label>
+                  <input className="form-input" placeholder="2024-03" value={periodo} onChange={e => setPeriodo(e.target.value)} />
+                </div>
+              )}
+
+              <div
+                className={`upload-zone ${dragover ? 'dragover' : ''}`}
+                onDragOver={e => { e.preventDefault(); setDragover(true); }}
+                onDragLeave={() => setDragover(false)}
+                onDrop={onDrop}
+                onClick={() => document.getElementById('file-input').click()}
+              >
+                <input id="file-input" type="file" style={{ display: 'none' }} onChange={e => setFile(e.target.files[0])} />
+                <div className="upload-icon">📂</div>
+                {file
+                  ? <div className="upload-text"><strong>{file.name}</strong><br/>{(file.size/1024).toFixed(1)} KB</div>
+                  : <div className="upload-text"><strong>Hacer clic o arrastrar</strong> para seleccionar archivo</div>
+                }
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={onClose}>Cancelar</button>
+              <button className="btn btn-primary" onClick={handleUpload} disabled={loading || !file}>
+                {loading ? 'Subiendo...' : '↑ Subir archivo'}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ─── Vista principal de hallazgos ───
+    function HallazgosView({ auditoriaId, auditoria, toast }) {
+      const [hallazgos, setHallazgos] = useState([]);
+      const [resumen, setResumen] = useState(null);
+      const [filtroRiesgo, setFiltroRiesgo] = useState('todos');
+      const [filtroImpuesto, setFiltroImpuesto] = useState('todos');
+      const [filtroEstado, setFiltroEstado] = useState('todos');
+      const [selected, setSelected] = useState(null);
+      const [showNuevo, setShowNuevo] = useState(false);
+      const [showUpload, setShowUpload] = useState(false);
+      const [loading, setLoading] = useState(true);
+
+      const cargar = useCallback(async () => {
+        try {
+          const [h, r] = await Promise.all([
+            API.get(`/auditorias/${auditoriaId}/hallazgos`),
+            API.get(`/auditorias/${auditoriaId}/hallazgos/resumen/contingencias`),
+          ]);
+          setHallazgos(h);
+          setResumen(r);
+        } catch(e) { toast('Error cargando hallazgos', 'error'); }
+        setLoading(false);
+      }, [auditoriaId]);
+
+      useEffect(() => { cargar(); }, [cargar]);
+
+      const confirmar = async (id, notas) => {
+        try {
+          await API.post(`/auditorias/${auditoriaId}/hallazgos/${id}/confirmar`, notas ? { notas } : undefined);
+          toast('Hallazgo confirmado', 'success');
+          setSelected(null);
+          cargar();
+        } catch(e) { toast('Error', 'error'); }
+      };
+
+      const descartar = async (id) => {
+        if (!confirm('¿Descartar este hallazgo?')) return;
+        try {
+          await fetch(`/api/auditorias/${auditoriaId}/hallazgos/${id}?motivo=Descartado por el auditor`, { method: 'DELETE' });
+          toast('Hallazgo descartado', 'default');
+          setSelected(null);
+          cargar();
+        } catch(e) { toast('Error', 'error'); }
+      };
+
+      const filtrados = hallazgos.filter(h => {
+        if (filtroRiesgo !== 'todos' && h.nivel_riesgo !== filtroRiesgo) return false;
+        if (filtroImpuesto !== 'todos' && h.impuesto !== filtroImpuesto) return false;
+        if (filtroEstado !== 'todos' && h.estado !== filtroEstado) return false;
+        return true;
+      });
+
+      const impuestosUnicos = [...new Set(hallazgos.map(h => h.impuesto))];
+
+      return (
+        <div>
+          {/* KPIs */}
+          {resumen && (
+            <div className="kpi-grid">
+              <div className="kpi-card rojo">
+                <div className="kpi-label">Contingencia total</div>
+                <div className="kpi-value rojo">{formatPYG(resumen.total_contingencia)}</div>
+                <div className="kpi-sub">Impuesto + multas + intereses</div>
+              </div>
+              <div className="kpi-card ambar">
+                <div className="kpi-label">Hallazgos alto riesgo</div>
+                <div className="kpi-value">{hallazgos.filter(h => h.nivel_riesgo === 'alto' && h.estado !== 'descartado').length}</div>
+                <div className="kpi-sub">Requieren atención inmediata</div>
+              </div>
+              <div className="kpi-card azul">
+                <div className="kpi-label">Total hallazgos</div>
+                <div className="kpi-value">{resumen.cantidad_hallazgos}</div>
+                <div className="kpi-sub">
+                  {hallazgos.filter(h => h.estado === 'pendiente').length} pendientes de revisión
+                </div>
+              </div>
+              <div className="kpi-card verde">
+                <div className="kpi-label">Impuesto omitido</div>
+                <div className="kpi-value verde">{formatPYG(resumen.total_impuesto)}</div>
+                <div className="kpi-sub">Sin multas ni intereses</div>
+              </div>
+            </div>
+          )}
+
+          {/* Header + filtros */}
+          <div className="section-header">
+            <div className="section-title">Hallazgos de auditoría</div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="btn btn-secondary" onClick={() => setShowUpload(true)}>📎 Subir archivos</button>
+              <button className="btn btn-secondary" onClick={() => setShowNuevo(true)}>✏ Agregar hallazgo</button>
+              <button className="btn btn-primary" onClick={() => {
+                fetch(`/api/auditorias/${auditoriaId}/informes/word`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+                  .then(r => r.blob()).then(b => {
+                    const url = URL.createObjectURL(b);
+                    const a = document.createElement('a'); a.href = url; a.download = 'informe.docx'; a.click();
+                    toast('Informe Word descargado', 'success');
+                  }).catch(() => toast('Error generando informe', 'error'));
+              }}>📄 Generar informe Word</button>
+            </div>
+          </div>
+
+          {/* Filtros */}
+          <div className="filter-bar" style={{ marginBottom: 16 }}>
+            <span style={{ fontSize: 12, color: 'var(--gris)', fontWeight: 600 }}>RIESGO:</span>
+            {['todos','alto','medio','bajo'].map(r => (
+              <button key={r} className={`filter-chip ${filtroRiesgo === r ? 'active' : ''}`} onClick={() => setFiltroRiesgo(r)}>
+                {r === 'todos' ? 'Todos' : r.charAt(0).toUpperCase() + r.slice(1)}
+              </button>
+            ))}
+            <span style={{ fontSize: 12, color: 'var(--gris)', fontWeight: 600, marginLeft: 8 }}>IMPUESTO:</span>
+            <button className={`filter-chip ${filtroImpuesto === 'todos' ? 'active' : ''}`} onClick={() => setFiltroImpuesto('todos')}>Todos</button>
+            {impuestosUnicos.map(i => (
+              <button key={i} className={`filter-chip ${filtroImpuesto === i ? 'active' : ''}`} onClick={() => setFiltroImpuesto(i)}>{i}</button>
+            ))}
+            <span style={{ fontSize: 12, color: 'var(--gris)', fontWeight: 600, marginLeft: 8 }}>ESTADO:</span>
+            {['todos','pendiente','confirmado','descartado'].map(e => (
+              <button key={e} className={`filter-chip ${filtroEstado === e ? 'active' : ''}`} onClick={() => setFiltroEstado(e)}>
+                {e === 'todos' ? 'Todos' : e.charAt(0).toUpperCase() + e.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {/* Tabla */}
+          <div className="card">
+            {loading ? (
+              <div className="empty-state"><div>Cargando...</div></div>
+            ) : filtrados.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">🔍</div>
+                <div className="empty-title">Sin hallazgos</div>
+                <div className="empty-desc">
+                  {hallazgos.length === 0
+                    ? 'Ejecutá el análisis o agregá hallazgos manualmente.'
+                    : 'No hay hallazgos con los filtros seleccionados.'}
+                </div>
+              </div>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Impuesto</th>
+                    <th>Período</th>
+                    <th>Tipo</th>
+                    <th className="td-right">Impuesto omitido</th>
+                    <th className="td-right">Contingencia total</th>
+                    <th>Riesgo</th>
+                    <th>Estado</th>
+                    <th>Origen</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtrados.map(h => (
+                    <tr key={h.id} onClick={() => setSelected(h)} style={{ cursor: 'pointer' }}>
+                      <td>
+                        <span style={{
+                          background: (IMPUESTO_COLOR[h.impuesto] || '#999') + '20',
+                          color: IMPUESTO_COLOR[h.impuesto] || '#999',
+                          padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700
+                        }}>{h.impuesto}</span>
+                      </td>
+                      <td className="td-mono">{h.periodo}</td>
+                      <td style={{ maxWidth: 200 }}>
+                        <div style={{ fontSize: 12, fontWeight: 500 }}>{h.tipo_hallazgo?.replace(/_/g, ' ')}</div>
+                        <div style={{ fontSize: 11, color: 'var(--gris)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 200 }}>
+                          {h.descripcion}
+                        </div>
+                      </td>
+                      <td className="td-right">{formatPYG(h.impuesto_omitido)}</td>
+                      <td className="td-right" style={{ fontWeight: 700, color: 'var(--rojo)' }}>{formatPYG(h.total_contingencia)}</td>
+                      <td><span className={`badge ${RIESGO_BADGE[h.nivel_riesgo]}`}>{h.nivel_riesgo}</span></td>
+                      <td><span className={`badge ${ESTADO_BADGE[h.estado]}`}>{h.estado}</span></td>
+                      <td><span className={`badge ${h.creado_por === 'auditor' ? 'badge-auditor' : 'badge-sistema'}`} style={{ fontSize: 10 }}>
+                        {h.creado_por === 'auditor' ? '✏' : '⚡'}
+                      </span></td>
+                      <td onClick={e => e.stopPropagation()}>
+                        <div className="row-actions">
+                          {h.estado === 'pendiente' && <>
+                            <button className="btn btn-success btn-sm" onClick={() => confirmar(h.id)}>✓</button>
+                            <button className="btn btn-danger btn-sm" onClick={() => descartar(h.id)}>✕</button>
+                          </>}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* Panel lateral */}
+          {selected && (
+            <HallazgoPanel
+              hallazgo={{ ...selected, auditoria_id: auditoriaId }}
+              onClose={() => setSelected(null)}
+              onConfirm={(id, notas) => confirmar(id, notas)}
+              onDiscard={descartar}
+              toast={toast}
+            />
+          )}
+
+          {/* Modales */}
+          {showNuevo && (
+            <NuevoHallazgoModal
+              auditoriaId={auditoriaId}
+              onClose={() => setShowNuevo(false)}
+              onCreate={h => { setHallazgos(prev => [h, ...prev]); cargar(); }}
+              toast={toast}
+            />
+          )}
+          {showUpload && (
+            <UploadModal
+              auditoriaId={auditoriaId}
+              onClose={() => setShowUpload(false)}
+              onSuccess={cargar}
+              toast={toast}
+            />
+          )}
+        </div>
+      );
+    }
+
+    // ─── App principal ───
+    function App() {
+      const [auditoriaId, setAuditoriaId] = useState(null);
+      const [auditoria, setAuditoria] = useState(null);
+      const [view, setView] = useState('hallazgos');
+      const { toasts, show: toast } = useToast();
+
+      // En producción esto viene de auth / routing
+      useEffect(() => {
+        const id = new URLSearchParams(location.search).get('auditoria');
+        if (id) {
+          setAuditoriaId(id);
+          API.get(`/auditorias/${id}`).then(setAuditoria).catch(() => {});
+        }
+      }, []);
+
+      return (
+        <div className="app-layout">
+          {/* Sidebar */}
+          <aside className="sidebar">
+            <div className="sidebar-logo">
+              <div className="logo-text">
+                <span className="logo-inteli">Inteli</span><span className="logo-audit">audit</span><span className="logo-dot">.</span>
+              </div>
+            </div>
+
+            {auditoria && (
+              <div className="sidebar-client">
+                <strong>{auditoria.cliente_ruc}</strong>
+                {auditoria.periodo_desde} → {auditoria.periodo_hasta}
+              </div>
+            )}
+
+            <nav className="sidebar-nav">
+              <div className="nav-section">
+                <div className="nav-label">Auditoría</div>
+                <button className={`nav-item ${view === 'hallazgos' ? 'active' : ''}`} onClick={() => setView('hallazgos')}>
+                  <span className="icon">⚠</span> Hallazgos
+                </button>
+                <button className={`nav-item ${view === 'cedulas' ? 'active' : ''}`} onClick={() => setView('cedulas')}>
+                  <span className="icon">📋</span> Cédulas
+                </button>
+                <button className={`nav-item ${view === 'informes' ? 'active' : ''}`} onClick={() => setView('informes')}>
+                  <span className="icon">📄</span> Informes
+                </button>
+              </div>
+              <div className="nav-section">
+                <div className="nav-label">Datos</div>
+                <button className={`nav-item ${view === 'declaraciones' ? 'active' : ''}`} onClick={() => setView('declaraciones')}>
+                  <span className="icon">📊</span> Declaraciones
+                </button>
+                <button className={`nav-item ${view === 'rg90' ? 'active' : ''}`} onClick={() => setView('rg90')}>
+                  <span className="icon">🧾</span> RG 90
+                </button>
+                <button className={`nav-item ${view === 'hechauka' ? 'active' : ''}`} onClick={() => setView('hechauka')}>
+                  <span className="icon">🔄</span> HECHAUKA
+                </button>
+                <button className={`nav-item ${view === 'archivos' ? 'active' : ''}`} onClick={() => setView('archivos')}>
+                  <span className="icon">📎</span> Archivos
+                </button>
+              </div>
+              <div className="nav-section">
+                <div className="nav-label">Sistema</div>
+                <button className={`nav-item ${view === 'trail' ? 'active' : ''}`} onClick={() => setView('trail')}>
+                  <span className="icon">🕐</span> Trail de auditoría
+                </button>
+              </div>
+            </nav>
+          </aside>
+
+          {/* Main */}
+          <main className="main">
+            <header className="header">
+              <div className="header-title">
+                {view === 'hallazgos' && 'Hallazgos'}
+                {view === 'cedulas' && 'Cédulas analíticas'}
+                {view === 'informes' && 'Informes'}
+                {view === 'declaraciones' && 'Declaraciones juradas'}
+                {view === 'rg90' && 'RG 90 — Detalle IVA'}
+                {view === 'hechauka' && 'HECHAUKA'}
+                {view === 'archivos' && 'Archivos subidos'}
+                {view === 'trail' && 'Trail de auditoría'}
+              </div>
+              {auditoria && (
+                <div className="header-period">
+                  {auditoria.periodo_desde} → {auditoria.periodo_hasta} | {auditoria.impuestos?.join(', ')}
+                </div>
+              )}
+            </header>
+
+            <div className="content">
+              {!auditoriaId ? (
+                <div className="empty-state">
+                  <div className="empty-icon">🔍</div>
+                  <div className="empty-title">Seleccioná una auditoría</div>
+                  <div className="empty-desc">Agregá ?auditoria=ID en la URL o seleccioná desde el listado.</div>
+                </div>
+              ) : view === 'hallazgos' ? (
+                <HallazgosView auditoriaId={auditoriaId} auditoria={auditoria} toast={toast} />
+              ) : (
+                <div className="empty-state">
+                  <div className="empty-icon">🚧</div>
+                  <div className="empty-title">Vista en desarrollo</div>
+                  <div className="empty-desc">Esta sección está siendo implementada.</div>
+                </div>
+              )}
+            </div>
+          </main>
+
+          <ToastContainer toasts={toasts} />
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

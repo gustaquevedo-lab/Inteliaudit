@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+env/
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets.yaml
+
+# Database files (local data — never in repo)
+*.db
+*.sqlite
+*.sqlite3
+
+# Node / frontend
+ui-web/node_modules/
+ui-web/.vite/
+ui-web/dist/
+
+# Vite build output (served by FastAPI — generated on deploy)
+ui-web-dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Playwright
+playwright-report/
+test-results/
+
+# Logs
+*.log
+logs/
+
+# WeasyPrint / PDF temp files
+*.pdf
+tmp/
+
+# Claude Code
+.claude/launch.json
+.claude/settings.local.json

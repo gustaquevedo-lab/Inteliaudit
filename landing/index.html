@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inteliaudit — Auditoría impositiva inteligente para Paraguay</title>
+  <meta name="description" content="Automatizá tu auditoría impositiva desde Marangatú hasta el informe firmable. Cruzá RG90, SIFEN y HECHAUKA en segundos. Para firmas auditoras paraguayas." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #104c91;
+      --primary-dark: #0a356b;
+      --primary-light: #256ebf;
+      --primary-600: #1561e1;
+      --primary-800: #13407c;
+      --secondary: #00a651;
+      --secondary-dark: #00823e;
+      --secondary-light: #1ecb73;
+      --accent: #3AAFA9;
+      --body-bg: #f0f4f8;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--body-bg);
+      color: var(--text-dark);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* ── NAVBAR ─────────────────────────────────────────── */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(16,76,145,0.07);
+      transition: box-shadow 0.3s ease;
+    }
+    .navbar.scrolled { box-shadow: 0 2px 24px rgba(16,76,145,0.10); }
+    .navbar-inner {
+      max-width: 1200px; margin: 0 auto;
+      padding: 0 24px;
+      height: 68px;
+      display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo svg { height: 36px; width: auto; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 14px; font-weight: 600; color: #475569;
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--primary); }
+    .btn-nav {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+      color: white; font-weight: 700; font-size: 14px;
+      padding: 10px 22px; border-radius: 12px; border: none;
+      cursor: pointer; text-decoration: none;
+      box-shadow: 0 4px 18px rgba(0,166,81,0.35);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,166,81,0.45); }
+    .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; flex-shrink: 0; }
+    .hamburger span {
+      display: block; width: 22px; height: 2px;
+      background: var(--primary); margin: 4px 0;
+      transition: all 0.3s; border-radius: 2px;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+    /* Mobile nav drawer */
+    .mobile-nav {
+      display: none;
+      position: fixed; top: 68px; left: 0; right: 0; bottom: 0; z-index: 99;
+    }
+    .mobile-nav.open { display: block; }
+    .mobile-nav-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(2px);
+    }
+    .mobile-nav-panel {
+      position: absolute; top: 0; left: 0; right: 0;
+      background: white;
+      padding: 24px;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      animation: slideDown 0.25s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .mobile-nav-panel a {
+      display: block; padding: 13px 0;
+      font-size: 16px; font-weight: 600; color: #374151;
+      text-decoration: none;
+      border-bottom: 1px solid #f1f5f9;
+      transition: color 0.2s;
+    }
+    .mobile-nav-panel a:last-child { border-bottom: none; }
+    .mobile-nav-panel a:hover { color: var(--primary); }
+    .mobile-nav-cta {
+      display: block; margin-top: 16px;
+      background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+      color: white !important; font-weight: 700; font-size: 15px !important;
+      padding: 14px 20px !important; border-radius: 12px;
+      text-align: center; border-bottom: none !important;
+      box-shadow: 0 4px 16px rgba(0,166,81,0.35);
+    }
+
+    /* ── HERO ───────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #071e3d 0%, #0d3a6b 35%, #104c91 70%, #1561e1 100%);
+      position: relative; overflow: hidden;
+      display: flex; align-items: center;
+      padding-top: 68px;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.055) 1px, transparent 1px);
+      background-size: 26px 26px;
+      pointer-events: none;
+    }
+    .hero-glow-1 {
+      position: absolute; top: -10%; right: -5%;
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,166,81,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-glow-2 {
+      position: absolute; bottom: -15%; left: -8%;
+      width: 500px; height: 500px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(58,175,169,0.14) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-inner {
+      max-width: 1200px; margin: 0 auto; padding: 80px 24px 60px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 64px;
+      align-items: center; position: relative; z-index: 1;
+      width: 100%;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(0,166,81,0.15);
+      border: 1px solid rgba(0,166,81,0.3);
+      border-radius: 99px; padding: 6px 14px;
+      margin-bottom: 24px;
+    }
+    .hero-badge-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 8px #4ade80;
+      animation: ping 2s cubic-bezier(0,0,0.2,1) infinite;
+    }
+    @keyframes ping {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.7; }
+    }
+    .hero-badge span { font-size: 12px; font-weight: 700; color: #4ade80; letter-spacing: 0.04em; }
+    .hero h1 {
+      font-size: clamp(38px, 4.5vw, 62px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: white;
+      margin-bottom: 24px;
+    }
+    .hero h1 .accent { color: #4ade80; }
+    .hero p {
+      font-size: 18px; line-height: 1.7;
+      color: rgba(255,255,255,0.72);
+      margin-bottom: 36px;
+      max-width: 480px;
+    }
+    .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 40px; }
+    .btn-hero-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+      color: white; font-weight: 800; font-size: 16px;
+      padding: 16px 32px; border-radius: 14px; border: none;
+      cursor: pointer; text-decoration: none;
+      box-shadow: 0 8px 32px rgba(0,166,81,0.5);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(0,166,81,0.55); }
+    .btn-hero-secondary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: transparent;
+      border: 1.5px solid rgba(255,255,255,0.3);
+      color: white; font-weight: 700; font-size: 16px;
+      padding: 16px 28px; border-radius: 14px;
+      cursor: pointer; text-decoration: none;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s;
+    }
+    .btn-hero-secondary:hover {
+      border-color: rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.07);
+    }
+    .hero-trust {
+      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    }
+    .hero-trust span {
+      font-size: 11px; font-weight: 700;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    .hero-trust-sep { width: 1px; height: 12px; background: rgba(255,255,255,0.2); }
+
+    /* Dashboard mockup */
+    .hero-mockup { position: relative; }
+    .mockup-frame {
+      background: rgba(255,255,255,0.97);
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 2px 24px rgba(0,0,0,0.1), 0 32px 80px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .mockup-chrome {
+      background: #1e293b;
+      padding: 12px 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .mockup-dots { display: flex; gap: 6px; }
+    .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .mockup-url {
+      flex: 1; background: #0f172a; border-radius: 6px;
+      padding: 5px 12px; font-size: 11px;
+      color: rgba(255,255,255,0.4); font-family: monospace;
+    }
+    .mockup-body { display: flex; }
+    .mockup-sidebar {
+      width: 54px; background: #104c91;
+      padding: 12px 8px; display: flex;
+      flex-direction: column; gap: 8px; align-items: center;
+    }
+    .mockup-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mockup-icon.active { background: var(--secondary); }
+    .mockup-icon.inactive { background: rgba(255,255,255,0.12); }
+    .mockup-content { flex: 1; background: #f1f5f9; padding: 14px; }
+    .mockup-header {
+      font-size: 11px; font-weight: 800;
+      color: #0f172a; margin-bottom: 10px;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .mockup-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .mockup-kpi {
+      background: white; border-radius: 10px;
+      padding: 10px; border: 1px solid #e2e8f0;
+    }
+    .mockup-kpi-label { font-size: 9px; color: #94a3b8; font-weight: 600; margin-bottom: 4px; }
+    .mockup-kpi-value { font-size: 15px; font-weight: 900; color: #0f172a; }
+    .mockup-kpi-value.red { color: #dc2626; }
+    .mockup-kpi-value.green { color: #16a34a; }
+    .mockup-table { background: white; border-radius: 10px; overflow: hidden; }
+    .mockup-tr {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px; border-bottom: 1px solid #f1f5f9;
+      font-size: 9px;
+    }
+    .mockup-tr:last-child { border-bottom: none; }
+    .mockup-badge {
+      font-size: 8px; font-weight: 700; padding: 2px 6px;
+      border-radius: 99px;
+    }
+    .mockup-badge.red { background: #fef2f2; color: #dc2626; }
+    .mockup-badge.amber { background: #fffbeb; color: #d97706; }
+    .mockup-badge.green { background: #f0fdf4; color: #16a34a; }
+    .mockup-badge.blue { background: #eff6ff; color: #2563eb; }
+
+    /* Floating elements on mockup */
+    .float-badge {
+      position: absolute;
+      border-radius: 14px;
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 700;
+      animation: float 4s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .float-badge.green {
+      background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+      color: white;
+      box-shadow: 0 8px 32px rgba(0,166,81,0.5);
+      bottom: -20px; left: -24px;
+      animation-delay: 0s;
+    }
+    .float-badge.white {
+      background: white;
+      color: var(--text-dark);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      top: -20px; right: -24px;
+      animation-delay: 1.5s;
+    }
+    .float-icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+
+    /* Wave */
+    .hero-wave {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      line-height: 0;
+    }
+
+    /* ── PAIN POINTS ──────────────────────────────────────── */
+    .section { padding: 96px 24px; }
+    .section-inner { max-width: 1200px; margin: 0 auto; }
+    .section-label {
+      font-size: 11px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--secondary);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(28px, 3.5vw, 44px);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--text-dark);
+      margin-bottom: 16px;
+    }
+    .section-subtitle {
+      font-size: 18px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 540px;
+    }
+    .section-header { margin-bottom: 56px; }
+
+    .pain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .pain-card {
+      background: white;
+      border-radius: 20px;
+      padding: 28px;
+      border: 1.5px solid var(--border);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .pain-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #ef4444, #f97316);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .pain-card:hover { transform: translateY(-4px); box-shadow: 0 20px 48px rgba(0,0,0,0.08); }
+    .pain-card:hover::before { opacity: 1; }
+    .pain-emoji { font-size: 32px; margin-bottom: 14px; display: block; }
+    .pain-card h3 {
+      font-size: 16px; font-weight: 800;
+      color: var(--text-dark); margin-bottom: 8px;
+    }
+    .pain-card p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+    .pain-quote {
+      font-style: italic;
+      background: #fef2f2;
+      border-left: 3px solid #ef4444;
+      padding: 10px 14px;
+      border-radius: 0 8px 8px 0;
+      font-size: 13px;
+      color: #991b1b;
+      margin-top: 14px;
+    }
+
+    /* ── SOLUTION ─────────────────────────────────────────── */
+    .solution-bg {
+      background: linear-gradient(135deg, #0a356b 0%, #104c91 100%);
+      padding: 96px 24px;
+    }
+    .solution-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .solution-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 28px;
+      backdrop-filter: blur(8px);
+      transition: all 0.3s;
+    }
+    .solution-card:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+    }
+    .solution-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,166,81,0.2);
+      border: 1px solid rgba(0,166,81,0.3);
+      margin-bottom: 18px; font-size: 22px;
+    }
+    .solution-card h3 {
+      font-size: 17px; font-weight: 800;
+      color: white; margin-bottom: 8px;
+    }
+    .solution-card p { font-size: 14px; color: rgba(255,255,255,0.65); line-height: 1.6; }
+    .solution-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 14px; padding: 5px 12px;
+      background: rgba(0,166,81,0.15);
+      border: 1px solid rgba(0,166,81,0.25);
+      border-radius: 99px;
+      font-size: 11px; font-weight: 700; color: #4ade80;
+    }
+
+    /* ── STATS ────────────────────────────────────────────── */
+    .stats-section { background: white; padding: 72px 24px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+    .stat-item { text-align: center; }
+    .stat-number {
+      font-size: clamp(36px, 4vw, 56px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+    .stat-label { font-size: 14px; font-weight: 600; color: var(--text-muted); }
+
+    /* ── HOW IT WORKS ─────────────────────────────────────── */
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; position: relative; }
+    .steps-grid::before {
+      content: '';
+      position: absolute; top: 28px; left: 16%; right: 16%; height: 2px;
+      background: linear-gradient(90deg, var(--secondary), var(--accent));
+      opacity: 0.3;
+    }
+    .step-card { text-align: center; padding: 32px 20px; }
+    .step-number {
+      width: 56px; height: 56px; border-radius: 16px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white; font-size: 22px; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 8px 24px rgba(16,76,145,0.35);
+    }
+    .step-card h3 { font-size: 18px; font-weight: 800; color: var(--text-dark); margin-bottom: 10px; }
+    .step-card p { font-size: 14px; color: var(--text-muted); line-height: 1.65; }
+    .step-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      margin-top: 14px; padding: 5px 12px;
+      background: #f0fdf4; border: 1px solid #bbf7d0;
+      border-radius: 99px;
+      font-size: 11px; font-weight: 700; color: #16a34a;
+    }
+
+    /* ── FEATURES DEEP DIVE ───────────────────────────────── */
+    .features-bg { background: #f8fafc; }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .feature-card {
+      background: white;
+      border-radius: 20px; padding: 28px;
+      border: 1px solid var(--border);
+      transition: all 0.3s;
+    }
+    .feature-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(16,76,145,0.08);
+      border-color: rgba(16,76,145,0.15);
+    }
+    .feature-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin-bottom: 18px;
+    }
+    .fi-blue { background: #eff6ff; }
+    .fi-green { background: #f0fdf4; }
+    .fi-purple { background: #faf5ff; }
+    .fi-orange { background: #fff7ed; }
+    .fi-teal { background: #f0fdfa; }
+    .fi-red { background: #fef2f2; }
+    .feature-card h3 { font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 8px; }
+    .feature-card p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+    .feature-list {
+      list-style: none; margin-top: 14px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .feature-list li {
+      font-size: 13px; color: #475569;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .feature-list li::before {
+      content: '✓'; font-size: 11px; font-weight: 900;
+      color: var(--secondary); background: #f0fdf4;
+      width: 18px; height: 18px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── LEGAL COMPLIANCE ─────────────────────────────────── */
+    .legal-section {
+      background: linear-gradient(135deg, #065f46 0%, #00a651 50%, #1ecb73 100%);
+      padding: 72px 24px;
+    }
+    .legal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+    .legal-card {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 16px; padding: 20px;
+      backdrop-filter: blur(8px);
+    }
+    .legal-card-title { font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.9); margin-bottom: 12px; }
+    .legal-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      font-size: 13px; color: rgba(255,255,255,0.8);
+    }
+    .legal-item:last-child { border-bottom: none; }
+    .legal-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #4ade80; margin-top: 4px; flex-shrink: 0;
+    }
+
+    /* ── PRICING ──────────────────────────────────────────── */
+    .pricing-section { background: white; padding: 96px 24px; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: end; max-width: 900px; margin: 0 auto; }
+    .price-card {
+      border-radius: 24px; padding: 32px 28px;
+      border: 1.5px solid var(--border);
+      position: relative;
+      transition: transform 0.3s;
+    }
+    .price-card:hover { transform: translateY(-4px); }
+    .price-card.popular {
+      border: 2.5px solid var(--secondary);
+      transform: scale(1.04);
+      box-shadow: 0 20px 60px rgba(0,166,81,0.18);
+    }
+    .price-card.popular:hover { transform: scale(1.04) translateY(-4px); }
+    .popular-badge {
+      position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+      color: white; font-size: 11px; font-weight: 900;
+      padding: 6px 16px; border-radius: 99px;
+      box-shadow: 0 4px 16px rgba(0,166,81,0.4);
+      white-space: nowrap;
+    }
+    .price-plan { font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+    .price-amount {
+      font-size: 36px; font-weight: 900;
+      color: var(--text-dark);
+      letter-spacing: -0.02em;
+      margin-bottom: 2px;
+    }
+    .price-amount span { font-size: 16px; font-weight: 700; color: var(--text-muted); }
+    .price-currency { font-size: 18px; font-weight: 900; color: var(--primary); }
+    .price-period { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+    .price-clients {
+      font-size: 13px; font-weight: 700;
+      color: var(--primary); margin-bottom: 24px;
+      background: #eff6ff; padding: 6px 12px; border-radius: 8px;
+      display: inline-block;
+    }
+    .price-divider { height: 1px; background: var(--border); margin: 20px 0; }
+    .price-features { list-style: none; display: flex; flex-direction: column; gap: 11px; margin-bottom: 28px; }
+    .price-features li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 14px; color: #374151;
+    }
+    .price-check { color: var(--secondary); font-size: 14px; font-weight: 900; margin-top: 1px; flex-shrink: 0; }
+    .price-check.gray { color: #cbd5e1; }
+    .btn-price-primary {
+      display: block; width: 100%; text-align: center;
+      background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+      color: white; font-weight: 800; font-size: 15px;
+      padding: 14px; border-radius: 14px; border: none;
+      cursor: pointer; text-decoration: none;
+      box-shadow: 0 6px 20px rgba(0,166,81,0.35);
+      transition: all 0.2s;
+    }
+    .btn-price-primary:hover { box-shadow: 0 10px 30px rgba(0,166,81,0.45); transform: translateY(-1px); }
+    .btn-price-outline {
+      display: block; width: 100%; text-align: center;
+      background: #f8fafc;
+      color: var(--text-dark); font-weight: 700; font-size: 15px;
+      padding: 14px; border-radius: 14px;
+      border: 1.5px solid var(--border);
+      cursor: pointer; text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-price-outline:hover { border-color: var(--primary); color: var(--primary); }
+    .pricing-note {
+      text-align: center; margin-top: 40px;
+      font-size: 13px; color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap;
+    }
+    .pricing-note span { display: flex; align-items: center; gap: 6px; }
+
+    /* ── FAQ ────────────────────────────────────────────────── */
+    .faq-section { background: #f8fafc; padding: 96px 24px; }
+    .faq-grid { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+    .faq-item {
+      background: white; border-radius: 16px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .faq-question {
+      width: 100%; text-align: left;
+      padding: 20px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      background: none; border: none; cursor: pointer;
+      font-size: 15px; font-weight: 700; color: var(--text-dark);
+      transition: color 0.2s;
+    }
+    .faq-question:hover { color: var(--primary); }
+    .faq-icon { font-size: 18px; transition: transform 0.3s; flex-shrink: 0; color: var(--secondary); }
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+    .faq-answer {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.35s ease;
+    }
+    .faq-item.open .faq-answer { max-height: 300px; }
+    .faq-answer-inner {
+      padding: 0 24px 20px;
+      font-size: 14px; color: var(--text-muted); line-height: 1.7;
+    }
+
+    /* ── CTA FINAL ────────────────────────────────────────── */
+    .cta-section {
+      background: linear-gradient(135deg, #071e3d 0%, #0d3a6b 35%, #104c91 70%, #1561e1 100%);
+      padding: 100px 24px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 26px 26px;
+    }
+    .cta-section h2 {
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 900; color: white;
+      letter-spacing: -0.02em; margin-bottom: 16px;
+      position: relative;
+    }
+    .cta-section h2 .accent { color: #4ade80; }
+    .cta-section p {
+      font-size: 18px; color: rgba(255,255,255,0.7);
+      margin-bottom: 40px; max-width: 480px; margin-left: auto; margin-right: auto;
+      position: relative;
+    }
+    .cta-buttons { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; position: relative; }
+
+    /* ── FOOTER ───────────────────────────────────────────── */
+    .footer {
+      background: #0f172a; padding: 56px 24px 32px;
+      color: rgba(255,255,255,0.5);
+    }
+    .footer-inner {
+      max-width: 1200px; margin: 0 auto;
+    }
+    .footer-top {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px; margin-bottom: 48px;
+    }
+    .footer-brand p {
+      font-size: 14px; line-height: 1.7; color: rgba(255,255,255,0.45);
+      margin-top: 12px; max-width: 280px;
+    }
+    .footer-col h4 {
+      font-size: 11px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.6); margin-bottom: 16px;
+    }
+    .footer-col a {
+      display: block; font-size: 14px;
+      color: rgba(255,255,255,0.45);
+      text-decoration: none; margin-bottom: 10px;
+      transition: color 0.2s;
+    }
+    .footer-col a:hover { color: white; }
+    .footer-bottom {
+      padding-top: 28px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex; justify-content: space-between;
+      align-items: center; flex-wrap: gap;
+      font-size: 12px;
+    }
+    .footer-watermark {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .footer-watermark span { color: rgba(255,255,255,0.4); font-size: 12px; }
+    .footer-watermark b { color: rgba(255,255,255,0.7); }
+
+    /* ── REVEAL ANIMATIONS ────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* fix: footer-bottom wrap */
+    .footer-bottom { flex-wrap: wrap; gap: 12px; }
+
+    /* fix: faq max-height suficiente para respuestas largas */
+    .faq-item.open .faq-answer { max-height: 600px; }
+
+    /* ── RESPONSIVE ───────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .pain-grid { grid-template-columns: repeat(2, 1fr); }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+      .footer-top { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 0; padding: 48px 20px 56px; }
+      .hero-mockup { display: none; }
+      .hero h1 { font-size: 34px; }
+      .hero p { font-size: 16px; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .steps-grid::before { display: none; }
+      .solution-grid { grid-template-columns: 1fr; }
+      .legal-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 420px; }
+      .price-card.popular { transform: none; }
+      .price-card.popular:hover { transform: translateY(-4px); }
+      .pain-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none !important; }
+      .btn-nav { display: none !important; }
+      .hamburger { display: block !important; }
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+      .section { padding: 72px 20px; }
+      .solution-bg { padding: 72px 20px; }
+      .stats-section { padding: 56px 20px; }
+      .pricing-section { padding: 72px 20px; }
+      .faq-section { padding: 72px 20px; }
+      .cta-section { padding: 72px 20px; }
+      .wa-widget { bottom: 20px; right: 16px; }
+      .wa-bubble {
+        max-width: calc(100vw - 32px);
+        right: 0;
+        left: auto;
+        position: relative;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 30px; }
+      .section { padding: 60px 16px; }
+      .solution-bg, .stats-section, .pricing-section,
+      .faq-section, .cta-section { padding: 60px 16px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+      .stat-label { font-size: 12px; }
+      .hero-ctas { flex-direction: column; }
+      .btn-hero-primary, .btn-hero-secondary { text-align: center; justify-content: center; width: 100%; }
+      .hero-trust { gap: 12px; }
+      .footer-top { grid-template-columns: 1fr; gap: 28px; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .cta-buttons { flex-direction: column; align-items: center; }
+      .cta-buttons a { width: 100%; max-width: 320px; justify-content: center; }
+      .section-title { font-size: 26px; }
+      .pain-quote { font-size: 12px; }
+      .price-amount { font-size: 30px; }
+      .faq-question { font-size: 14px; padding: 16px 18px; }
+      .faq-answer-inner { padding: 0 18px 16px; }
+    }
+  /* ── MOBILE OVERRIDES (alta especificidad) ──────────────── */
+  @media screen and (max-width: 768px) {
+    nav.navbar .btn-nav       { display: none !important; }
+    nav.navbar .nav-links     { display: none !important; }
+    nav.navbar .hamburger     { display: flex !important; flex-direction: column; justify-content: center; }
+    .wa-bubble                { position: relative !important; left: auto !important; right: 0 !important;
+                                max-width: calc(100vw - 32px) !important; }
+  }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ NAVBAR ══════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="navbar-inner">
+    <a href="#" class="nav-logo">
+      <!-- Logo Inteliaudit -->
+      <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Isotipo: squircle con lente + check -->
+        <rect x="0" y="2" width="36" height="36" rx="10" fill="url(#navGrad)"/>
+        <!-- Círculo de la lupa -->
+        <circle cx="16" cy="18" r="7" stroke="white" stroke-width="2.2"/>
+        <!-- Mango de lupa -->
+        <line x1="21.5" y1="23.5" x2="27" y2="29" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+        <!-- Check verde dentro de la lupa -->
+        <path d="M13 18.2l2 2 3.5-3.5" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Punto verde (i) -->
+        <circle cx="30" cy="7" r="3.5" fill="#00a651"/>
+        <!-- Wordmark -->
+        <text x="44" y="26" font-family="Inter,sans-serif" font-weight="900" font-size="18" fill="#104c91">Inteli</text>
+        <text x="91" y="26" font-family="Inter,sans-serif" font-weight="300" font-size="18" fill="#00a651">audit</text>
+        <defs>
+          <linearGradient id="navGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#1561e1"/>
+            <stop offset="1" stop-color="#104c91"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </a>
+
+    <div class="nav-links">
+      <a href="#dolor">¿Por qué Inteliaudit?</a>
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="#funcionalidades">Funcionalidades</a>
+      <a href="#precios">Precios</a>
+      <a href="#faq">FAQ</a>
+    </div>
+
+    <a href="/app/login" class="btn-nav">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+      Ingresar al sistema
+    </a>
+
+    <button class="hamburger" id="hamburger" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile nav drawer -->
+<div class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+  <div class="mobile-nav-panel">
+    <a href="#dolor" class="mobile-nav-link">¿Por qué Inteliaudit?</a>
+    <a href="#como-funciona" class="mobile-nav-link">Cómo funciona</a>
+    <a href="#funcionalidades" class="mobile-nav-link">Funcionalidades</a>
+    <a href="#precios" class="mobile-nav-link">Precios</a>
+    <a href="#faq" class="mobile-nav-link">FAQ</a>
+    <a href="/app/login" class="mobile-nav-cta">Ingresar al sistema →</a>
+  </div>
+</div>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section class="hero">
+  <div class="hero-glow-1"></div>
+  <div class="hero-glow-2"></div>
+
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <div class="hero-badge">
+        <div class="hero-badge-dot"></div>
+        <span>Sistema sin precedentes en Paraguay</span>
+      </div>
+
+      <h1>
+        Auditoría impositiva<br/>que se hace<br/>
+        <span class="accent">sola.</span>
+      </h1>
+
+      <p>
+        Del Excel artesanal al informe firmable en horas. Cruzá RG90, SIFEN y HECHAUKA automáticamente, detectá hallazgos con IA y generá informes profesionales cumpliendo Ley 6380/2019, Ley 125/1991 y RG 90/2021.
+      </p>
+
+      <div class="hero-ctas">
+        <a href="#precios" class="btn-hero-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Empezar gratis 7 días
+        </a>
+        <a href="#como-funciona" class="btn-hero-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16"/></svg>
+          Ver demo
+        </a>
+      </div>
+
+      <div class="hero-trust">
+        <span>✓ Sin permanencia</span>
+        <div class="hero-trust-sep"></div>
+        <span>✓ Cancelá cuando quieras</span>
+        <div class="hero-trust-sep"></div>
+        <span>✓ Soporte local</span>
+      </div>
+    </div>
+
+    <div class="hero-mockup">
+      <div style="position:relative;">
+        <!-- Floating badges -->
+        <div class="float-badge white">
+          <div class="float-icon" style="background:#fef2f2;">🔍</div>
+          <div>
+            <div style="font-size:11px;color:#64748b;font-weight:600;">Hallazgo detectado</div>
+            <div style="font-size:13px;color:#0f172a;font-weight:800;">RUC inactivo · Gs. 4.2M</div>
+          </div>
+        </div>
+
+        <div class="mockup-frame">
+          <div class="mockup-chrome">
+            <div class="mockup-dots">
+              <div class="mockup-dot" style="background:#ff5f56;"></div>
+              <div class="mockup-dot" style="background:#ffbd2e;"></div>
+              <div class="mockup-dot" style="background:#27c93f;"></div>
+            </div>
+            <div class="mockup-url">app.inteliaudit.com.py</div>
+          </div>
+          <div class="mockup-body">
+            <div class="mockup-sidebar">
+              <div class="mockup-icon active">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              </div>
+              <div class="mockup-icon inactive">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              </div>
+              <div class="mockup-icon inactive">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </div>
+              <div class="mockup-icon inactive">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+            </div>
+            <div class="mockup-content">
+              <div class="mockup-header">Auditoría — Empresa ABC S.A.</div>
+              <div class="mockup-kpis">
+                <div class="mockup-kpi">
+                  <div class="mockup-kpi-label">Contingencia total</div>
+                  <div class="mockup-kpi-value red">₲ 42.8M</div>
+                </div>
+                <div class="mockup-kpi">
+                  <div class="mockup-kpi-label">Hallazgos activos</div>
+                  <div class="mockup-kpi-value">14</div>
+                </div>
+                <div class="mockup-kpi">
+                  <div class="mockup-kpi-label">Alto riesgo</div>
+                  <div class="mockup-kpi-value red">6</div>
+                </div>
+                <div class="mockup-kpi">
+                  <div class="mockup-kpi-label">Confirmados</div>
+                  <div class="mockup-kpi-value green">8</div>
+                </div>
+              </div>
+              <div class="mockup-table">
+                <div class="mockup-tr" style="background:#f8fafc;">
+                  <span style="font-size:8px;font-weight:800;color:#94a3b8;text-transform:uppercase;flex:2;">Hallazgo</span>
+                  <span style="font-size:8px;font-weight:800;color:#94a3b8;text-transform:uppercase;flex:1;">Riesgo</span>
+                  <span style="font-size:8px;font-weight:800;color:#94a3b8;text-transform:uppercase;flex:1;">Contingencia</span>
+                </div>
+                <div class="mockup-tr">
+                  <span style="flex:2;color:#0f172a;font-weight:600;">Crédito c/ RUC inactivo</span>
+                  <span style="flex:1;"><span class="mockup-badge red">Alto</span></span>
+                  <span style="flex:1;font-weight:800;color:#dc2626;">₲ 18.4M</span>
+                </div>
+                <div class="mockup-tr">
+                  <span style="flex:2;color:#0f172a;font-weight:600;">Sin CDC en SIFEN</span>
+                  <span style="flex:1;"><span class="mockup-badge red">Alto</span></span>
+                  <span style="flex:1;font-weight:800;color:#dc2626;">₲ 9.2M</span>
+                </div>
+                <div class="mockup-tr">
+                  <span style="flex:2;color:#0f172a;font-weight:600;">Retención no practicada</span>
+                  <span style="flex:1;"><span class="mockup-badge amber">Medio</span></span>
+                  <span style="flex:1;font-weight:700;color:#d97706;">₲ 6.1M</span>
+                </div>
+                <div class="mockup-tr">
+                  <span style="flex:2;color:#0f172a;font-weight:600;">Gasto sin comprobante</span>
+                  <span style="flex:1;"><span class="mockup-badge amber">Medio</span></span>
+                  <span style="flex:1;font-weight:700;color:#d97706;">₲ 4.8M</span>
+                </div>
+                <div class="mockup-tr">
+                  <span style="flex:2;color:#0f172a;font-weight:600;">Dif. RG90 vs Form. 120</span>
+                  <span style="flex:1;"><span class="mockup-badge green">Bajo</span></span>
+                  <span style="flex:1;font-weight:700;color:#16a34a;">₲ 1.3M</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="float-badge green">
+          <div class="float-icon" style="background:rgba(255,255,255,0.2);">✓</div>
+          <div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.8);">Informe generado</div>
+            <div style="font-size:13px;font-weight:800;">Word + PDF listos</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-wave">
+    <svg viewBox="0 0 1440 64" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,64 C360,10 1080,60 1440,20 L1440,64 Z" fill="#f0f4f8"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ══════════════ ESTADÍSTICAS ══════════════ -->
+<section class="stats-section">
+  <div class="section-inner">
+    <div class="stats-grid">
+      <div class="stat-item reveal">
+        <div class="stat-number">12+</div>
+        <div class="stat-label">Procedimientos de auditoría automatizados</div>
+      </div>
+      <div class="stat-item reveal">
+        <div class="stat-number">80%</div>
+        <div class="stat-label">Reducción en tiempo de preparación de informes</div>
+      </div>
+      <div class="stat-item reveal">
+        <div class="stat-number">100%</div>
+        <div class="stat-label">Alineado con Ley 6380/2019 y RG 90/2021</div>
+      </div>
+      <div class="stat-item reveal">
+        <div class="stat-number">∞</div>
+        <div class="stat-label">Clientes gestionables en plan ilimitado</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ DOLOR ══════════════ -->
+<section class="section" id="dolor">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-label">¿Te identificás?</div>
+      <h2 class="section-title">El día a día del auditor impositivo<br/>no debería ser así</h2>
+      <p class="section-subtitle">Conocemos cada dolor del auditor paraguayo. Los vivimos, los entendemos, y los resolvimos.</p>
+    </div>
+
+    <div class="pain-grid">
+      <div class="pain-card reveal">
+        <span class="pain-emoji">📊</span>
+        <h3>Horas cruzando Excel contra Marangatú</h3>
+        <p>Bajás el RG90, lo abrís en Excel, lo comparás manualmente con SIFEN y HECHAUKA. Un proceso que lleva días y que nadie debería hacer a mano en 2025.</p>
+        <div class="pain-quote">"Tardo 3 días en hacer lo que debería llevar 3 horas."</div>
+      </div>
+      <div class="pain-card reveal">
+        <span class="pain-emoji">😰</span>
+        <h3>Miedo a perder un hallazgo crítico</h3>
+        <p>Con tantas columnas, períodos y fuentes distintas, siempre está el fantasma de que algo se te escape. Un crédito fiscal con RUC cancelado. Una factura sin CDC en SIFEN.</p>
+        <div class="pain-quote">"¿Y si se me pasó algo? La responsabilidad es mía."</div>
+      </div>
+      <div class="pain-card reveal">
+        <span class="pain-emoji">📝</span>
+        <h3>Informes que lleva días preparar</h3>
+        <p>Armás el informe en Word desde cero, calculás las multas e intereses a mano, formateás la matriz de riesgo, revisás los artículos legales. Y aun así no queda profesional.</p>
+        <div class="pain-quote">"Dedico más tiempo al informe que a la auditoría en sí."</div>
+      </div>
+      <div class="pain-card reveal">
+        <span class="pain-emoji">🔄</span>
+        <h3>Gestionar múltiples clientes sin sistema</h3>
+        <p>¿En qué estado está la auditoría de cada cliente? ¿Quién está trabajando en qué? Sin sistema, todo vive en carpetas, mails y notas de WhatsApp.</p>
+        <div class="pain-quote">"Tengo 8 auditorías activas y no sé cuál está al día."</div>
+      </div>
+      <div class="pain-card reveal">
+        <span class="pain-emoji">⚖️</span>
+        <h3>Normativa que cambia constantemente</h3>
+        <p>La SET emite resoluciones, cambian tasas, vencen timbrados. Mantener actualizado tu conocimiento legal Y tus plantillas de trabajo es un trabajo en sí mismo.</p>
+        <div class="pain-quote">"¿Ya entró en vigencia la nueva RG? No sé si mi plantilla es correcta."</div>
+      </div>
+      <div class="pain-card reveal">
+        <span class="pain-emoji">🤝</span>
+        <h3>Clientes que piden transparencia</h3>
+        <p>Tus clientes quieren saber qué encontraste, cuánto representa, qué riesgo tienen. Comunicar eso de manera clara y profesional diferencia a una firma de otra.</p>
+        <div class="pain-quote">"Mi cliente me pregunta cuál es su exposición y yo le mando un Excel."</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ SOLUCIÓN ══════════════ -->
+<section class="solution-bg" id="solucion">
+  <div class="section-inner">
+    <div class="section-header" style="text-align:center;">
+      <div class="section-label" style="color:#4ade80;">La solución</div>
+      <h2 class="section-title" style="color:white;">Inteliaudit lo hace<br/>todo en tu lugar</h2>
+      <p class="section-subtitle" style="color:rgba(255,255,255,0.65);margin:0 auto;">Desde la descarga en Marangatú hasta el informe firmable, sin hojas de cálculo, sin plantillas manuales, sin márgenes para el error humano.</p>
+    </div>
+
+    <div class="solution-grid">
+      <div class="solution-card reveal">
+        <div class="solution-icon">🔗</div>
+        <h3>Cruce automático de fuentes</h3>
+        <p>Conecta Marangatú, SIFEN y HECHAUKA. Cruza RG90 contra Form. 120, valida CDCs, detecta RUCs inactivos y compara lo declarado con lo recibido de terceros.</p>
+        <div class="solution-tag">✓ Antes: 3 días · Ahora: minutos</div>
+      </div>
+      <div class="solution-card reveal">
+        <div class="solution-icon">🤖</div>
+        <h3>Detección inteligente de hallazgos</h3>
+        <p>12+ procedimientos de auditoría corriendo automáticamente sobre tus datos. Cada hallazgo se documenta con base legal específica, cuantificación y nivel de riesgo.</p>
+        <div class="solution-tag">✓ Ningún hallazgo se escapa</div>
+      </div>
+      <div class="solution-card reveal">
+        <div class="solution-icon">📄</div>
+        <h3>Informes profesionales al instante</h3>
+        <p>Generá informes en Word y PDF con portada personalizada, resumen ejecutivo, detalle de cada hallazgo, matriz de riesgo y cálculo exacto de multas e intereses.</p>
+        <div class="solution-tag">✓ Informe firmable en 1 clic</div>
+      </div>
+      <div class="solution-card reveal">
+        <div class="solution-icon">📊</div>
+        <h3>Dashboard de gestión multi-cliente</h3>
+        <p>Todos tus clientes, todas sus auditorías, todos los hallazgos en un solo lugar. Asigná auditores, seguí el estado de cada encargo, nunca más perdás el hilo.</p>
+        <div class="solution-tag">✓ Control total de tu firma</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ CÓMO FUNCIONA ══════════════ -->
+<section class="section" id="como-funciona">
+  <div class="section-inner">
+    <div class="section-header" style="text-align:center;">
+      <div class="section-label">Proceso</div>
+      <h2 class="section-title">Tres pasos. De los datos<br/>al informe.</h2>
+      <p class="section-subtitle" style="margin:0 auto;">No necesitás cambiar cómo trabajás. Solo dejá que Inteliaudit trabaje por vos.</p>
+    </div>
+
+    <div class="steps-grid">
+      <div class="step-card reveal">
+        <div class="step-number">1</div>
+        <h3>Cargá los datos del cliente</h3>
+        <p>Subí los archivos RG90, HECHAUKA, estados de cuenta SET y balances descargados de Marangatú. El sistema los procesa y organiza automáticamente.</p>
+        <div class="step-tag">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          XLSX · PDF · XML · CDC
+        </div>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-number">2</div>
+        <h3>Ejecutá el análisis automático</h3>
+        <p>Con un clic, el motor de auditoría cruza todas las fuentes, valida comprobantes en SIFEN, verifica RUCs activos y cuantifica cada desvío con su base legal aplicable.</p>
+        <div class="step-tag">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          12+ procedimientos en segundos
+        </div>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-number">3</div>
+        <h3>Revisá, confirmá y generá el informe</h3>
+        <p>Revisá los hallazgos detectados, agregá tus notas como auditor, descartá o confirmá cada uno. Luego generá el informe en Word o PDF con un solo clic.</p>
+        <div class="step-tag">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Informe profesional y firmable
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FUNCIONALIDADES ══════════════ -->
+<section class="section features-bg" id="funcionalidades">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-label">Funcionalidades</div>
+      <h2 class="section-title">Todo lo que necesitás.<br/>Nada que no necesitás.</h2>
+      <p class="section-subtitle">Construido específicamente para la realidad tributaria paraguaya.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="feature-icon fi-blue">🔍</div>
+        <h3>Cruce RG90 multi-fuente</h3>
+        <p>Detecta diferencias entre lo declarado en RG90, lo registrado en SIFEN y lo informado por terceros en HECHAUKA con exactitud contable.</p>
+        <ul class="feature-list">
+          <li>RG90 vs Form. 120 (total IVA)</li>
+          <li>CDCs validados en SIFEN en tiempo real</li>
+          <li>RUCs cruzados con estado en SET</li>
+          <li>Notas de crédito y débito reconciliadas</li>
+        </ul>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon fi-red">⚠️</div>
+        <h3>Hallazgos con base legal</h3>
+        <p>Cada irregularidad detectada incluye el artículo legal aplicable (Ley 6380/2019, Ley 125/1991, Dcto. 3107/2019) y el monto de contingencia calculado.</p>
+        <ul class="feature-list">
+          <li>Multa por omisión (50% — Art. 175)</li>
+          <li>Intereses moratorios (1% mensual)</li>
+          <li>Contingencia total cuantificada</li>
+          <li>Clasificación por nivel de riesgo</li>
+        </ul>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon fi-green">📋</div>
+        <h3>Informes auditoría profesionales</h3>
+        <p>Generá informes con identidad corporativa de tu firma, portada personalizada con logo del cliente y todos los elementos que exige un encargo de auditoría.</p>
+        <ul class="feature-list">
+          <li>Portada con logo del cliente</li>
+          <li>Resumen ejecutivo + KPIs</li>
+          <li>Matriz de riesgo por impuesto</li>
+          <li>Word (.docx) + PDF nativos</li>
+        </ul>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon fi-purple">🏢</div>
+        <h3>Multi-cliente y multi-auditor</h3>
+        <p>Gestioná toda tu cartera desde un solo panel. Asigná clientes a auditores, controlá el estado de cada encargo y supervisá la producción del equipo.</p>
+        <ul class="feature-list">
+          <li>Roles: Admin, Auditor Senior, Auditor</li>
+          <li>Historial completo por cliente</li>
+          <li>Auditorías simultáneas ilimitadas</li>
+          <li>Trail de auditoría de cada acción</li>
+        </ul>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon fi-orange">🔐</div>
+        <h3>Credenciales SET encriptadas</h3>
+        <p>Guardá las credenciales Marangatú de tus clientes con encriptación AES-256. El sistema puede descargar datos automáticamente, siempre con tu autorización explícita.</p>
+        <ul class="feature-list">
+          <li>Encriptación AES-256 en reposo</li>
+          <li>Descarga automática de Marangatú</li>
+          <li>Acceso auditado y trazable</li>
+          <li>Por cliente y por período</li>
+        </ul>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon fi-teal">📋</div>
+        <h3>Trazabilidad total de auditoría</h3>
+        <p>Cada acción queda registrada. Quién detectó cada hallazgo, cuándo, con qué evidencia y qué decisión tomó el auditor.</p>
+        <ul class="feature-list">
+          <li>Audit trail completo por hallazgo</li>
+          <li>Notas y decisiones del auditor</li>
+          <li>Versionado automático de informes</li>
+          <li>Estados: pendiente · confirmado · regularizado</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ MARCO LEGAL ══════════════ -->
+<section class="legal-section">
+  <div class="section-inner">
+    <div class="legal-grid">
+      <div>
+        <div class="section-label" style="color:rgba(255,255,255,0.7);">Compliance</div>
+        <h2 class="section-title" style="color:white;">Construido sobre<br/>la ley paraguaya.</h2>
+        <p style="font-size:16px;color:rgba(255,255,255,0.7);line-height:1.7;margin-top:16px;max-width:380px;">
+          No es un sistema genérico adaptado. Fue diseñado desde cero para la realidad tributaria del Paraguay, con cada norma vigente incorporada en la lógica de análisis.
+        </p>
+        <a href="#precios" class="btn-hero-primary" style="margin-top:32px;display:inline-flex;">
+          Empezar ahora →
+        </a>
+      </div>
+      <div>
+        <div class="legal-card" style="margin-bottom:12px;">
+          <div class="legal-card-title">🏛️ Leyes principales</div>
+          <div class="legal-item"><div class="legal-dot"></div><div><b>Ley 6380/2019</b> — Modernización tributaria. IRE, IRP, IDU, IVA reformado.</div></div>
+          <div class="legal-item"><div class="legal-dot"></div><div><b>Ley 125/1991</b> — Código tributario. Multas, intereses, prescripción.</div></div>
+          <div class="legal-item"><div class="legal-dot"></div><div><b>Decreto 3107/2019</b> — Tasas de depreciación máximas IRE.</div></div>
+          <div class="legal-item"><div class="legal-dot"></div><div><b>Decreto 3181/2019</b> — Reglamentación IVA Ley 6380.</div></div>
+        </div>
+        <div class="legal-card">
+          <div class="legal-card-title">📋 Resoluciones SET aplicadas</div>
+          <div class="legal-item"><div class="legal-dot"></div><div><b>RG 90/2021</b> — Detalle de comprobantes por contribuyente (libro IVA digital).</div></div>
+          <div class="legal-item"><div class="legal-dot"></div><div><b>RG 69/2020</b> — Factura electrónica e-Kuatia y validez del CDC.</div></div>
+          <div class="legal-item"><div class="legal-dot"></div><div><b>RG 24/2014</b> — Comprobantes de venta autorizados pre-electrónicos.</div></div>
+          <div class="legal-item"><div class="legal-dot"></div><div><b>RG 108/2021</b> — Calendario de obligados a facturación electrónica.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ PRECIOS ══════════════ -->
+<section class="pricing-section" id="precios">
+  <div class="section-inner">
+    <div class="section-header" style="text-align:center;">
+      <div class="section-label">Precios</div>
+      <h2 class="section-title">Transparente. Sin sorpresas.<br/>Sin permanencia.</h2>
+      <p class="section-subtitle" style="margin:0 auto;">Elegí el plan que se adapta a tu firma. Cambiá cuando quieras.</p>
+    </div>
+
+    <div class="pricing-grid">
+      <!-- Plan Starter -->
+      <div class="price-card reveal">
+        <div class="price-plan">Starter</div>
+        <div style="margin-bottom:4px;">
+          <span class="price-currency">Gs.</span>
+          <span class="price-amount"> 330.000</span>
+        </div>
+        <div class="price-period">por mes · facturado mensualmente</div>
+        <div class="price-clients">Hasta 10 clientes activos</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li><span class="price-check">✓</span> Análisis automático IVA + IRE + Retenciones</li>
+          <li><span class="price-check">✓</span> Cruce RG90 vs SIFEN vs HECHAUKA</li>
+          <li><span class="price-check">✓</span> Generación de informes Word + PDF</li>
+          <li><span class="price-check">✓</span> Hasta 3 usuarios por firma</li>
+          <li><span class="price-check">✓</span> Soporte por email</li>
+          <li><span class="price-check">✓</span> Audit trail completo de acciones</li>
+        </ul>
+        <a href="/app/login" class="btn-price-outline">Empezar gratis 7 días</a>
+      </div>
+
+      <!-- Plan Pro (popular) -->
+      <div class="price-card popular reveal">
+        <div class="popular-badge">⭐ Más popular</div>
+        <div class="price-plan">Pro</div>
+        <div style="margin-bottom:4px;">
+          <span class="price-currency">Gs.</span>
+          <span class="price-amount"> 495.000</span>
+        </div>
+        <div class="price-period">por mes · facturado mensualmente</div>
+        <div class="price-clients" style="background:#f0fdf4;color:#16a34a;">Hasta 20 clientes activos</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li><span class="price-check">✓</span> Todo lo del plan Starter</li>
+          <li><span class="price-check">✓</span> Hasta 8 usuarios por firma</li>
+          <li><span class="price-check">✓</span> Credenciales Marangatú encriptadas AES-256</li>
+          <li><span class="price-check">✓</span> Plan de trabajo con checklist automático</li>
+          <li><span class="price-check">✓</span> Evidencias y notas por hallazgo</li>
+          <li><span class="price-check">✓</span> Soporte prioritario WhatsApp</li>
+        </ul>
+        <a href="/app/login" class="btn-price-primary">Empezar gratis 7 días</a>
+      </div>
+
+      <!-- Plan Enterprise -->
+      <div class="price-card reveal">
+        <div class="price-plan">Enterprise</div>
+        <div style="margin-bottom:4px;">
+          <span class="price-currency">Gs.</span>
+          <span class="price-amount"> 990.000</span>
+        </div>
+        <div class="price-period">por mes · facturado mensualmente</div>
+        <div class="price-clients">Clientes ilimitados</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li><span class="price-check">✓</span> Todo lo del plan Pro</li>
+          <li><span class="price-check">✓</span> Usuarios ilimitados</li>
+          <li><span class="price-check">✓</span> Logo e identidad de firma en informes</li>
+          <li><span class="price-check">✓</span> Onboarding y capacitación del equipo</li>
+          <li><span class="price-check">✓</span> Soporte dedicado con SLA</li>
+          <li><span class="price-check">✓</span> Capacitación del equipo incluida</li>
+        </ul>
+        <a href="/app/login" class="btn-price-outline">Empezar gratis 7 días</a>
+      </div>
+    </div>
+
+    <div class="pricing-note">
+      <span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00a651" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        7 días gratis sin tarjeta de crédito
+      </span>
+      <span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00a651" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Cancelá cuando quieras, sin cargos adicionales
+      </span>
+      <span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00a651" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Soporte en horario comercial PY (GMT-4)
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FAQ ══════════════ -->
+<section class="faq-section" id="faq">
+  <div class="section-inner">
+    <div class="section-header" style="text-align:center;">
+      <div class="section-label">Preguntas frecuentes</div>
+      <h2 class="section-title">Todo lo que querés saber</h2>
+    </div>
+
+    <div class="faq-grid">
+      <div class="faq-item">
+        <button class="faq-question">
+          ¿Inteliaudit reemplaza al auditor?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            No. Inteliaudit es una herramienta de soporte al auditor, no un sustituto. El sistema automatiza la recopilación de datos, el cruce entre fuentes y la detección de irregularidades. El juicio profesional, la confirmación de hallazgos y las conclusiones finales siempre son del auditor. Lo que cambia es que el auditor llega al análisis con toda la información organizada y cuantificada, sin haber perdido días en tareas mecánicas.
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">
+          ¿Cómo se integra con Marangatú?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            Marangatú no tiene API pública, por lo que Inteliaudit trabaja de dos maneras: (1) podés subir manualmente los archivos que ya descargaste de Marangatú (RG90 en XLSX, declaraciones en PDF, estado de cuenta), o (2) podés guardar las credenciales del cliente con encriptación AES-256 y el sistema descarga los archivos automáticamente por vos. Ambas opciones son válidas y seguras.
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">
+          ¿Qué pasa con la seguridad de las credenciales de mis clientes?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            Las credenciales Marangatú de tus clientes se almacenan encriptadas con AES-256 y nunca se transmiten en texto plano. Solo el auditor responsable puede acceder a ellas dentro del sistema, y cada acceso queda registrado en el trail de auditoría. Podés eliminar las credenciales en cualquier momento desde el panel de control.
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">
+          ¿Los informes generados son aceptados por la SET?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            Inteliaudit genera informes de auditoría privada, no declaraciones juradas ni documentos con efecto tributario directo. Los informes son documentos de trabajo del auditor, que sirven como evidencia para recomendaciones al cliente, negociaciones con la SET o como soporte en procedimientos de fiscalización. La firma del auditor habilitado sigue siendo necesaria para darles valor legal.
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">
+          ¿Puedo probar antes de pagar?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            Sí. Tenés 7 días de prueba gratuita con acceso a todas las funcionalidades del plan Pro, sin necesidad de tarjeta de crédito. Si al terminar el período de prueba no querés continuar, tu cuenta se suspende automáticamente sin ningún cargo.
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">
+          ¿Qué impuestos cubre el análisis automático?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            El motor de análisis cubre IVA (Form. 120 + RG90), IRE (Form. 500), IRP (Form. 510), IDU (Form. 530) y Retenciones (Forms. 800-830). Podés elegir qué impuestos incluir en cada auditoría según el alcance acordado con tu cliente. Los procedimientos de cada impuesto están basados en la normativa vigente al momento de usar el sistema.
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">
+          ¿Qué pasa si la SET modifica una resolución?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            El equipo de Inteliaudit monitorea continuamente las resoluciones de la SET y actualiza la lógica de análisis cuando hay cambios normativos. Como cliente, recibís estas actualizaciones automáticamente, sin necesidad de actualizar plantillas ni modificar procesos manualmente.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ CTA FINAL ══════════════ -->
+<section class="cta-section">
+  <h2>Tu próxima auditoría,<br/>en <span class="accent">la mitad del tiempo.</span></h2>
+  <p>Probá Inteliaudit 7 días gratis. Sin tarjeta. Sin permanencia. Con todo el soporte que necesitás para empezar.</p>
+  <div class="cta-buttons">
+    <a href="/app/login" class="btn-hero-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Empezar gratis ahora
+    </a>
+    <a href="mailto:hola@inteliaudit.com.py" class="btn-hero-secondary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      Hablar con el equipo
+    </a>
+  </div>
+</section>
+
+<!-- ══════════════ WHATSAPP WIDGET ══════════════ -->
+<style>
+  .wa-widget {
+    position: fixed; bottom: 28px; right: 28px; z-index: 200;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 12px;
+  }
+  .wa-bubble {
+    background: white;
+    border-radius: 16px;
+    padding: 14px 18px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08);
+    max-width: 240px;
+    opacity: 0; transform: translateY(8px) scale(0.96);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+    border: 1px solid #e2e8f0;
+  }
+  .wa-bubble.visible {
+    opacity: 1; transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  .wa-bubble-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+  }
+  .wa-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #00a651, #00823e);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .wa-bubble-name { font-size: 13px; font-weight: 800; color: #0f172a; }
+  .wa-bubble-status { font-size: 11px; color: #64748b; display: flex; align-items: center; gap: 4px; }
+  .wa-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+  .wa-bubble-text { font-size: 13px; color: #374151; line-height: 1.5; }
+  .wa-bubble-cta {
+    display: block; margin-top: 12px;
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    color: white; font-size: 13px; font-weight: 700;
+    padding: 9px 14px; border-radius: 10px;
+    text-decoration: none; text-align: center;
+    transition: opacity 0.2s;
+  }
+  .wa-bubble-cta:hover { opacity: 0.9; }
+  .wa-btn {
+    width: 58px; height: 58px; border-radius: 50%;
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 28px rgba(37,211,102,0.5), 0 2px 8px rgba(0,0,0,0.12);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+  }
+  .wa-btn:hover { transform: scale(1.08); box-shadow: 0 12px 36px rgba(37,211,102,0.6); }
+  .wa-btn-ping {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: rgba(37,211,102,0.35);
+    animation: wa-ping 2.5s ease-in-out infinite;
+  }
+  @keyframes wa-ping {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.5); opacity: 0; }
+  }
+  .wa-unread {
+    position: absolute; top: -3px; right: -3px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #ef4444; border: 2px solid white;
+    font-size: 10px; font-weight: 900; color: white;
+    display: flex; align-items: center; justify-content: center;
+  }
+</style>
+
+<div class="wa-widget" id="waWidget">
+  <div class="wa-bubble" id="waBubble">
+    <div class="wa-bubble-header">
+      <div class="wa-avatar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      </div>
+      <div>
+        <div class="wa-bubble-name">Equipo Inteliaudit</div>
+        <div class="wa-bubble-status"><div class="wa-status-dot"></div> En línea ahora</div>
+      </div>
+    </div>
+    <div class="wa-bubble-text">¡Hola! 👋 ¿Tenés dudas sobre Inteliaudit? Respondemos al toque.</div>
+    <a href="https://wa.me/595994516360?text=Hola%2C%20me%20interesa%20conocer%20m%C3%A1s%20sobre%20Inteliaudit" target="_blank" rel="noopener" class="wa-bubble-cta">
+      Escribinos por WhatsApp →
+    </a>
+  </div>
+
+  <button class="wa-btn" id="waBtn" aria-label="Contactar por WhatsApp">
+    <div class="wa-btn-ping"></div>
+    <span class="wa-unread">1</span>
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </button>
+</div>
+
+<script>
+  const waBtn = document.getElementById('waBtn');
+  const waBubble = document.getElementById('waBubble');
+  const waUnread = waBtn.querySelector('.wa-unread');
+  let bubbleOpen = false;
+
+  // Auto-show bubble after 4s (solo en desktop)
+  if (window.innerWidth > 768) {
+    setTimeout(() => {
+      waBubble.classList.add('visible');
+      bubbleOpen = true;
+    }, 4000);
+  }
+
+  waBtn.addEventListener('click', () => {
+    bubbleOpen = !bubbleOpen;
+    waBubble.classList.toggle('visible', bubbleOpen);
+    if (waUnread) waUnread.style.display = 'none';
+  });
+
+  // Close bubble clicking outside
+  document.addEventListener('click', (e) => {
+    const widget = document.getElementById('waWidget');
+    if (!widget.contains(e.target) && bubbleOpen) {
+      waBubble.classList.remove('visible');
+      bubbleOpen = false;
+    }
+  });
+</script>
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:32px;">
+          <rect x="0" y="2" width="36" height="36" rx="10" fill="url(#footGrad)"/>
+          <circle cx="16" cy="18" r="7" stroke="white" stroke-width="2.2"/>
+          <line x1="21.5" y1="23.5" x2="27" y2="29" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M13 18.2l2 2 3.5-3.5" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="30" cy="7" r="3.5" fill="#00a651"/>
+          <text x="44" y="26" font-family="Inter,sans-serif" font-weight="900" font-size="18" fill="#256ebf">Inteli</text>
+          <text x="91" y="26" font-family="Inter,sans-serif" font-weight="300" font-size="18" fill="#1ecb73">audit</text>
+          <defs>
+            <linearGradient id="footGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#1561e1"/><stop offset="1" stop-color="#104c91"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <p>Auditoría impositiva inteligente para Paraguay. La única herramienta construida desde cero para la realidad tributaria paraguaya.</p>
+        <p style="margin-top:8px;font-size:12px;">Parte del ecosistema <b style="color:rgba(255,255,255,0.6);">Intelihouse</b></p>
+      </div>
+      <div class="footer-col">
+        <h4>Producto</h4>
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#funcionalidades">Funcionalidades</a>
+        <a href="#precios">Precios</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="#">Ley 6380/2019</a>
+        <a href="#">RG 90/2021</a>
+        <a href="#">Términos de uso</a>
+        <a href="#">Política de privacidad</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contacto</h4>
+        <a href="mailto:hola@inteliaudit.com.py">hola@inteliaudit.com.py</a>
+        <a href="#">WhatsApp soporte</a>
+        <a href="/app/login">Acceder al sistema</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-watermark">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:18px;opacity:0.5;">
+          <rect width="20" height="20" rx="5" fill="#1561e1"/>
+          <circle cx="9" cy="10" r="4" stroke="white" stroke-width="1.4"/>
+          <line x1="12" y1="13" x2="15" y2="16" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M7.5 10.2l1.2 1.2 2-2" stroke="#4ade80" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>© 2025 <b>Inteliaudit</b> · Parte de Intelihouse · Asunción, Paraguay</span>
+      </div>
+      <span style="font-size:12px;color:rgba(255,255,255,0.25);">Auditoría impositiva inteligente para Paraguay</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Hamburger / mobile nav
+  const hamburger = document.getElementById('hamburger');
+  const mobileNav = document.getElementById('mobileNav');
+  const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+
+  function closeMobileNav() {
+    hamburger.classList.remove('open');
+    mobileNav.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  hamburger.addEventListener('click', () => {
+    const isOpen = mobileNav.classList.toggle('open');
+    hamburger.classList.toggle('open', isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  });
+
+  mobileNavOverlay.addEventListener('click', closeMobileNav);
+
+  document.querySelectorAll('.mobile-nav-link, .mobile-nav-cta').forEach(a => {
+    a.addEventListener('click', closeMobileNav);
+  });
+
+  // Navbar scroll shadow
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 20);
+  });
+
+  // Reveal on scroll
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  reveals.forEach(el => observer.observe(el));
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-question').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    });
+  });
+
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
