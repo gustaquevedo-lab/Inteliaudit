@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, Building2, ChevronRight, CheckCircle, XCircle } from 'lucide-react'
+import { Plus, Search, Building2, ChevronRight, CheckCircle, XCircle, AlertTriangle } from 'lucide-react'
 import { api } from '../../api/client'
 import { useToast } from '../../components/Toaster'
+import { useAuth } from '../../context/AuthContext'
 import Modal from '../../components/Modal'
 import EmptyState from '../../components/EmptyState'
 import type { Cliente } from '../../api/types'
@@ -12,6 +13,7 @@ const REGIMENES = ['General', 'Pequeño contribuyente', 'Autoliquidación', 'Otr
 export default function ClientesList() {
   const navigate = useNavigate()
   const { success, error } = useToast()
+  const { planInfo } = useAuth()
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -62,6 +64,40 @@ export default function ClientesList() {
           <Plus size={16} /> Nuevo cliente
         </button>
       </div>
+
+      {/* Banner límite de clientes */}
+      {planInfo?.clientesMaximos != null && (() => {
+        const actual = clientes.length
+        const maximo = planInfo.clientesMaximos!
+        const restantes = maximo - actual
+        if (restantes <= 1) {
+          return (
+            <div className={`flex items-start gap-3 p-4 rounded-2xl border text-sm ${
+              restantes <= 0
+                ? 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800/40 text-red-700 dark:text-red-300'
+                : 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800/40 text-amber-700 dark:text-amber-300'
+            }`}>
+              <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+              <div>
+                <p className="font-black">
+                  {restantes <= 0
+                    ? `Límite de clientes alcanzado — ${actual}/${maximo} en tu plan ${planInfo.nombre}`
+                    : `Te queda 1 cliente disponible en tu plan ${planInfo.nombre} (${actual}/${maximo})`}
+                </p>
+                <a
+                  href="https://inteliaudit.com/#precios"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold underline underline-offset-2 mt-0.5 inline-block opacity-80 hover:opacity-100 transition-opacity"
+                >
+                  Actualizá tu plan para agregar más
+                </a>
+              </div>
+            </div>
+          )
+        }
+        return null
+      })()}
 
       {/* Search */}
       <div className="card p-4">

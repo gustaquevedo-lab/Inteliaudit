@@ -565,6 +565,22 @@ async def analisis_claude(
     - Procedimientos adicionales sugeridos
     """
     from config.settings import settings
+    from config.plans import get_plan, PLAN_ALIAS_MAP
+    from db.models import Firma
+    from sqlalchemy import select
+
+    # Verificar que el plan incluya IA
+    firma_result = await db.execute(select(Firma).where(Firma.id == user.firma_id))
+    firma = firma_result.scalar_one_or_none()
+    if firma:
+        plan_key = PLAN_ALIAS_MAP.get(firma.plan, firma.plan)
+        plan_cfg = get_plan(plan_key)
+        if not plan_cfg.tiene_ia:
+            raise HTTPException(
+                403,
+                "El análisis con Inteligencia Artificial requiere el plan Pro o Enterprise. "
+                "Actualizá tu plan en inteliaudit.com para acceder a esta función."
+            )
 
     if not settings.anthropic_api_key:
         raise HTTPException(400, "API key de Anthropic no configurada. Agregá ANTHROPIC_API_KEY en el .env")

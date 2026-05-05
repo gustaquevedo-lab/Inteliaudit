@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Zap, CheckCircle2, AlertTriangle, Loader2, BarChart3, Database, FileSearch, TrendingUp, ChevronRight, Sparkles, BrainCircuit } from 'lucide-react'
+import { Zap, CheckCircle2, AlertTriangle, Loader2, BarChart3, Database, FileSearch, TrendingUp, ChevronRight, Sparkles, BrainCircuit, Lock } from 'lucide-react'
 import { api } from '../../../api/client'
 import { useToast } from '../../../components/Toaster'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../../context/AuthContext'
 import { pyg } from '../../../utils/formatters'
 
 interface Props {
@@ -73,6 +74,8 @@ interface ClaudeResult {
 export default function TabAnalisis({ auditoriaId }: Props) {
   const { success, error } = useToast()
   const navigate = useNavigate()
+  const { planInfo } = useAuth()
+  const tieneIA = planInfo?.tieneIA ?? false
   const [running, setRunning] = useState<string | null>(null)
   const [results, setResults] = useState<Record<string, AnalisisResult>>({})
   const [rg90, setRg90] = useState<RG90Resumen | null>(null)
@@ -244,22 +247,44 @@ export default function TabAnalisis({ auditoriaId }: Props) {
       </div>
 
       {/* Análisis IA con Claude */}
-      <div className="card p-5 border border-purple-200 dark:border-purple-800/40">
+      <div className={`card p-5 border ${tieneIA ? 'border-purple-200 dark:border-purple-800/40' : 'border-gray-200 dark:border-gray-700'}`}>
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3 flex-1">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 shrink-0 mt-0.5">
-              <BrainCircuit size={18} className="text-white" />
+            <div className={`p-2.5 rounded-xl shrink-0 mt-0.5 ${tieneIA ? 'bg-gradient-to-br from-purple-500 to-blue-600' : 'bg-gray-200 dark:bg-gray-700'}`}>
+              <BrainCircuit size={18} className={tieneIA ? 'text-white' : 'text-gray-400 dark:text-gray-500'} />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-0.5">
                 <p className="font-black text-gray-900 dark:text-white text-sm">Análisis con Inteligencia Artificial</p>
                 <span className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-[9px] font-black uppercase rounded-full">Claude</span>
+                {!tieneIA && (
+                  <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-[9px] font-black uppercase rounded-full flex items-center gap-1">
+                    <Lock size={8} /> Pro
+                  </span>
+                )}
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                 Claude interpreta los hallazgos existentes y redacta narrativa profesional, conclusión ejecutiva y procedimientos adicionales recomendados.
               </p>
 
-              {claudeResult && (
+              {!tieneIA && (
+                <div className="mt-3 p-3 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/10 dark:to-blue-900/10 border border-purple-100 dark:border-purple-800/30 rounded-xl">
+                  <p className="text-xs font-bold text-purple-800 dark:text-purple-300 mb-1">Función exclusiva del plan Pro</p>
+                  <p className="text-xs text-purple-700 dark:text-purple-400 leading-relaxed">
+                    Actualizá tu plan para acceder al análisis automático con IA, narrativa legal y procedimientos sugeridos por Claude.
+                  </p>
+                  <a
+                    href="https://inteliaudit.com/#precios"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 mt-2 text-xs font-black text-purple-700 dark:text-purple-300 hover:text-purple-900 dark:hover:text-purple-100 transition-colors"
+                  >
+                    Ver planes <ChevronRight size={11} />
+                  </a>
+                </div>
+              )}
+
+              {tieneIA && claudeResult && (
                 <div className="mt-4 space-y-4">
                   {!claudeResult.ok && claudeResult.mensaje && (
                     <div className="p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30 rounded-xl text-xs text-amber-700 dark:text-amber-400">
@@ -302,17 +327,23 @@ export default function TabAnalisis({ auditoriaId }: Props) {
             </div>
           </div>
 
-          <button
-            onClick={ejecutarClaudeIA}
-            disabled={runningClaude || running !== null}
-            className="btn-primary py-2 px-4 text-xs flex items-center gap-1.5 shrink-0 bg-gradient-to-r from-purple-600 to-blue-600 border-0"
-          >
-            {runningClaude ? (
-              <><Loader2 size={13} className="animate-spin" /> Analizando...</>
-            ) : (
-              <><Sparkles size={13} /> Analizar con IA</>
-            )}
-          </button>
+          {tieneIA ? (
+            <button
+              onClick={ejecutarClaudeIA}
+              disabled={runningClaude || running !== null}
+              className="btn-primary py-2 px-4 text-xs flex items-center gap-1.5 shrink-0 bg-gradient-to-r from-purple-600 to-blue-600 border-0"
+            >
+              {runningClaude ? (
+                <><Loader2 size={13} className="animate-spin" /> Analizando...</>
+              ) : (
+                <><Sparkles size={13} /> Analizar con IA</>
+              )}
+            </button>
+          ) : (
+            <div className="shrink-0 px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-400 text-xs font-black flex items-center gap-1.5 cursor-not-allowed">
+              <Lock size={12} /> Bloqueado
+            </div>
+          )}
         </div>
       </div>
 

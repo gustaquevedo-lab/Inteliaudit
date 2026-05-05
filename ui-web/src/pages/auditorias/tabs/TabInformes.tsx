@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { FileText, Download, Loader2, FileCheck, Clock, Share2, Copy, CheckCircle2, ExternalLink } from 'lucide-react'
+import { FileText, Download, Loader2, FileCheck, Clock, Share2, Copy, CheckCircle2, ExternalLink, Lock, ChevronRight } from 'lucide-react'
 import { api } from '../../../api/client'
 import { useToast } from '../../../components/Toaster'
+import { useAuth } from '../../../context/AuthContext'
 import { fecha, fechaHora } from '../../../utils/formatters'
 import type { Informe } from '../../../api/types'
 
@@ -9,6 +10,8 @@ interface Props { auditoriaId: string; clienteRuc: string }
 
 export default function TabInformes({ auditoriaId, clienteRuc }: Props) {
   const { success, error } = useToast()
+  const { planInfo } = useAuth()
+  const tienePortal = planInfo?.planId === 'enterprise'
   const [informes, setInformes] = useState<Informe[]>([])
   const [loading, setLoading] = useState(true)
   const [generandoWord, setGenerandoWord] = useState(false)
@@ -162,45 +165,78 @@ export default function TabInformes({ auditoriaId, clienteRuc }: Props) {
 
       {/* Portal cliente */}
       <div className="card p-6">
-        <h3 className="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight mb-1">
-          Compartir con el cliente
-        </h3>
+        <div className="flex items-start justify-between gap-3 mb-1">
+          <h3 className="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tight">
+            Compartir con el cliente
+          </h3>
+          {!tienePortal && (
+            <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-[9px] font-black uppercase rounded-full flex items-center gap-1 shrink-0">
+              <Lock size={8} /> Enterprise
+            </span>
+          )}
+        </div>
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
           Generá un enlace de acceso temporal (30 días) para que tu cliente vea sus hallazgos sin necesidad de login.
         </p>
 
-        <button
-          onClick={generarEnlacePortal}
-          disabled={generandoToken}
-          className="btn-outline w-full sm:w-auto"
-        >
-          {generandoToken
-            ? <><Loader2 size={15} className="animate-spin" /> Generando enlace...</>
-            : <><Share2 size={15} /> Generar enlace de acceso</>
-          }
-        </button>
+        {tienePortal ? (
+          <>
+            <button
+              onClick={generarEnlacePortal}
+              disabled={generandoToken}
+              className="btn-outline w-full sm:w-auto"
+            >
+              {generandoToken
+                ? <><Loader2 size={15} className="animate-spin" /> Generando enlace...</>
+                : <><Share2 size={15} /> Generar enlace de acceso</>
+              }
+            </button>
 
-        {portalToken && (
-          <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800/30 rounded-xl space-y-3">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 size={15} className="text-green-600 dark:text-green-400 shrink-0" />
-              <p className="text-xs font-bold text-green-700 dark:text-green-400">Enlace generado correctamente</p>
+            {portalToken && (
+              <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800/30 rounded-xl space-y-3">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={15} className="text-green-600 dark:text-green-400 shrink-0" />
+                  <p className="text-xs font-bold text-green-700 dark:text-green-400">Enlace generado correctamente</p>
+                </div>
+                <div className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-green-200 dark:border-green-800/40 rounded-lg px-3 py-2">
+                  <ExternalLink size={13} className="text-gray-400 shrink-0" />
+                  <span className="text-xs font-mono text-gray-600 dark:text-gray-300 truncate flex-1">
+                    {window.location.origin}/app/portal/{portalToken.token}
+                  </span>
+                  <button
+                    onClick={copiarEnlace}
+                    className="shrink-0 flex items-center gap-1 text-xs font-bold text-primary hover:text-primary/80 transition-colors"
+                  >
+                    {copiado ? <><CheckCircle2 size={13} className="text-green-500" /> Copiado</> : <><Copy size={13} /> Copiar</>}
+                  </button>
+                </div>
+                <p className="text-[10px] text-gray-400 dark:text-gray-500">
+                  Expira el {fecha(portalToken.expira)} · El cliente puede ver los hallazgos activos sin iniciar sesión.
+                </p>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700 rounded-xl">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-gray-200 dark:bg-gray-700 rounded-xl">
+                <Share2 size={16} className="text-gray-400" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-500 dark:text-gray-400">Disponible en el plan Enterprise</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                  Compartí hallazgos con tus clientes con un enlace seguro y temporario.
+                </p>
+                <a
+                  href="https://inteliaudit.com/#precios"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 mt-1.5 text-xs font-black text-primary hover:text-primary/80 transition-colors"
+                >
+                  Actualizar plan <ChevronRight size={11} />
+                </a>
+              </div>
             </div>
-            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-green-200 dark:border-green-800/40 rounded-lg px-3 py-2">
-              <ExternalLink size={13} className="text-gray-400 shrink-0" />
-              <span className="text-xs font-mono text-gray-600 dark:text-gray-300 truncate flex-1">
-                {window.location.origin}/app/portal/{portalToken.token}
-              </span>
-              <button
-                onClick={copiarEnlace}
-                className="shrink-0 flex items-center gap-1 text-xs font-bold text-primary hover:text-primary/80 transition-colors"
-              >
-                {copiado ? <><CheckCircle2 size={13} className="text-green-500" /> Copiado</> : <><Copy size={13} /> Copiar</>}
-              </button>
-            </div>
-            <p className="text-[10px] text-gray-400 dark:text-gray-500">
-              Expira el {fecha(portalToken.expira)} · El cliente puede ver los hallazgos activos sin iniciar sesión.
-            </p>
           </div>
         )}
       </div>
