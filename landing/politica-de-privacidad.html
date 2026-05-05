@@ -1,190 +1,673 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Política de Privacidad | Inteliaudit</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2" />
-  <link rel="shortcut icon" href="favicon.svg?v=2" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta name="description" content="Política de privacidad de Inteliaudit. Cómo recopilamos, almacenamos y protegemos tus datos y los de tus clientes auditados. Desarrollado por Intellihouse, Paraguay." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><rect width='36' height='36' rx='10' fill='%231561e1'/><circle cx='16' cy='18' r='7' stroke='white' stroke-width='2.2' fill='none'/><line x1='21.5' y1='23.5' x2='27' y2='29' stroke='white' stroke-width='2.4' stroke-linecap='round'/><path d='M13 18.2l2 2 3.5-3.5' stroke='%234ade80' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/><circle cx='30' cy='7' r='3.5' fill='%2300a651'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --primary: #1561e1;
-      --primary-dark: #104c91;
-      --accent: #4ade80;
-      --text: #0f172a;
-      --text-light: #64748b;
-      --bg: #f8fafc;
-      --white: #ffffff;
+      --primary: #104c91; --primary-dark: #0a356b; --primary-light: #256ebf;
+      --primary-600: #1561e1; --secondary: #00a651; --secondary-dark: #00823e;
+      --secondary-light: #1ecb73; --body-bg: #f0f4f8; --text-dark: #0f172a;
+      --text-muted: #64748b; --border: #e2e8f0;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { 
-      font-family: 'Inter', sans-serif; 
-      background: var(--bg); 
-      color: var(--text); 
-      line-height: 1.6;
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--body-bg); color: var(--text-dark); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+    /* NAVBAR */
+    .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(255,255,255,0.92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(16,76,145,0.07); transition: box-shadow 0.3s ease; }
+    .navbar.scrolled { box-shadow: 0 2px 24px rgba(16,76,145,0.10); }
+    .navbar-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo svg { height: 36px; width: auto; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a { font-size: 14px; font-weight: 600; color: #475569; text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--primary); }
+    .btn-nav { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--secondary), var(--secondary-dark)); color: white; font-weight: 700; font-size: 14px; padding: 10px 22px; border-radius: 12px; border: none; cursor: pointer; text-decoration: none; box-shadow: 0 4px 18px rgba(0,166,81,0.35); transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,166,81,0.45); }
+    .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; flex-shrink: 0; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--primary); margin: 4px 0; transition: all 0.3s; border-radius: 2px; }
+    .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+    .mobile-nav { display: none; position: fixed; top: 68px; left: 0; right: 0; bottom: 0; z-index: 99; }
+    .mobile-nav.open { display: block; }
+    .mobile-nav-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); }
+    .mobile-nav-panel { position: absolute; top: 0; left: 0; right: 0; background: white; padding: 24px; border-bottom: 1px solid var(--border); box-shadow: 0 8px 32px rgba(0,0,0,0.12); animation: slideDown 0.25s ease; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    .mobile-nav-panel a { display: block; padding: 13px 0; font-size: 16px; font-weight: 600; color: #374151; text-decoration: none; border-bottom: 1px solid #f1f5f9; transition: color 0.2s; }
+    .mobile-nav-panel a:last-child { border-bottom: none; }
+    .mobile-nav-panel a:hover { color: var(--primary); }
+    .mobile-nav-cta { display: block; margin-top: 16px; background: linear-gradient(135deg, var(--secondary), var(--secondary-dark)); color: white !important; font-weight: 700; font-size: 15px !important; padding: 14px 20px !important; border-radius: 12px; text-align: center; border-bottom: none !important; box-shadow: 0 4px 16px rgba(0,166,81,0.35); }
+
+    /* HERO */
+    .page-hero { background: linear-gradient(135deg, #071e3d 0%, #0d3a6b 35%, #104c91 70%, #1561e1 100%); padding: 120px 24px 80px; text-align: center; position: relative; overflow: hidden; }
+    .page-hero::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.055) 1px, transparent 1px); background-size: 26px 26px; pointer-events: none; }
+    .page-hero-inner { max-width: 800px; margin: 0 auto; position: relative; z-index: 1; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(0,166,81,0.15); border: 1px solid rgba(0,166,81,0.3); border-radius: 99px; padding: 6px 16px; margin-bottom: 28px; }
+    .hero-badge span { font-size: 12px; font-weight: 700; color: #4ade80; letter-spacing: 0.04em; }
+    .page-hero h1 { font-size: clamp(32px, 4.5vw, 52px); font-weight: 900; line-height: 1.08; letter-spacing: -0.03em; color: white; margin-bottom: 20px; }
+    .page-hero p { font-size: 17px; line-height: 1.7; color: rgba(255,255,255,0.72); max-width: 600px; margin: 0 auto; }
+
+    /* LAYOUT */
+    .content-outer { max-width: 1100px; margin: 0 auto; padding: 64px 24px 96px; display: grid; grid-template-columns: 260px 1fr; gap: 48px; align-items: start; }
+
+    /* SIDEBAR */
+    .sidebar { position: sticky; top: 92px; }
+    .sidebar-card { background: white; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(16,76,145,0.06); overflow: hidden; }
+    .sidebar-header { background: linear-gradient(135deg, var(--primary), var(--primary-600)); padding: 16px 20px; }
+    .sidebar-header h3 { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.8); }
+    .sidebar-links { padding: 8px 0; }
+    .sidebar-links a { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 13px; font-weight: 500; color: var(--text-muted); text-decoration: none; transition: all 0.2s; border-left: 3px solid transparent; }
+    .sidebar-links a:hover { color: var(--primary); background: #f8faff; border-left-color: var(--primary-600); }
+    .sidebar-links .num { font-size: 11px; font-weight: 800; color: var(--primary-600); width: 20px; flex-shrink: 0; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text-muted); text-decoration: none; transition: color 0.2s; margin-bottom: 20px; }
+    .back-link:hover { color: var(--primary); }
+
+    /* MAIN CONTENT */
+    .section-block { background: white; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(16,76,145,0.06); margin-bottom: 24px; overflow: hidden; }
+    .section-block-header { display: flex; align-items: center; gap: 20px; padding: 28px 32px 0; }
+    .section-num { font-size: 48px; font-weight: 900; color: var(--border); line-height: 1; letter-spacing: -0.04em; flex-shrink: 0; user-select: none; }
+    .section-block-header h2 { font-size: 20px; font-weight: 800; color: var(--text-dark); letter-spacing: -0.01em; line-height: 1.3; }
+    .section-block-body { padding: 16px 32px 32px 32px; }
+    .section-block-body p { font-size: 15px; line-height: 1.8; color: #334155; margin-bottom: 14px; }
+    .section-block-body p:last-child { margin-bottom: 0; }
+    .section-block-body ul { margin: 12px 0 14px 20px; }
+    .section-block-body ul li { font-size: 15px; line-height: 1.8; color: #334155; margin-bottom: 8px; }
+    .section-block-body ul li::marker { color: var(--primary-600); }
+
+    /* CALLOUT */
+    .callout { display: flex; gap: 14px; align-items: flex-start; border-radius: 12px; padding: 18px 20px; margin: 18px 0; }
+    .callout.yellow { background: #fffbeb; border: 1px solid #fcd34d; }
+    .callout.blue { background: #eff6ff; border: 1px solid #bfdbfe; }
+    .callout.green { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .callout.purple { background: #f5f3ff; border: 1px solid #ddd6fe; }
+    .callout-icon { flex-shrink: 0; margin-top: 1px; }
+    .callout p { font-size: 14px; color: #334155; line-height: 1.7; margin-bottom: 0 !important; }
+    .callout strong { color: var(--text-dark); }
+
+    /* DATA TABLE */
+    .data-table { width: 100%; border-collapse: collapse; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin: 16px 0 20px; }
+    .data-table thead tr { background: linear-gradient(135deg, var(--primary), var(--primary-600)); }
+    .data-table thead th { padding: 12px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: white; text-align: left; }
+    .data-table tbody tr { background: white; border-top: 1px solid #f1f5f9; }
+    .data-table tbody tr:hover { background: #f8fafc; }
+    .data-table td { padding: 12px 16px; font-size: 14px; color: #334155; vertical-align: top; }
+    .data-table td:first-child { font-weight: 700; color: var(--primary); width: 35%; }
+
+    /* SECURITY BADGES */
+    .security-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 16px 0; }
+    .security-badge { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; }
+    .security-badge svg { flex-shrink: 0; }
+    .security-badge-text { font-size: 13px; font-weight: 600; color: var(--text-dark); }
+    .security-badge-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* FOOTER */
+    .footer { background: #0f172a; padding: 56px 24px 32px; color: rgba(255,255,255,0.5); }
+    .footer-inner { max-width: 1200px; margin: 0 auto; }
+    .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+    .footer-brand p { font-size: 14px; line-height: 1.7; color: rgba(255,255,255,0.45); margin-top: 12px; max-width: 280px; }
+    .footer-col h4 { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.6); margin-bottom: 16px; }
+    .footer-col a { display: block; font-size: 14px; color: rgba(255,255,255,0.45); text-decoration: none; margin-bottom: 10px; transition: color 0.2s; }
+    .footer-col a:hover { color: white; }
+    .footer-bottom { padding-top: 28px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 12px; }
+    .footer-watermark { display: flex; align-items: center; gap: 8px; }
+    .footer-watermark span { color: rgba(255,255,255,0.4); font-size: 12px; }
+    .footer-watermark b { color: rgba(255,255,255,0.7); }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) { .content-outer { grid-template-columns: 220px 1fr; gap: 32px; } .footer-top { grid-template-columns: 1fr 1fr; } .security-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) {
+      .content-outer { grid-template-columns: 1fr; }
+      .sidebar { position: static; display: none; }
+      .section-block-header { padding: 24px 24px 0; }
+      .section-block-body { padding: 12px 24px 28px; }
+      .section-num { font-size: 36px; }
+      nav.navbar .btn-nav { display: none !important; }
+      nav.navbar .nav-links { display: none !important; }
+      nav.navbar .hamburger { display: flex !important; flex-direction: column; justify-content: center; }
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+      .security-grid { grid-template-columns: 1fr; }
     }
-    .legal-nav {
-      background: var(--white);
-      padding: 20px 0;
-      border-bottom: 1px solid #e2e8f0;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-    .nav-inner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .logo-text {
-      font-weight: 900;
-      font-size: 20px;
-      color: var(--primary-dark);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .btn-back {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--primary);
-      text-decoration: none;
-    }
-    .legal-header {
-      padding: 80px 0 40px;
-      text-align: center;
-    }
-    .legal-header h1 {
-      font-size: 36px;
-      font-weight: 900;
-      margin-bottom: 16px;
-      color: var(--primary-dark);
-    }
-    .last-update {
-      font-size: 14px;
-      color: var(--text-light);
-    }
-    .legal-content {
-      background: var(--white);
-      padding: 48px;
-      border-radius: 24px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.04);
-      margin-bottom: 80px;
-    }
-    .legal-content h2 {
-      font-size: 20px;
-      font-weight: 800;
-      margin: 32px 0 16px;
-      color: var(--text);
-    }
-    .legal-content p {
-      margin-bottom: 16px;
-      color: #334155;
-    }
-    .legal-content ul {
-      margin-bottom: 24px;
-      padding-left: 20px;
-    }
-    .legal-content li {
-      margin-bottom: 8px;
-      color: #334155;
-    }
-    .company-card {
-      background: #f1f5f9;
-      padding: 24px;
-      border-radius: 16px;
-      margin: 40px 0;
-      border: 1px solid #e2e8f0;
-    }
-    .company-card b { color: var(--primary-dark); }
-    footer {
-      padding: 40px 0;
-      text-align: center;
-      border-top: 1px solid #e2e8f0;
-      font-size: 14px;
-      color: var(--text-light);
-    }
-    @media (max-width: 640px) {
-      .legal-content { padding: 24px; }
-      .legal-header h1 { font-size: 28px; }
-    }
+    @media (max-width: 480px) { .footer-top { grid-template-columns: 1fr; gap: 28px; } .footer-bottom { flex-direction: column; align-items: flex-start; } }
   </style>
 </head>
 <body>
 
-<nav class="legal-nav">
-  <div class="container nav-inner">
-    <a href="index.html" class="logo-text">Inteliaudit</a>
-    <a href="index.html" class="btn-back">← Volver al inicio</a>
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="nav-logo">
+      <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="2" width="36" height="36" rx="10" fill="url(#navGrad)"/>
+        <circle cx="16" cy="18" r="7" stroke="white" stroke-width="2.2"/>
+        <line x1="21.5" y1="23.5" x2="27" y2="29" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M13 18.2l2 2 3.5-3.5" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="30" cy="7" r="3.5" fill="#00a651"/>
+        <text x="44" y="26" font-family="Inter,sans-serif" font-weight="900" font-size="18" fill="#104c91">Inteli</text>
+        <text x="91" y="26" font-family="Inter,sans-serif" font-weight="300" font-size="18" fill="#00a651">audit</text>
+        <defs>
+          <linearGradient id="navGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#1561e1"/><stop offset="1" stop-color="#104c91"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#dolor">¿Por qué Inteliaudit?</a>
+      <a href="index.html#como-funciona">Cómo funciona</a>
+      <a href="index.html#funcionalidades">Funcionalidades</a>
+      <a href="index.html#precios">Precios</a>
+      <a href="index.html#faq">FAQ</a>
+    </div>
+    <a href="/app/login" class="btn-nav">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+      Ingresar al sistema
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="Menú"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
-<div class="container">
-  <header class="legal-header">
-    <h1>Política de Privacidad</h1>
-    <p class="last-update">Última actualización: 5 de mayo de 2026</p>
-  </header>
-
-  <div class="legal-content">
-    <p>En <b>Inteliaudit</b>, la privacidad y seguridad de los datos de nuestros usuarios y de los contribuyentes que gestionan es nuestra prioridad absoluta. Esta política describe cómo recolectamos, usamos y protegemos su información en el marco del ecosistema "Inteli".</p>
-
-    <div class="company-card">
-      <p><b>Responsable del Tratamiento:</b><br>
-      Intellihouse Soluciones E.A.S.<br>
-      RUC: 80144114-5<br>
-      Domicilio: Pedro Juan Caballero, Paraguay.<br>
-      Contacto: hola@inteliaudit.com.py</p>
-    </div>
-
-    <h2>1. Datos que recolectamos</h2>
-    <p>Para la prestación del servicio de auditoría impositiva inteligente, procesamos los siguientes datos:</p>
-    <ul>
-      <li><b>Datos de la Firma:</b> Nombre de la firma, RUC, dirección y datos de contacto de los auditores responsables.</li>
-      <li><b>Datos de Clientes (Contribuyentes):</b> RUC, Razón Social y archivos tributarios (RG90, Hechauka, estados de cuenta, balances).</li>
-      <li><b>Credenciales Marangatú:</b> Solo si el usuario opta por la descarga automática, se almacenan credenciales encriptadas con algoritmos de grado bancario (AES-256).</li>
-    </ul>
-
-    <h2>2. Finalidad del tratamiento</h2>
-    <p>Los datos se recolectan con el único fin de automatizar los procedimientos de auditoría establecidos en la Ley 6380/2019 y resoluciones vigentes de la DNIT. Esto incluye:</p>
-    <ul>
-      <li>Cruce automático de fuentes (RG90 vs SIFEN vs HECHAUKA).</li>
-      <li>Detección de irregularidades y cuantificación de contingencias.</li>
-      <li>Generación de informes profesionales de auditoría.</li>
-    </ul>
-
-    <h2>3. Seguridad y Confidencialidad</h2>
-    <p>Implementamos medidas técnicas y organizativas para garantizar la integridad de los datos:</p>
-    <ul>
-      <li>Encriptación en tránsito (SSL/TLS) y en reposo.</li>
-      <li>Acceso restringido por roles de usuario definidos por la firma.</li>
-      <li>Audit trail completo de cada acción realizada sobre los datos de un cliente.</li>
-    </ul>
-
-    <h2>4. Propiedad de los Datos</h2>
-    <p>Los datos cargados en Inteliaudit pertenecen en todo momento a la Firma de Auditoría o al Contribuyente. Intellihouse Soluciones E.A.S. actúa como encargado de tratamiento y no comercializará, compartirá ni utilizará esta información para fines ajenos al servicio contratado.</p>
-
-    <h2>5. Cumplimiento Normativo</h2>
-    <p>Nuestros procesos están diseñados respetando el secreto profesional del auditor y las normativas de protección de datos vigentes en la República del Paraguay.</p>
-
-    <h2>6. Contacto</h2>
-    <p>Para ejercer sus derechos de acceso, rectificación o eliminación de datos, puede contactarnos en <b>soporte@intelihouse.com.py</b>.</p>
+<div class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+  <div class="mobile-nav-panel">
+    <a href="index.html#dolor" class="mobile-nav-link">¿Por qué Inteliaudit?</a>
+    <a href="index.html#como-funciona" class="mobile-nav-link">Cómo funciona</a>
+    <a href="index.html#funcionalidades" class="mobile-nav-link">Funcionalidades</a>
+    <a href="index.html#precios" class="mobile-nav-link">Precios</a>
+    <a href="index.html#faq" class="mobile-nav-link">FAQ</a>
+    <a href="/app/login" class="mobile-nav-cta">Ingresar al sistema →</a>
   </div>
 </div>
 
-<footer>
-  <div class="container">
-    &copy; 2026 Intellihouse Soluciones E.A.S. · Todos los derechos reservados · Inteliaudit es un producto de Inteli Ecosystem.
+<!-- HERO -->
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <div class="hero-badge"><span>🔒 Política de Privacidad · Inteliaudit</span></div>
+    <h1>Tus datos y los de tus clientes,<br/>protegidos al máximo.</h1>
+    <p>Última actualización: Mayo 2026 · Responsable: Intellihouse · Pedro Juan Caballero, Paraguay</p>
+  </div>
+</section>
+
+<!-- CONTENT -->
+<div class="content-outer">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="index.html" class="back-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Volver al inicio
+    </a>
+    <div class="sidebar-card">
+      <div class="sidebar-header"><h3>Índice rápido</h3></div>
+      <div class="sidebar-links">
+        <a href="#s1"><span class="num">01</span>Responsable del Tratamiento</a>
+        <a href="#s2"><span class="num">02</span>Datos que Recopilamos</a>
+        <a href="#s3"><span class="num">03</span>Finalidad del Tratamiento</a>
+        <a href="#s4"><span class="num">04</span>Almacenamiento y Seguridad</a>
+        <a href="#s5"><span class="num">05</span>Compartición con Terceros</a>
+        <a href="#s6"><span class="num">06</span>Retención de Datos</a>
+        <a href="#s7"><span class="num">07</span>Derechos del Usuario</a>
+        <a href="#s8"><span class="num">08</span>Cookies y Tracking</a>
+        <a href="#s9"><span class="num">09</span>Inteligencia Artificial</a>
+        <a href="#s10"><span class="num">10</span>Transferencias Internacionales</a>
+        <a href="#s11"><span class="num">11</span>Menores de Edad</a>
+        <a href="#s12"><span class="num">12</span>Cambios a esta Política</a>
+        <a href="#s13"><span class="num">13</span>Contacto</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- Intro -->
+    <div class="section-block" style="margin-bottom:24px;">
+      <div class="section-block-body" style="padding-top:28px;">
+        <p>En <strong>Inteliaudit</strong> entendemos que los datos de tus clientes auditados no son datos cualquiera — son información tributaria confidencial de contribuyentes paraguayos. Esta política explica con total transparencia cómo recopilamos, almacenamos, procesamos y protegemos esa información.</p>
+        <p>Leé esta política completa antes de usar el servicio. Si en cualquier momento tenés dudas sobre cómo tratamos tus datos, escribinos a <a href="mailto:hola@inteliaudit.com.py" style="color:var(--primary-600);font-weight:600;">hola@inteliaudit.com.py</a> — respondemos en 1 a 2 días hábiles.</p>
+        <div class="callout green">
+          <div class="callout-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00a651" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <p><strong>Compromiso central:</strong> Nunca vendemos, alquilamos ni compartimos datos de nuestros usuarios ni de sus clientes auditados con terceros para fines comerciales. Los datos se usan exclusivamente para prestar el servicio contratado.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1 -->
+    <div class="section-block" id="s1">
+      <div class="section-block-header">
+        <div class="section-num">01</div>
+        <h2>Responsable del Tratamiento</h2>
+      </div>
+      <div class="section-block-body">
+        <p>El responsable del tratamiento de datos personales es <strong>Intellihouse</strong>, empresa desarrolladora de Inteliaudit, radicada en la ciudad de <strong>Pedro Juan Caballero, Departamento de Amambay, República del Paraguay</strong>.</p>
+        <table class="data-table">
+          <tbody>
+            <tr><td>Empresa</td><td>Intellihouse</td></tr>
+            <tr><td>Producto</td><td>Inteliaudit — Software SaaS de auditoría impositiva</td></tr>
+            <tr><td>Ciudad</td><td>Pedro Juan Caballero, Amambay, Paraguay</td></tr>
+            <tr><td>Email de contacto</td><td><a href="mailto:hola@inteliaudit.com.py" style="color:var(--primary-600);">hola@inteliaudit.com.py</a></td></tr>
+            <tr><td>Soporte WhatsApp</td><td><a href="https://wa.me/595994516360" target="_blank" rel="noopener" style="color:var(--primary-600);">+595 994 516 360</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="section-block" id="s2">
+      <div class="section-block-header">
+        <div class="section-num">02</div>
+        <h2>Datos que Recopilamos</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Recopilamos distintas categorías de datos según la fuente y el propósito:</p>
+
+        <table class="data-table">
+          <thead>
+            <tr><th>Categoría</th><th>Datos específicos</th><th>Fuente</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Datos de la firma auditora</td>
+              <td>Razón social, RUC, email corporativo, teléfono, dirección</td>
+              <td>Registro del usuario</td>
+            </tr>
+            <tr>
+              <td>Datos de usuarios del sistema</td>
+              <td>Nombre, email, rol (admin/auditor), contraseña (hash bcrypt), historial de acciones</td>
+              <td>Registro y uso del sistema</td>
+            </tr>
+            <tr>
+              <td>Datos de clientes auditados</td>
+              <td>RUC, razón social, actividad, régimen tributario, datos fiscales cargados por el auditor</td>
+              <td>Cargados por el usuario auditor</td>
+            </tr>
+            <tr>
+              <td>Credenciales Marangatú</td>
+              <td>Usuario y clave de acceso al portal tributario (cifradas AES-256)</td>
+              <td>Ingresadas voluntariamente por el usuario</td>
+            </tr>
+            <tr>
+              <td>Archivos tributarios</td>
+              <td>Archivos XLSX de RG90 y HECHAUKA, PDFs descargados de Marangatú, balances contables, extractos bancarios</td>
+              <td>Subidos por el usuario</td>
+            </tr>
+            <tr>
+              <td>Datos de uso</td>
+              <td>Logs de acceso, acciones realizadas, IP de origen, navegador (user agent), timestamp</td>
+              <td>Generados automáticamente por el sistema</td>
+            </tr>
+            <tr>
+              <td>Datos de facturación</td>
+              <td>Datos del plan contratado, método de pago (procesado externamente), historial de facturas</td>
+              <td>Proceso de suscripción</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout yellow">
+          <div class="callout-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <p><strong>Sobre datos de menores:</strong> Inteliaudit está dirigido exclusivamente a profesionales y empresas. No recopilamos intencionalmente datos de personas menores de 18 años. Si detectamos que se han cargado datos de menores, los eliminamos de inmediato.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="section-block" id="s3">
+      <div class="section-block-header">
+        <div class="section-num">03</div>
+        <h2>Finalidad del Tratamiento</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Tratamos los datos recopilados con las siguientes finalidades específicas:</p>
+        <ul>
+          <li><strong>Prestación del servicio:</strong> Procesar los datos fiscales cargados por el usuario para ejecutar cruces de RG90, SIFEN y HECHAUKA, detectar hallazgos y generar informes de auditoría.</li>
+          <li><strong>Autenticación y control de acceso:</strong> Verificar la identidad del usuario en cada sesión y garantizar que solo acceda a los datos de su propio tenant (firma auditora).</li>
+          <li><strong>Audit trail:</strong> Registrar cada acción relevante en el sistema para garantizar la trazabilidad del trabajo de auditoría y cumplir con las exigencias de las Normas Internacionales de Auditoría (NIA 230).</li>
+          <li><strong>Mejora del servicio:</strong> Analizar patrones de uso anonimizados para mejorar la usabilidad, corregir errores y priorizar el desarrollo de nuevas funcionalidades.</li>
+          <li><strong>Facturación:</strong> Gestionar las suscripciones, emitir facturas conforme a la normativa fiscal paraguaya y procesar pagos.</li>
+          <li><strong>Comunicaciones del servicio:</strong> Enviar notificaciones relevantes sobre el estado del servicio, cambios en los términos, actualizaciones normativas y soporte técnico.</li>
+          <li><strong>Seguridad:</strong> Detectar accesos no autorizados, intentos de fraude o comportamientos anómalos que puedan comprometer la seguridad del sistema o de los datos.</li>
+          <li><strong>Cumplimiento legal:</strong> Dar cumplimiento a obligaciones legales aplicables en la República del Paraguay.</li>
+        </ul>
+        <p>No utilizamos los datos para ninguna finalidad distinta a las listadas. En particular, <strong>no utilizamos los datos tributarios de los clientes auditados para ningún análisis estadístico, comercial o de inteligencia de mercado</strong> que no sea la prestación directa del servicio al usuario auditor.</p>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="section-block" id="s4">
+      <div class="section-block-header">
+        <div class="section-num">04</div>
+        <h2>Almacenamiento y Seguridad</h2>
+      </div>
+      <div class="section-block-body">
+        <p>La seguridad de los datos es nuestra prioridad operativa más alta. Implementamos múltiples capas de protección:</p>
+
+        <div class="security-grid">
+          <div class="security-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00a651" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <div>
+              <div class="security-badge-text">AES-256 en reposo</div>
+              <div class="security-badge-sub">Credenciales Marangatú</div>
+            </div>
+          </div>
+          <div class="security-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1561e1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <div>
+              <div class="security-badge-text">HTTPS / TLS obligatorio</div>
+              <div class="security-badge-sub">Todas las comunicaciones</div>
+            </div>
+          </div>
+          <div class="security-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <div>
+              <div class="security-badge-text">Tenant isolation</div>
+              <div class="security-badge-sub">Separación total entre firmas</div>
+            </div>
+          </div>
+          <div class="security-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div>
+              <div class="security-badge-text">Audit trail inmutable</div>
+              <div class="security-badge-sub">Cada acción registrada</div>
+            </div>
+          </div>
+        </div>
+
+        <p>Los datos se almacenan en infraestructura de <strong>Neon PostgreSQL</strong> con backups automáticos cada 24 horas y <strong>Render.com</strong> como plataforma de hosting. Ambos proveedores cuentan con certificaciones de seguridad estándar de la industria (SOC 2 Type II).</p>
+        <p>Las <strong>contraseñas de los usuarios</strong> se almacenan exclusivamente como hashes bcrypt con sal única por usuario. Ningún empleado de Intellihouse puede conocer la contraseña de un usuario en texto plano — ni siquiera para soporte técnico.</p>
+        <p>Las <strong>credenciales de Marangatú</strong> (RUC y clave SET de clientes auditados) se cifran con AES-256 antes de persistirse en base de datos. La clave de cifrado se gestiona de forma separada a los datos cifrados. Nunca se transmiten en texto plano por ningún canal.</p>
+        <p>El acceso a los datos de producción está <strong>restringido a un número mínimo de personas</strong> con necesidad operativa justificada y está sujeto a autenticación multifactor. Cualquier acceso a datos sensibles queda registrado en logs de auditoría internos.</p>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="section-block" id="s5">
+      <div class="section-block-header">
+        <div class="section-num">05</div>
+        <h2>Compartición con Terceros</h2>
+      </div>
+      <div class="section-block-body">
+        <p><strong>No compartimos datos de usuarios ni de sus clientes auditados con terceros para ningún fin comercial, publicitario o de análisis de mercado.</strong></p>
+        <p>Los únicos terceros que pueden procesar datos como parte de la prestación del servicio son los siguientes <strong>subprocesadores técnicos</strong>, todos bajo acuerdo de confidencialidad y con las salvaguardas descritas:</p>
+
+        <table class="data-table">
+          <thead>
+            <tr><th>Proveedor</th><th>Rol</th><th>Datos procesados</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Render.com</td>
+              <td>Hosting del servicio web</td>
+              <td>Todos los datos que pasan por la aplicación (tráfico cifrado TLS)</td>
+            </tr>
+            <tr>
+              <td>Neon (Neon Inc.)</td>
+              <td>Base de datos PostgreSQL</td>
+              <td>Todos los datos persistidos en la base de datos</td>
+            </tr>
+            <tr>
+              <td>Anthropic (Claude API)</td>
+              <td>Análisis con IA — planes Pro y Enterprise</td>
+              <td>Textos de hallazgos para generación de narrativa. Anthropic no almacena estos datos según su política de API.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout purple">
+          <div class="callout-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <p><strong>Sobre Claude API (Anthropic):</strong> En los planes Pro y Enterprise, los textos descriptivos de los hallazgos se envían a la API de Claude para generar narrativa profesional. Anthropic procesa estos datos en tiempo real pero <strong>no los almacena</strong> para entrenamiento ni ningún otro fin, conforme a su política de uso de datos de API. Los datos se transmiten siempre cifrados mediante TLS.</p>
+        </div>
+
+        <p>En caso de requerimiento judicial o administrativo de autoridad competente de la República del Paraguay, Intellihouse puede estar obligada a divulgar ciertos datos. En tales casos, notificaremos al usuario afectado con la mayor antelación posible, salvo que la propia orden judicial o normativa aplicable lo prohíba.</p>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="section-block" id="s6">
+      <div class="section-block-header">
+        <div class="section-num">06</div>
+        <h2>Retención de Datos</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Conservamos los datos durante los plazos mínimos necesarios para la prestación del servicio y el cumplimiento de obligaciones legales:</p>
+
+        <table class="data-table">
+          <thead>
+            <tr><th>Tipo de dato</th><th>Plazo de retención</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Datos de cuenta y suscripción activa</td><td>Mientras dure la suscripción</td></tr>
+            <tr><td>Datos de clientes y auditorías</td><td>Mientras dure la suscripción + 30 días post-cancelación</td></tr>
+            <tr><td>Credenciales Marangatú cifradas</td><td>Eliminadas inmediatamente al cancelar o a solicitud del usuario</td></tr>
+            <tr><td>Logs de auditoría del sistema</td><td>5 años (obligación legal contable / NIA 230)</td></tr>
+            <tr><td>Registros de facturación</td><td>5 años (obligación fiscal paraguaya)</td></tr>
+            <tr><td>Backups de base de datos</td><td>Eliminados a los 30 días post-cancelación</td></tr>
+            <tr><td>Datos post-terminación por incumplimiento</td><td>30 días para exportar, luego eliminación permanente</td></tr>
+          </tbody>
+        </table>
+
+        <p>Al finalizar cualquier período de retención, los datos son eliminados de forma permanente mediante procesos de borrado seguro que imposibilitan su recuperación. No conservamos copias de seguridad más allá de los plazos indicados.</p>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="section-block" id="s7">
+      <div class="section-block-header">
+        <div class="section-num">07</div>
+        <h2>Derechos del Usuario</h2>
+      </div>
+      <div class="section-block-body">
+        <p>El usuario tiene los siguientes derechos sobre sus datos personales y los de su firma auditora:</p>
+        <ul>
+          <li><strong>Acceso:</strong> Solicitar una copia de todos los datos que Inteliaudit conserva sobre tu firma y tus usuarios.</li>
+          <li><strong>Rectificación:</strong> Corregir datos inexactos o incompletos. La mayoría de los datos pueden actualizarse directamente desde el panel de administración.</li>
+          <li><strong>Eliminación ("derecho al olvido"):</strong> Solicitar la eliminación de tus datos y los de tus clientes. La eliminación se ejecuta dentro de los 30 días siguientes a la solicitud, salvo que exista obligación legal de retención (como los registros de facturación).</li>
+          <li><strong>Portabilidad:</strong> Exportar tus datos en formatos estándar (JSON, XLSX, PDF) directamente desde la plataforma o solicitando asistencia a nuestro equipo.</li>
+          <li><strong>Oposición:</strong> Oponerte al tratamiento de tus datos para alguna finalidad específica. Ten en cuenta que si te oponés al tratamiento necesario para prestar el servicio, deberemos suspender tu cuenta.</li>
+          <li><strong>Limitación:</strong> Solicitar que limitemos el tratamiento de tus datos a ciertas finalidades mientras se resuelve una disputa sobre su exactitud o uso.</li>
+        </ul>
+        <p>Para ejercer cualquiera de estos derechos, enviá un email a <a href="mailto:hola@inteliaudit.com.py" style="color:var(--primary-600);font-weight:600;">hola@inteliaudit.com.py</a> con el asunto <strong>"Ejercicio de derechos — Privacidad"</strong> y tu razón social o email de registro. Responderemos dentro de los <strong>15 días hábiles</strong> siguientes a la recepción de la solicitud.</p>
+        <div class="callout blue">
+          <div class="callout-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1561e1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <p><strong>Exportación directa:</strong> Los auditores con plan activo pueden exportar sus hallazgos, informes y datos de clientes directamente desde la plataforma en cualquier momento, sin necesidad de contactar soporte.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="section-block" id="s8">
+      <div class="section-block-header">
+        <div class="section-num">08</div>
+        <h2>Cookies y Tracking</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Inteliaudit tiene una política de cookies <strong>minimalista y transparente</strong>. Solo utilizamos las cookies estrictamente necesarias para el funcionamiento del servicio:</p>
+        <ul>
+          <li><strong>Cookie de sesión:</strong> Una cookie técnica (httpOnly, Secure, SameSite=Strict) que identifica la sesión del usuario autenticado. Sin esta cookie, no es posible usar la plataforma. Expira automáticamente al cerrar el navegador o tras 8 horas de inactividad.</li>
+          <li><strong>Cookie de preferencias:</strong> Almacena preferencias de la interfaz (tema claro/oscuro). No contiene datos personales identificables.</li>
+        </ul>
+        <p><strong>No utilizamos:</strong></p>
+        <ul>
+          <li>Cookies de publicidad o retargeting</li>
+          <li>Google Analytics ni herramientas de analítica de terceros</li>
+          <li>Píxeles de tracking de redes sociales</li>
+          <li>Fingerprinting del navegador o del dispositivo</li>
+          <li>Scripts de terceros no declarados en esta política</li>
+        </ul>
+        <p>El landing público (inteliaudit.com.py) puede utilizar una cookie de sesión básica para el funcionamiento del menú de navegación. No contiene datos personales ni se comparte con terceros.</p>
+        <div class="callout green">
+          <div class="callout-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00a651" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <p><strong>Sin banners intrusivos:</strong> Dado que solo usamos cookies técnicas necesarias, no requerimos consentimiento adicional para cookies. No hay banner de cookies ni pop-ups de tracking.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9 -->
+    <div class="section-block" id="s9">
+      <div class="section-block-header">
+        <div class="section-num">09</div>
+        <h2>Inteligencia Artificial</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Los planes <strong>Pro</strong> y <strong>Enterprise</strong> incluyen análisis con inteligencia artificial mediante la API de <strong>Claude (Anthropic)</strong>. Este módulo genera narrativa técnica de auditoría, conclusiones ejecutivas y procedimientos adicionales sugeridos a partir de los hallazgos detectados.</p>
+        <p><strong>¿Qué datos se envían a la IA?</strong> Se envían los textos descriptivos de los hallazgos generados por los motores de análisis automático: tipo de hallazgo, impuesto involucrado, monto de contingencia estimada y base legal citada. No se envían datos de identificación personal de los contribuyentes auditados (nombres, RUCs, datos de contacto) — solo los datos fiscales numéricos y descriptivos necesarios para la interpretación.</p>
+        <p><strong>¿Anthropic almacena estos datos?</strong> Según la política de uso de la API de Anthropic vigente a la fecha de esta política, los datos enviados a través de la API no se utilizan para entrenar los modelos de IA ni se almacenan más allá del tiempo necesario para procesar la solicitud. Recomendamos consultar la política de privacidad de Anthropic directamente en <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener" style="color:var(--primary-600);">anthropic.com/privacy</a> para información actualizada.</p>
+        <p><strong>Control del usuario:</strong> El análisis con IA se ejecuta solo cuando el usuario presiona activamente el botón "Analizar con IA" en la plataforma. No hay procesamiento automático de datos con IA sin acción explícita del usuario.</p>
+        <p>Si el usuario prefiere no usar el módulo de IA, puede simplemente no ejecutarlo. El resto de las funcionalidades del plan contratado están disponibles independientemente del uso del análisis IA.</p>
+      </div>
+    </div>
+
+    <!-- 10 -->
+    <div class="section-block" id="s10">
+      <div class="section-block-header">
+        <div class="section-num">10</div>
+        <h2>Transferencias Internacionales</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Inteliaudit opera con infraestructura de proveedores con servidores ubicados principalmente en <strong>Estados Unidos</strong> (Render.com y Neon). Esto implica que los datos del usuario se transfieren y almacenan fuera de la República del Paraguay.</p>
+        <p>Al registrarse y utilizar el servicio, el usuario consiente expresamente estas transferencias internacionales, que son necesarias para la prestación del servicio en las condiciones de calidad, seguridad y disponibilidad descritas en esta política.</p>
+        <p>Intellihouse selecciona proveedores de infraestructura que cuentan con certificaciones de seguridad reconocidas internacionalmente y que suscriben compromisos contractuales de protección de datos adecuados. Los proveedores actuales (Render.com y Neon) cuentan con certificación SOC 2 Type II.</p>
+        <p>En el caso de la API de Claude (Anthropic), los datos se procesan en infraestructura de Anthropic ubicada en EE.UU. Anthropic es una empresa con compromiso documentado en materia de privacidad y seguridad de datos de API.</p>
+      </div>
+    </div>
+
+    <!-- 11 -->
+    <div class="section-block" id="s11">
+      <div class="section-block-header">
+        <div class="section-num">11</div>
+        <h2>Menores de Edad</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Inteliaudit es un servicio <strong>exclusivamente dirigido a profesionales y empresas</strong> que ejercen actividad de auditoría impositiva en la República del Paraguay. No está diseñado ni destinado a ser utilizado por personas menores de 18 años.</p>
+        <p>No recopilamos intencionalmente datos personales de menores de edad. Si tenemos conocimiento de que se han cargado datos de menores en la plataforma, procederemos a eliminarlos de inmediato. Si sospechás que se han cargado datos de menores sin autorización, notificanos a <a href="mailto:hola@inteliaudit.com.py" style="color:var(--primary-600);font-weight:600;">hola@inteliaudit.com.py</a>.</p>
+      </div>
+    </div>
+
+    <!-- 12 -->
+    <div class="section-block" id="s12">
+      <div class="section-block-header">
+        <div class="section-num">12</div>
+        <h2>Cambios a esta Política</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Podemos actualizar esta Política de Privacidad para reflejar cambios en nuestras prácticas de manejo de datos, cambios tecnológicos, cambios en la legislación aplicable o mejoras en la transparencia de nuestra comunicación.</p>
+        <p>Ante <strong>cambios sustanciales</strong> (modificación de finalidades de tratamiento, nuevos subprocesadores, cambios en los plazos de retención), notificaremos a todos los usuarios registrados con al menos <strong>30 días de anticipación</strong> por email y mediante un aviso visible en la plataforma.</p>
+        <p>Para cambios menores (correcciones de redacción, actualización de datos de contacto, aclaraciones que no alteran el contenido sustancial), la política puede actualizarse sin previo aviso. La fecha de "Última actualización" al inicio de este documento siempre indica la versión vigente.</p>
+        <p>El uso continuado del servicio tras la entrada en vigor de una nueva versión de esta política implica la aceptación de los cambios. Si no estás de acuerdo con los cambios, podés cancelar tu cuenta antes de que entren en vigor.</p>
+      </div>
+    </div>
+
+    <!-- 13 -->
+    <div class="section-block" id="s13">
+      <div class="section-block-header">
+        <div class="section-num">13</div>
+        <h2>Contacto</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Para cualquier consulta, reclamo o ejercicio de derechos relacionado con esta Política de Privacidad, podés contactarnos a través de:</p>
+        <ul>
+          <li><strong>Email:</strong> <a href="mailto:hola@inteliaudit.com.py" style="color:var(--primary-600);font-weight:600;">hola@inteliaudit.com.py</a> — Asunto: "Privacidad"</li>
+          <li><strong>WhatsApp:</strong> <a href="https://wa.me/595994516360" target="_blank" rel="noopener" style="color:var(--primary-600);font-weight:600;">+595 994 516 360</a> (soporte en horario comercial)</li>
+          <li><strong>Domicilio:</strong> Intellihouse — Pedro Juan Caballero, Departamento de Amambay, República del Paraguay</li>
+        </ul>
+        <p>El tiempo de respuesta habitual es de <strong>1 a 2 días hábiles</strong>. Para solicitudes de eliminación o portabilidad de datos, el plazo máximo de respuesta es de 15 días hábiles.</p>
+        <div class="callout green">
+          <div class="callout-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00a651" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <p>Tratamos cada consulta de privacidad con prioridad máxima. Tu confianza en Inteliaudit depende de que tus datos estén seguros — ese es nuestro compromiso más importante.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:32px;">
+          <rect x="0" y="2" width="36" height="36" rx="10" fill="url(#footGrad)"/>
+          <circle cx="16" cy="18" r="7" stroke="white" stroke-width="2.2"/>
+          <line x1="21.5" y1="23.5" x2="27" y2="29" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M13 18.2l2 2 3.5-3.5" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="30" cy="7" r="3.5" fill="#00a651"/>
+          <text x="44" y="26" font-family="Inter,sans-serif" font-weight="900" font-size="18" fill="#256ebf">Inteli</text>
+          <text x="91" y="26" font-family="Inter,sans-serif" font-weight="300" font-size="18" fill="#1ecb73">audit</text>
+          <defs>
+            <linearGradient id="footGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#1561e1"/><stop offset="1" stop-color="#104c91"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <p>Auditoría impositiva inteligente para Paraguay. La única herramienta construida desde cero para la realidad tributaria paraguaya.</p>
+        <p style="margin-top:8px;font-size:12px;">Parte del ecosistema <b style="color:rgba(255,255,255,0.6);">Intellihouse</b></p>
+      </div>
+      <div class="footer-col">
+        <h4>Producto</h4>
+        <a href="index.html#como-funciona">Cómo funciona</a>
+        <a href="index.html#funcionalidades">Funcionalidades</a>
+        <a href="index.html#precios">Precios</a>
+        <a href="index.html#faq">FAQ</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="ley-6380.html">Ley 6380/2019</a>
+        <a href="rg-90.html">RG 90/2021</a>
+        <a href="terminos-de-uso.html">Términos de uso</a>
+        <a href="politica-de-privacidad.html">Política de privacidad</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contacto</h4>
+        <a href="mailto:hola@inteliaudit.com.py">hola@inteliaudit.com.py</a>
+        <a href="https://wa.me/595994516360" target="_blank" rel="noopener">WhatsApp soporte</a>
+        <a href="/app/login">Acceder al sistema</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-watermark">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:18px;opacity:0.5;">
+          <rect width="20" height="20" rx="5" fill="#1561e1"/>
+          <circle cx="9" cy="10" r="4" stroke="white" stroke-width="1.4"/>
+          <line x1="12" y1="13" x2="15" y2="16" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M7.5 10.2l1.2 1.2 2-2" stroke="#4ade80" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>© 2026 <b>Inteliaudit</b> · Desarrollado por <b>Intellihouse</b> · Pedro Juan Caballero, Paraguay</span>
+      </div>
+      <span style="font-size:12px;color:rgba(255,255,255,0.25);">Auditoría impositiva inteligente para Paraguay</span>
+    </div>
   </div>
 </footer>
 
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const mobileNav = document.getElementById('mobileNav');
+  const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+  function closeMobileNav() { hamburger.classList.remove('open'); mobileNav.classList.remove('open'); document.body.style.overflow = ''; }
+  hamburger.addEventListener('click', () => { const isOpen = mobileNav.classList.toggle('open'); hamburger.classList.toggle('open', isOpen); document.body.style.overflow = isOpen ? 'hidden' : ''; });
+  mobileNavOverlay.addEventListener('click', closeMobileNav);
+  document.querySelectorAll('.mobile-nav-link, .mobile-nav-cta').forEach(a => a.addEventListener('click', closeMobileNav));
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 20));
+</script>
 </body>
 </html>

@@ -1,48 +1,549 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RG 90/2021 | Inteliaudit</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RG 90/2021 — Libro Digital del IVA Paraguay | Inteliaudit</title>
+  <meta name="description" content="Resolución General 90/2021: el detalle de comprobantes obligatorio en la DJ IVA. Los 5 cruces que hace Inteliaudit con RG90, hallazgos típicos y base legal." />
   <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2" />
   <link rel="shortcut icon" href="favicon.svg?v=2" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
-    :root { --primary: #1561e1; --primary-dark: #104c91; --accent: #4ade80; --text: #0f172a; --text-light: #64748b; --bg: #f8fafc; --white: #ffffff; }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
-    .legal-nav { background: var(--white); padding: 20px 0; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
-    .container { max-width: 800px; margin: 0 auto; padding: 0 24px; }
-    .nav-inner { display: flex; justify-content: space-between; align-items: center; }
-    .logo-text { font-weight: 900; font-size: 20px; color: var(--primary-dark); text-decoration: none; }
-    .legal-header { padding: 80px 0 40px; text-align: center; }
-    .legal-header h1 { font-size: 36px; font-weight: 900; color: var(--primary-dark); }
-    .legal-content { background: var(--white); padding: 48px; border-radius: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); margin-bottom: 80px; }
-    .legal-content h2 { font-size: 20px; font-weight: 800; margin: 32px 0 16px; color: var(--primary); }
-    .law-badge { background: #f0fdf4; color: #16a34a; padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 700; display: inline-block; margin-bottom: 12px; }
-    footer { padding: 40px 0; text-align: center; border-top: 1px solid #e2e8f0; font-size: 14px; color: var(--text-light); }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #104c91; --primary-dark: #0a356b; --primary-light: #256ebf;
+      --primary-600: #1561e1; --secondary: #00a651; --secondary-dark: #00823e;
+      --secondary-light: #1ecb73; --body-bg: #f0f4f8; --text-dark: #0f172a;
+      --text-muted: #64748b; --border: #e2e8f0;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--body-bg); color: var(--text-dark); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+    /* NAVBAR */
+    .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(255,255,255,0.92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(16,76,145,0.07); transition: box-shadow 0.3s ease; }
+    .navbar.scrolled { box-shadow: 0 2px 24px rgba(16,76,145,0.10); }
+    .navbar-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo svg { height: 36px; width: auto; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a { font-size: 14px; font-weight: 600; color: #475569; text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--primary); }
+    .btn-nav { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--secondary), var(--secondary-dark)); color: white; font-weight: 700; font-size: 14px; padding: 10px 22px; border-radius: 12px; border: none; cursor: pointer; text-decoration: none; box-shadow: 0 4px 18px rgba(0,166,81,0.35); transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,166,81,0.45); }
+    .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; flex-shrink: 0; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--primary); margin: 4px 0; transition: all 0.3s; border-radius: 2px; }
+    .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+    .mobile-nav { display: none; position: fixed; top: 68px; left: 0; right: 0; bottom: 0; z-index: 99; }
+    .mobile-nav.open { display: block; }
+    .mobile-nav-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); }
+    .mobile-nav-panel { position: absolute; top: 0; left: 0; right: 0; background: white; padding: 24px; border-bottom: 1px solid var(--border); box-shadow: 0 8px 32px rgba(0,0,0,0.12); animation: slideDown 0.25s ease; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    .mobile-nav-panel a { display: block; padding: 13px 0; font-size: 16px; font-weight: 600; color: #374151; text-decoration: none; border-bottom: 1px solid #f1f5f9; transition: color 0.2s; }
+    .mobile-nav-panel a:last-child { border-bottom: none; }
+    .mobile-nav-panel a:hover { color: var(--primary); }
+    .mobile-nav-cta { display: block; margin-top: 16px; background: linear-gradient(135deg, var(--secondary), var(--secondary-dark)); color: white !important; font-weight: 700; font-size: 15px !important; padding: 14px 20px !important; border-radius: 12px; text-align: center; border-bottom: none !important; box-shadow: 0 4px 16px rgba(0,166,81,0.35); }
+
+    /* HERO */
+    .page-hero { background: linear-gradient(135deg, #071e3d 0%, #0d3a6b 35%, #104c91 70%, #1561e1 100%); padding: 120px 24px 80px; text-align: center; position: relative; overflow: hidden; }
+    .page-hero::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.055) 1px, transparent 1px); background-size: 26px 26px; pointer-events: none; }
+    .page-hero-inner { max-width: 800px; margin: 0 auto; position: relative; z-index: 1; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(0,166,81,0.15); border: 1px solid rgba(0,166,81,0.3); border-radius: 99px; padding: 6px 16px; margin-bottom: 28px; }
+    .hero-badge span { font-size: 12px; font-weight: 700; color: #4ade80; letter-spacing: 0.04em; }
+    .page-hero h1 { font-size: clamp(32px, 4.5vw, 56px); font-weight: 900; line-height: 1.08; letter-spacing: -0.03em; color: white; margin-bottom: 20px; }
+    .page-hero h1 .accent { color: #4ade80; }
+    .page-hero p { font-size: 18px; line-height: 1.7; color: rgba(255,255,255,0.72); max-width: 640px; margin: 0 auto; }
+
+    /* CONTENT */
+    .content-wrap { max-width: 1100px; margin: 0 auto; padding: 72px 24px 96px; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text-muted); text-decoration: none; transition: color 0.2s; margin-bottom: 40px; }
+    .back-link:hover { color: var(--primary); }
+    .section-label { display: inline-block; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: var(--secondary); margin-bottom: 12px; }
+    .section-title { font-size: clamp(26px, 3vw, 38px); font-weight: 900; letter-spacing: -0.02em; color: var(--text-dark); margin-bottom: 16px; }
+    .section-subtitle { font-size: 16px; color: var(--text-muted); line-height: 1.7; max-width: 640px; margin-bottom: 40px; }
+
+    /* INTRO CARD */
+    .intro-card { background: white; border-radius: 20px; padding: 40px 48px; border: 1px solid var(--border); box-shadow: 0 4px 24px rgba(16,76,145,0.07); margin-bottom: 40px; }
+    .intro-card p { font-size: 16px; line-height: 1.8; color: #334155; margin-bottom: 16px; }
+    .intro-card p:last-child { margin-bottom: 0; }
+
+    /* CALLOUT */
+    .callout { display: flex; gap: 16px; align-items: flex-start; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 14px; padding: 20px 24px; margin: 24px 0; }
+    .callout.blue { background: #eff6ff; border-color: #bfdbfe; }
+    .callout.green { background: #f0fdf4; border-color: #bbf7d0; }
+    .callout-icon { flex-shrink: 0; margin-top: 2px; }
+    .callout p { font-size: 14px; color: #334155; line-height: 1.7; }
+    .callout strong { color: var(--text-dark); }
+
+    /* CAMPOS TABLE */
+    .campos-table { width: 100%; border-collapse: collapse; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin: 24px 0 48px; }
+    .campos-table thead tr { background: linear-gradient(135deg, var(--primary), var(--primary-600)); }
+    .campos-table thead th { padding: 14px 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: white; text-align: left; }
+    .campos-table tbody tr { background: white; border-top: 1px solid #f1f5f9; }
+    .campos-table tbody tr:hover { background: #f8fafc; }
+    .campos-table td { padding: 13px 20px; font-size: 14px; color: #334155; vertical-align: top; }
+    .campos-table td:first-child { font-weight: 700; color: var(--text-dark); white-space: nowrap; }
+    .required-badge { display: inline-block; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 6px; background: #fef2f2; color: #dc2626; margin-left: 6px; vertical-align: middle; }
+    .optional-badge { display: inline-block; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 6px; background: #f0fdf4; color: #16a34a; margin-left: 6px; vertical-align: middle; }
+
+    /* CRUCES */
+    .cruces-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 32px; margin-bottom: 64px; }
+    .cruce-card { background: white; border-radius: 16px; padding: 24px 28px; border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(16,76,145,0.06); display: flex; gap: 20px; align-items: flex-start; transition: box-shadow 0.2s; }
+    .cruce-card:hover { box-shadow: 0 6px 24px rgba(16,76,145,0.1); }
+    .cruce-num { width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; color: white; background: linear-gradient(135deg, var(--primary), var(--primary-600)); }
+    .cruce-body h4 { font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 6px; }
+    .cruce-body p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+    .cruce-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .cruce-tag { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 99px; background: #f1f5f9; color: #475569; }
+    .cruce-tag.alert { background: #fef2f2; color: #dc2626; }
+    .cruce-tag.success { background: #f0fdf4; color: #16a34a; }
+
+    /* HALLAZGOS */
+    .hallazgos-list { margin-top: 32px; margin-bottom: 64px; }
+    .hallazgo-item { display: flex; gap: 16px; align-items: flex-start; padding: 20px 24px; background: white; border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(16,76,145,0.05); margin-bottom: 12px; }
+    .hallazgo-icon { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .hallazgo-icon.red { background: #fef2f2; }
+    .hallazgo-icon.amber { background: #fffbeb; }
+    .hallazgo-text h4 { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+    .hallazgo-text p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+    .hallazgo-text .legal-ref { display: inline-block; font-size: 11px; font-weight: 700; color: var(--primary); background: #eff6ff; padding: 2px 8px; border-radius: 6px; margin-top: 6px; }
+
+    /* CTA */
+    .cta-box { background: linear-gradient(135deg, #071e3d 0%, #0d3a6b 35%, #104c91 70%, #1561e1 100%); border-radius: 24px; padding: 64px 48px; text-align: center; position: relative; overflow: hidden; }
+    .cta-box::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 26px 26px; }
+    .cta-box h2 { font-size: clamp(24px, 3vw, 36px); font-weight: 900; color: white; letter-spacing: -0.02em; margin-bottom: 16px; position: relative; }
+    .cta-box h2 .accent { color: #4ade80; }
+    .cta-box p { font-size: 16px; color: rgba(255,255,255,0.7); margin-bottom: 32px; position: relative; }
+    .btn-cta-primary { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, var(--secondary), var(--secondary-dark)); color: white; font-weight: 800; font-size: 15px; padding: 14px 32px; border-radius: 14px; border: none; cursor: pointer; text-decoration: none; box-shadow: 0 8px 32px rgba(0,166,81,0.5); transition: transform 0.2s, box-shadow 0.2s; position: relative; }
+    .btn-cta-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(0,166,81,0.55); }
+
+    /* FOOTER */
+    .footer { background: #0f172a; padding: 56px 24px 32px; color: rgba(255,255,255,0.5); }
+    .footer-inner { max-width: 1200px; margin: 0 auto; }
+    .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+    .footer-brand p { font-size: 14px; line-height: 1.7; color: rgba(255,255,255,0.45); margin-top: 12px; max-width: 280px; }
+    .footer-col h4 { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.6); margin-bottom: 16px; }
+    .footer-col a { display: block; font-size: 14px; color: rgba(255,255,255,0.45); text-decoration: none; margin-bottom: 10px; transition: color 0.2s; }
+    .footer-col a:hover { color: white; }
+    .footer-bottom { padding-top: 28px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 12px; }
+    .footer-watermark { display: flex; align-items: center; gap: 8px; }
+    .footer-watermark span { color: rgba(255,255,255,0.4); font-size: 12px; }
+    .footer-watermark b { color: rgba(255,255,255,0.7); }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .intro-card { padding: 28px 24px; } .cta-box { padding: 40px 24px; }
+      .cruce-card { flex-direction: column; gap: 12px; }
+      nav.navbar .btn-nav { display: none !important; } nav.navbar .nav-links { display: none !important; }
+      nav.navbar .hamburger { display: flex !important; flex-direction: column; justify-content: center; }
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+    }
+    @media (max-width: 1024px) { .footer-top { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .footer-top { grid-template-columns: 1fr; gap: 28px; } .footer-bottom { flex-direction: column; align-items: flex-start; } }
   </style>
 </head>
 <body>
-<nav class="legal-nav"><div class="container nav-inner"><a href="index.html" class="logo-text">Inteliaudit</a><a href="index.html" style="text-decoration:none; color:var(--primary); font-weight:600;">← Inicio</a></div></nav>
-<div class="container">
-  <header class="legal-header">
-    <div class="law-badge">Resolución General DNIT</div>
-    <h1>Resolución General 90/2021</h1>
-    <p>Implementación del Registro de Comprobantes (Libro IVA Digital)</p>
-  </header>
-  <div class="legal-content">
-    <p>La Resolución General 90/2021 es la columna vertebral técnica de Inteliaudit. El sistema ha sido optimizado para procesar los archivos generados bajo esta resolución con un 100% de precisión.</p>
-    <h2>Integración con Marangatú</h2>
-    <p>Inteliaudit lee los archivos de exportación de la RG 90 (Libros de Compras y Ventas) y los valida contra los registros de SIFEN en tiempo real, detectando comprobantes que no fueron confirmados o que presentan inconsistencias en el CDC.</p>
-    <h2>Automatización de Cruces</h2>
-    <p>El sistema realiza de manera automática el cruce entre lo declarado en el Formulario 120 (IVA) y el detalle de comprobantes presentado bajo la RG 90, identificando discrepancias de céntimos o errores de tipificación al instante.</p>
-    <h2>Validación de Timbrados</h2>
-    <p>Verificación masiva de la validez de timbrados y fechas de vigencia de los comprobantes registrados, alertando sobre facturas que podrían ser rechazadas en una fiscalización de la DNIT.</p>
+
+<nav class="navbar" id="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="nav-logo">
+      <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="2" width="36" height="36" rx="10" fill="url(#navGrad)"/>
+        <circle cx="16" cy="18" r="7" stroke="white" stroke-width="2.2"/>
+        <line x1="21.5" y1="23.5" x2="27" y2="29" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M13 18.2l2 2 3.5-3.5" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="30" cy="7" r="3.5" fill="#00a651"/>
+        <text x="44" y="26" font-family="Inter,sans-serif" font-weight="900" font-size="18" fill="#104c91">Inteli</text>
+        <text x="91" y="26" font-family="Inter,sans-serif" font-weight="300" font-size="18" fill="#00a651">audit</text>
+        <defs>
+          <linearGradient id="navGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#1561e1"/><stop offset="1" stop-color="#104c91"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#dolor">¿Por qué Inteliaudit?</a>
+      <a href="index.html#como-funciona">Cómo funciona</a>
+      <a href="index.html#funcionalidades">Funcionalidades</a>
+      <a href="index.html#precios">Precios</a>
+      <a href="index.html#faq">FAQ</a>
+    </div>
+    <a href="/app/login" class="btn-nav">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+      Ingresar al sistema
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="Menú"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+  <div class="mobile-nav-panel">
+    <a href="index.html#dolor" class="mobile-nav-link">¿Por qué Inteliaudit?</a>
+    <a href="index.html#como-funciona" class="mobile-nav-link">Cómo funciona</a>
+    <a href="index.html#funcionalidades" class="mobile-nav-link">Funcionalidades</a>
+    <a href="index.html#precios" class="mobile-nav-link">Precios</a>
+    <a href="index.html#faq" class="mobile-nav-link">FAQ</a>
+    <a href="/app/login" class="mobile-nav-cta">Ingresar al sistema →</a>
   </div>
 </div>
-<footer><div class="container">&copy; 2026 Intellihouse Soluciones E.A.S. · Inteli Ecosystem</div></footer>
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <div class="hero-badge"><span>Resolución General SET · IVA</span></div>
+    <h1>Resolución General 90/2021<br/><span class="accent">El libro digital</span><br/>del IVA paraguayo</h1>
+    <p>La RG 90 obliga a declarar cada comprobante de compra y venta en la DJ IVA. Es la fuente de verdad de toda auditoría de IVA — y Inteliaudit la cruza automáticamente contra SIFEN, HECHAUKA y Form. 120.</p>
+  </div>
+</section>
+
+<div class="content-wrap">
+
+  <a href="index.html" class="back-link">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Volver al inicio
+  </a>
+
+  <!-- ¿Qué es la RG 90? -->
+  <div style="margin-bottom:72px;">
+    <div class="section-label">Contexto</div>
+    <h2 class="section-title">¿Qué es la RG 90/2021?</h2>
+    <div class="intro-card">
+      <p>La <strong>Resolución General 90/2021 de la SET</strong> establece que los contribuyentes del IVA deben acompañar cada declaración jurada (Form. 120) con el detalle comprobante por comprobante de todas sus compras y ventas del período. Esto convirtió la DJ IVA en un verdadero libro digital de IVA, eliminando la posibilidad de presentar cifras globales sin respaldo documental.</p>
+      <p>Antes de la RG 90, el contribuyente declaraba el total de débito y crédito fiscal sin detallar cada comprobante. Con la RG 90, la SET puede cruzar automáticamente lo declarado por el vendedor contra lo declarado por el comprador, y contra los comprobantes electrónicos en SIFEN.</p>
+      <p>Para el auditor impositivo, el archivo XLSX del RG90 descargado de Marangatú es la fuente primaria de análisis. Todo cruce parte de ahí.</p>
+    </div>
+
+    <div class="callout green">
+      <div class="callout-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <p><strong>Principio de diseño de Inteliaudit:</strong> Marangatú es la única fuente de verdad. El análisis parte siempre del RG90 efectivamente presentado ante la SET, y se contrasta contra SIFEN, HECHAUKA y el Form. 120 para detectar inconsistencias.</p>
+    </div>
+  </div>
+
+  <!-- Campos obligatorios -->
+  <div style="margin-bottom:72px;">
+    <div class="section-label">Estructura del archivo</div>
+    <h2 class="section-title">Campos obligatorios del RG90</h2>
+    <p class="section-subtitle">El archivo XLSX del RG90 tiene columnas fijas definidas por la resolución. Inteliaudit parsea y valida cada columna automáticamente.</p>
+
+    <table class="campos-table">
+      <thead>
+        <tr>
+          <th>Campo</th>
+          <th>Descripción</th>
+          <th>Uso en auditoría</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>RUC contraparte <span class="required-badge">Obligatorio</span></td>
+          <td>RUC del proveedor (en compras) o del cliente (en ventas)</td>
+          <td>Validación de estado activo/inactivo en SET; cruce con HECHAUKA</td>
+        </tr>
+        <tr>
+          <td>Nombre / Razón social <span class="required-badge">Obligatorio</span></td>
+          <td>Nombre del emisor o receptor del comprobante</td>
+          <td>Verificación de coherencia con el RUC declarado</td>
+        </tr>
+        <tr>
+          <td>N° de comprobante <span class="required-badge">Obligatorio</span></td>
+          <td>Número de timbrado y número de documento en formato 001-001-0000001</td>
+          <td>Unicidad de comprobantes; detección de duplicados</td>
+        </tr>
+        <tr>
+          <td>CDC <span class="optional-badge">Si es electrónico</span></td>
+          <td>Código de Control del e-Kuatia (44 dígitos SHA256)</td>
+          <td>Validación en SIFEN; detección de CDCs inexistentes o inválidos</td>
+        </tr>
+        <tr>
+          <td>Fecha del comprobante <span class="required-badge">Obligatorio</span></td>
+          <td>Fecha de emisión del documento en formato DD/MM/AAAA</td>
+          <td>Verificación de período correcto; prescripción 5 años</td>
+        </tr>
+        <tr>
+          <td>Base gravada 10% <span class="required-badge">Obligatorio</span></td>
+          <td>Monto neto (sin IVA) gravado a alícuota del 10%</td>
+          <td>Cruce con total Form. 120; validación de IVA calculado</td>
+        </tr>
+        <tr>
+          <td>Base gravada 5% <span class="required-badge">Obligatorio</span></td>
+          <td>Monto neto (sin IVA) gravado a alícuota del 5%</td>
+          <td>Clasificación correcta de alícuota; error frecuente de auditoría</td>
+        </tr>
+        <tr>
+          <td>Monto exento <span class="required-badge">Obligatorio</span></td>
+          <td>Monto correspondiente a operaciones exentas de IVA</td>
+          <td>Proporcionalidad del crédito fiscal; impacto en deducibilidad</td>
+        </tr>
+        <tr>
+          <td>IVA discriminado <span class="required-badge">Obligatorio</span></td>
+          <td>Monto de IVA incluido en el comprobante (10% o 5% según alícuota)</td>
+          <td>Verificación aritmética; crédito/débito fiscal efectivo</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Por qué el RG90 es el corazón -->
+  <div style="margin-bottom:72px;">
+    <div class="section-label">Por qué importa</div>
+    <h2 class="section-title">El RG90 es el corazón de la auditoría IVA</h2>
+    <div class="intro-card">
+      <p>Antes de la RG 90, auditar el IVA implicaba pedir comprobantes físicos al cliente o confiar en registros contables que podían diferir de lo declarado. Con la RG 90, cada cifra declarada ante la SET puede verificarse comprobante por comprobante — sin depender de documentación adicional.</p>
+      <p>El RG90 de compras es la fuente del crédito fiscal reclamado. El RG90 de ventas es la fuente del débito fiscal declarado. Cualquier diferencia entre estos registros y las demás fuentes (SIFEN, HECHAUKA, Form. 120) constituye un hallazgo potencial de auditoría.</p>
+    </div>
+    <div class="callout">
+      <div class="callout-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <p><strong>Atención:</strong> El RG90 descargado de Marangatú refleja lo efectivamente presentado ante la SET, no necesariamente lo registrado en la contabilidad del cliente. Las diferencias entre ambos son en sí mismas hallazgos relevantes.</p>
+    </div>
+  </div>
+
+  <!-- Los 5 cruces -->
+  <div style="margin-bottom:72px;">
+    <div class="section-label">Metodología</div>
+    <h2 class="section-title">Los 5 cruces que hace Inteliaudit con el RG90</h2>
+    <p class="section-subtitle">Inteliaudit ejecuta estos cruces automáticamente sobre el RG90 descargado de Marangatú, sin intervención manual del auditor.</p>
+
+    <div class="cruces-grid">
+      <div class="cruce-card">
+        <div class="cruce-num">1</div>
+        <div class="cruce-body">
+          <h4>RG90 vs Form. 120 — ¿Cuadran los totales?</h4>
+          <p>La suma de bases gravadas y del IVA de todos los comprobantes del RG90 debe coincidir exactamente con los totales declarados en el Form. 120 del mismo período. Cualquier diferencia, por mínima que sea, indica un comprobante no declarado o una cifra corregida fuera del RG90.</p>
+          <div class="cruce-tags">
+            <span class="cruce-tag">Form. 120</span>
+            <span class="cruce-tag">RG90 compras + ventas</span>
+            <span class="cruce-tag alert">Diferencia = hallazgo</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cruce-card">
+        <div class="cruce-num">2</div>
+        <div class="cruce-body">
+          <h4>RG90 compras vs SIFEN — ¿Cada CDC existe y es válido?</h4>
+          <p>Cada comprobante de compra que tenga un CDC en el RG90 se consulta en SIFEN para verificar su existencia y validez. Un CDC que no existe en SIFEN, o que corresponde a un contribuyente diferente, indica un posible comprobante apócrifo y el crédito fiscal debe ser impugnado.</p>
+          <div class="cruce-tags">
+            <span class="cruce-tag">SIFEN</span>
+            <span class="cruce-tag">e-Kuatia</span>
+            <span class="cruce-tag alert">CDC inválido = crédito cuestionado</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cruce-card">
+        <div class="cruce-num">3</div>
+        <div class="cruce-body">
+          <h4>SIFEN recibidas vs RG90 — ¿Hay facturas electrónicas no declaradas?</h4>
+          <p>Inteliaudit consulta en SIFEN todas las facturas electrónicas emitidas a nombre del RUC auditado durante el período. Las facturas recibidas en SIFEN que no aparecen en el RG90 de compras representan crédito fiscal potencialmente omitido — un beneficio no tomado que el auditor debe reportar.</p>
+          <div class="cruce-tags">
+            <span class="cruce-tag">SIFEN recibidas</span>
+            <span class="cruce-tag">RG90 compras</span>
+            <span class="cruce-tag success">Crédito omitido = oportunidad</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cruce-card">
+        <div class="cruce-num">4</div>
+        <div class="cruce-body">
+          <h4>RG90 ventas vs HECHAUKA — ¿Lo que vendiste coincide con lo que declararon tus compradores?</h4>
+          <p>HECHAUKA contiene lo que terceros (compradores, agentes de retención) declararon haber adquirido del contribuyente auditado. Si un comprador declaró una compra que no aparece en el RG90 ventas del auditado, hay un potencial débito fiscal omitido — la diferencia más grave en auditoría IVA.</p>
+          <div class="cruce-tags">
+            <span class="cruce-tag">HECHAUKA</span>
+            <span class="cruce-tag">RG90 ventas</span>
+            <span class="cruce-tag alert">Venta omitida = débito ajustable</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cruce-card">
+        <div class="cruce-num">5</div>
+        <div class="cruce-body">
+          <h4>RUC de proveedores en RG90 — ¿Algún proveedor tiene RUC inactivo o cancelado?</h4>
+          <p>Cada RUC declarado en el RG90 de compras se valida contra el estado actual en el padrón de la SET. Un comprobante emitido por un RUC inactivo, suspendido o cancelado al momento de la emisión no genera crédito fiscal válido. La diferencia es directamente ajustable con multas e intereses.</p>
+          <div class="cruce-tags">
+            <span class="cruce-tag">Padrón SET</span>
+            <span class="cruce-tag">RG90 compras</span>
+            <span class="cruce-tag alert">RUC inactivo = crédito inválido</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hallazgos típicos -->
+  <div style="margin-bottom:72px;">
+    <div class="section-label">Hallazgos frecuentes</div>
+    <h2 class="section-title">Hallazgos típicos detectados por RG90</h2>
+    <p class="section-subtitle">Estos son los hallazgos más frecuentes detectados en auditorías IVA basadas en el cruce de RG90. Inteliaudit los detecta y cuantifica automáticamente.</p>
+
+    <div class="hallazgos-list">
+      <div class="hallazgo-item">
+        <div class="hallazgo-icon red">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        </div>
+        <div class="hallazgo-text">
+          <h4>Crédito fiscal con RUC inactivo o cancelado</h4>
+          <p>El contribuyente tomó crédito fiscal de comprobantes emitidos por proveedores cuyo RUC estaba inactivo o cancelado al momento de la emisión. El crédito es inválido y debe revertirse.</p>
+          <span class="legal-ref">Art. 85 Ley 6380 · Art. 100 Ley 6380</span>
+        </div>
+      </div>
+
+      <div class="hallazgo-item">
+        <div class="hallazgo-icon red">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="hallazgo-text">
+          <h4>CDC en RG90 que no existe en SIFEN (posible apócrifo)</h4>
+          <p>El comprobante electrónico declarado en el RG90 tiene un CDC que no se encuentra registrado en SIFEN, o que pertenece a otro contribuyente. Alta probabilidad de documento apócrifo.</p>
+          <span class="legal-ref">RG 69/2020 · RG 90/2021</span>
+        </div>
+      </div>
+
+      <div class="hallazgo-item">
+        <div class="hallazgo-icon amber">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <div class="hallazgo-text">
+          <h4>Facturas electrónicas recibidas en SIFEN no declaradas en RG90</h4>
+          <p>El contribuyente tiene facturas electrónicas registradas a su nombre en SIFEN que no fueron incluidas en el RG90. Puede representar crédito fiscal no tomado o ventas de contraparte no reconocidas.</p>
+          <span class="legal-ref">RG 90/2021 · RG 69/2020</span>
+        </div>
+      </div>
+
+      <div class="hallazgo-item">
+        <div class="hallazgo-icon red">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+        <div class="hallazgo-text">
+          <h4>Diferencia entre totales RG90 y Form. 120</h4>
+          <p>Los totales de bases imponibles e IVA del archivo RG90 no cuadran con los totales declarados en el Form. 120 del mismo período. Indica comprobantes no declarados o ajustes realizados fuera del RG90.</p>
+          <span class="legal-ref">Art. 88 Ley 6380 · RG 90/2021</span>
+        </div>
+      </div>
+
+      <div class="hallazgo-item">
+        <div class="hallazgo-icon red">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <div class="hallazgo-text">
+          <h4>Ventas declaradas en HECHAUKA por compradores no reflejadas en RG90</h4>
+          <p>Los compradores del auditado declararon compras en HECHAUKA que no aparecen en el RG90 ventas. Es el ajuste de mayor impacto: débito fiscal omitido directamente cuantificable.</p>
+          <span class="legal-ref">Art. 84 Ley 6380 · RG 90/2021</span>
+        </div>
+      </div>
+
+      <div class="hallazgo-item">
+        <div class="hallazgo-icon amber">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        </div>
+        <div class="hallazgo-text">
+          <h4>Crédito fiscal de comprobantes de períodos anteriores fuera del plazo</h4>
+          <p>Comprobantes de compra de ejercicios anteriores cuyo IVA se tomó como crédito después del plazo de prescripción (5 años). El crédito caduca y debe reversarse.</p>
+          <span class="legal-ref">Art. 162 Ley 125/1991 — Prescripción 5 años</span>
+        </div>
+      </div>
+
+      <div class="hallazgo-item">
+        <div class="hallazgo-icon amber">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <div class="hallazgo-text">
+          <h4>Notas de crédito recibidas no descontadas del crédito fiscal</h4>
+          <p>El contribuyente recibió notas de crédito de proveedores (devoluciones, descuentos) que no fueron restadas del crédito fiscal declarado. El IVA de las notas de crédito debe revertir el crédito original.</p>
+          <span class="legal-ref">Art. 92 Ley 6380 · RG 90/2021</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-box">
+    <h2>Inteliaudit ejecuta los 5 cruces<br/>en <span class="accent">segundos, no días</span></h2>
+    <p>Descargá el RG90 de Marangatú, importalo en Inteliaudit — y el sistema detecta todos los hallazgos automáticamente con base legal incluida.</p>
+    <a href="/app/login" class="btn-cta-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Probarlo gratis 7 días
+    </a>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:32px;">
+          <rect x="0" y="2" width="36" height="36" rx="10" fill="url(#footGrad)"/>
+          <circle cx="16" cy="18" r="7" stroke="white" stroke-width="2.2"/>
+          <line x1="21.5" y1="23.5" x2="27" y2="29" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M13 18.2l2 2 3.5-3.5" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="30" cy="7" r="3.5" fill="#00a651"/>
+          <text x="44" y="26" font-family="Inter,sans-serif" font-weight="900" font-size="18" fill="#256ebf">Inteli</text>
+          <text x="91" y="26" font-family="Inter,sans-serif" font-weight="300" font-size="18" fill="#1ecb73">audit</text>
+          <defs>
+            <linearGradient id="footGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#1561e1"/><stop offset="1" stop-color="#104c91"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <p>Auditoría impositiva inteligente para Paraguay. La única herramienta construida desde cero para la realidad tributaria paraguaya.</p>
+        <p style="margin-top:8px;font-size:12px;">Parte del ecosistema <b style="color:rgba(255,255,255,0.6);">Intelihouse</b></p>
+      </div>
+      <div class="footer-col">
+        <h4>Producto</h4>
+        <a href="index.html#como-funciona">Cómo funciona</a>
+        <a href="index.html#funcionalidades">Funcionalidades</a>
+        <a href="index.html#precios">Precios</a>
+        <a href="index.html#faq">FAQ</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="ley-6380.html">Ley 6380/2019</a>
+        <a href="rg-90.html">RG 90/2021</a>
+        <a href="terminos.html">Términos de uso</a>
+        <a href="privacidad.html">Política de privacidad</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contacto</h4>
+        <a href="mailto:hola@inteliaudit.com.py">hola@inteliaudit.com.py</a>
+        <a href="https://wa.me/595994516360?text=Hola%21%20Necesito%20soporte%20con%20Inteliaudit" target="_blank" rel="noopener">WhatsApp soporte</a>
+        <a href="/app/login">Acceder al sistema</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-watermark">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:18px;opacity:0.5;">
+          <rect width="20" height="20" rx="5" fill="#1561e1"/>
+          <circle cx="9" cy="10" r="4" stroke="white" stroke-width="1.4"/>
+          <line x1="12" y1="13" x2="15" y2="16" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M7.5 10.2l1.2 1.2 2-2" stroke="#4ade80" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>© 2026 <b>Inteliaudit</b> · Desarrollado por <b>Intellihouse</b> · Pedro Juan Caballero, Paraguay</span>
+      </div>
+      <span style="font-size:12px;color:rgba(255,255,255,0.25);">Auditoría impositiva inteligente para Paraguay</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const mobileNav = document.getElementById('mobileNav');
+  const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+  function closeMobileNav() { hamburger.classList.remove('open'); mobileNav.classList.remove('open'); document.body.style.overflow = ''; }
+  hamburger.addEventListener('click', () => { const isOpen = mobileNav.classList.toggle('open'); hamburger.classList.toggle('open', isOpen); document.body.style.overflow = isOpen ? 'hidden' : ''; });
+  mobileNavOverlay.addEventListener('click', closeMobileNav);
+  document.querySelectorAll('.mobile-nav-link, .mobile-nav-cta').forEach(a => a.addEventListener('click', closeMobileNav));
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 20));
+</script>
 </body>
 </html>

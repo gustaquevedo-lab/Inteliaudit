@@ -1,168 +1,582 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Términos de Uso | Inteliaudit</title>
+  <meta name="description" content="Términos y condiciones de uso de Inteliaudit, el software SaaS de auditoría impositiva para Paraguay. Desarrollado por Intellihouse, Pedro Juan Caballero." />
   <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2" />
   <link rel="shortcut icon" href="favicon.svg?v=2" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --primary: #1561e1;
-      --primary-dark: #104c91;
-      --accent: #4ade80;
-      --text: #0f172a;
-      --text-light: #64748b;
-      --bg: #f8fafc;
-      --white: #ffffff;
+      --primary: #104c91; --primary-dark: #0a356b; --primary-light: #256ebf;
+      --primary-600: #1561e1; --secondary: #00a651; --secondary-dark: #00823e;
+      --secondary-light: #1ecb73; --body-bg: #f0f4f8; --text-dark: #0f172a;
+      --text-muted: #64748b; --border: #e2e8f0;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { 
-      font-family: 'Inter', sans-serif; 
-      background: var(--bg); 
-      color: var(--text); 
-      line-height: 1.6;
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--body-bg); color: var(--text-dark); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+    /* NAVBAR */
+    .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(255,255,255,0.92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(16,76,145,0.07); transition: box-shadow 0.3s ease; }
+    .navbar.scrolled { box-shadow: 0 2px 24px rgba(16,76,145,0.10); }
+    .navbar-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo svg { height: 36px; width: auto; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a { font-size: 14px; font-weight: 600; color: #475569; text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--primary); }
+    .btn-nav { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--secondary), var(--secondary-dark)); color: white; font-weight: 700; font-size: 14px; padding: 10px 22px; border-radius: 12px; border: none; cursor: pointer; text-decoration: none; box-shadow: 0 4px 18px rgba(0,166,81,0.35); transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,166,81,0.45); }
+    .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; flex-shrink: 0; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--primary); margin: 4px 0; transition: all 0.3s; border-radius: 2px; }
+    .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+    .mobile-nav { display: none; position: fixed; top: 68px; left: 0; right: 0; bottom: 0; z-index: 99; }
+    .mobile-nav.open { display: block; }
+    .mobile-nav-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); }
+    .mobile-nav-panel { position: absolute; top: 0; left: 0; right: 0; background: white; padding: 24px; border-bottom: 1px solid var(--border); box-shadow: 0 8px 32px rgba(0,0,0,0.12); animation: slideDown 0.25s ease; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    .mobile-nav-panel a { display: block; padding: 13px 0; font-size: 16px; font-weight: 600; color: #374151; text-decoration: none; border-bottom: 1px solid #f1f5f9; transition: color 0.2s; }
+    .mobile-nav-panel a:last-child { border-bottom: none; }
+    .mobile-nav-panel a:hover { color: var(--primary); }
+    .mobile-nav-cta { display: block; margin-top: 16px; background: linear-gradient(135deg, var(--secondary), var(--secondary-dark)); color: white !important; font-weight: 700; font-size: 15px !important; padding: 14px 20px !important; border-radius: 12px; text-align: center; border-bottom: none !important; box-shadow: 0 4px 16px rgba(0,166,81,0.35); }
+
+    /* HERO */
+    .page-hero { background: linear-gradient(135deg, #071e3d 0%, #0d3a6b 35%, #104c91 70%, #1561e1 100%); padding: 120px 24px 80px; text-align: center; position: relative; overflow: hidden; }
+    .page-hero::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.055) 1px, transparent 1px); background-size: 26px 26px; pointer-events: none; }
+    .page-hero-inner { max-width: 800px; margin: 0 auto; position: relative; z-index: 1; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(0,166,81,0.15); border: 1px solid rgba(0,166,81,0.3); border-radius: 99px; padding: 6px 16px; margin-bottom: 28px; }
+    .hero-badge span { font-size: 12px; font-weight: 700; color: #4ade80; letter-spacing: 0.04em; }
+    .page-hero h1 { font-size: clamp(32px, 4.5vw, 52px); font-weight: 900; line-height: 1.08; letter-spacing: -0.03em; color: white; margin-bottom: 20px; }
+    .page-hero p { font-size: 17px; line-height: 1.7; color: rgba(255,255,255,0.72); max-width: 600px; margin: 0 auto; }
+
+    /* LAYOUT */
+    .content-outer { max-width: 1100px; margin: 0 auto; padding: 64px 24px 96px; display: grid; grid-template-columns: 260px 1fr; gap: 48px; align-items: start; }
+
+    /* SIDEBAR */
+    .sidebar { position: sticky; top: 92px; }
+    .sidebar-card { background: white; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(16,76,145,0.06); overflow: hidden; }
+    .sidebar-header { background: linear-gradient(135deg, var(--primary), var(--primary-600)); padding: 16px 20px; }
+    .sidebar-header h3 { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.8); }
+    .sidebar-links { padding: 8px 0; }
+    .sidebar-links a { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 13px; font-weight: 500; color: var(--text-muted); text-decoration: none; transition: all 0.2s; border-left: 3px solid transparent; }
+    .sidebar-links a:hover { color: var(--primary); background: #f8faff; border-left-color: var(--primary-600); }
+    .sidebar-links .num { font-size: 11px; font-weight: 800; color: var(--primary-600); width: 20px; flex-shrink: 0; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text-muted); text-decoration: none; transition: color 0.2s; margin-bottom: 20px; }
+    .back-link:hover { color: var(--primary); }
+
+    /* MAIN CONTENT */
+    .legal-main {}
+    .section-block { background: white; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(16,76,145,0.06); margin-bottom: 24px; overflow: hidden; }
+    .section-block-header { display: flex; align-items: center; gap: 20px; padding: 28px 32px 0; }
+    .section-num { font-size: 48px; font-weight: 900; color: var(--border); line-height: 1; letter-spacing: -0.04em; flex-shrink: 0; user-select: none; }
+    .section-block-header h2 { font-size: 20px; font-weight: 800; color: var(--text-dark); letter-spacing: -0.01em; line-height: 1.3; }
+    .section-block-body { padding: 16px 32px 32px 32px; }
+    .section-block-body p { font-size: 15px; line-height: 1.8; color: #334155; margin-bottom: 14px; }
+    .section-block-body p:last-child { margin-bottom: 0; }
+    .section-block-body ul { margin: 12px 0 14px 20px; }
+    .section-block-body ul li { font-size: 15px; line-height: 1.8; color: #334155; margin-bottom: 8px; }
+    .section-block-body ul li::marker { color: var(--primary-600); }
+
+    /* CALLOUT */
+    .callout { display: flex; gap: 14px; align-items: flex-start; border-radius: 12px; padding: 18px 20px; margin: 18px 0; }
+    .callout.yellow { background: #fffbeb; border: 1px solid #fcd34d; }
+    .callout.blue { background: #eff6ff; border: 1px solid #bfdbfe; }
+    .callout.green { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .callout.red { background: #fff1f2; border: 1px solid #fecdd3; }
+    .callout-icon { flex-shrink: 0; margin-top: 1px; }
+    .callout p { font-size: 14px; color: #334155; line-height: 1.7; margin-bottom: 0 !important; }
+    .callout strong { color: var(--text-dark); }
+
+    /* PRICING TABLE */
+    .plan-table { width: 100%; border-collapse: collapse; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin: 16px 0 20px; }
+    .plan-table thead tr { background: linear-gradient(135deg, var(--primary), var(--primary-600)); }
+    .plan-table thead th { padding: 12px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: white; text-align: left; }
+    .plan-table tbody tr { background: white; border-top: 1px solid #f1f5f9; }
+    .plan-table tbody tr:hover { background: #f8fafc; }
+    .plan-table td { padding: 12px 16px; font-size: 14px; color: #334155; }
+    .plan-table td:first-child { font-weight: 800; color: var(--primary); }
+    .plan-table td:nth-child(2) { font-weight: 700; color: var(--text-dark); font-family: monospace; }
+
+    /* FOOTER */
+    .footer { background: #0f172a; padding: 56px 24px 32px; color: rgba(255,255,255,0.5); }
+    .footer-inner { max-width: 1200px; margin: 0 auto; }
+    .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+    .footer-brand p { font-size: 14px; line-height: 1.7; color: rgba(255,255,255,0.45); margin-top: 12px; max-width: 280px; }
+    .footer-col h4 { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.6); margin-bottom: 16px; }
+    .footer-col a { display: block; font-size: 14px; color: rgba(255,255,255,0.45); text-decoration: none; margin-bottom: 10px; transition: color 0.2s; }
+    .footer-col a:hover { color: white; }
+    .footer-bottom { padding-top: 28px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 12px; }
+    .footer-watermark { display: flex; align-items: center; gap: 8px; }
+    .footer-watermark span { color: rgba(255,255,255,0.4); font-size: 12px; }
+    .footer-watermark b { color: rgba(255,255,255,0.7); }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) { .content-outer { grid-template-columns: 220px 1fr; gap: 32px; } .footer-top { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 768px) {
+      .content-outer { grid-template-columns: 1fr; }
+      .sidebar { position: static; display: none; }
+      .section-block-header { padding: 24px 24px 0; }
+      .section-block-body { padding: 12px 24px 28px; }
+      .section-num { font-size: 36px; }
+      nav.navbar .btn-nav { display: none !important; }
+      nav.navbar .nav-links { display: none !important; }
+      nav.navbar .hamburger { display: flex !important; flex-direction: column; justify-content: center; }
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
     }
-    .legal-nav {
-      background: var(--white);
-      padding: 20px 0;
-      border-bottom: 1px solid #e2e8f0;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-    .nav-inner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .logo-text {
-      font-weight: 900;
-      font-size: 20px;
-      color: var(--primary-dark);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .btn-back {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--primary);
-      text-decoration: none;
-    }
-    .legal-header {
-      padding: 80px 0 40px;
-      text-align: center;
-    }
-    .legal-header h1 {
-      font-size: 36px;
-      font-weight: 900;
-      margin-bottom: 16px;
-      color: var(--primary-dark);
-    }
-    .last-update {
-      font-size: 14px;
-      color: var(--text-light);
-    }
-    .legal-content {
-      background: var(--white);
-      padding: 48px;
-      border-radius: 24px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.04);
-      margin-bottom: 80px;
-    }
-    .legal-content h2 {
-      font-size: 20px;
-      font-weight: 800;
-      margin: 32px 0 16px;
-      color: var(--text);
-    }
-    .legal-content p {
-      margin-bottom: 16px;
-      color: #334155;
-    }
-    .legal-content b { color: var(--text); }
-    footer {
-      padding: 40px 0;
-      text-align: center;
-      border-top: 1px solid #e2e8f0;
-      font-size: 14px;
-      color: var(--text-light);
-    }
-    .highlight-box {
-      background: #fff9db;
-      padding: 20px;
-      border-radius: 12px;
-      border-left: 4px solid #fab005;
-      margin: 24px 0;
-      font-size: 15px;
-    }
+    @media (max-width: 480px) { .footer-top { grid-template-columns: 1fr; gap: 28px; } .footer-bottom { flex-direction: column; align-items: flex-start; } }
   </style>
 </head>
 <body>
 
-<nav class="legal-nav">
-  <div class="container nav-inner">
-    <a href="index.html" class="logo-text">Inteliaudit</a>
-    <a href="index.html" class="btn-back">← Volver al inicio</a>
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="nav-logo">
+      <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="2" width="36" height="36" rx="10" fill="url(#navGrad)"/>
+        <circle cx="16" cy="18" r="7" stroke="white" stroke-width="2.2"/>
+        <line x1="21.5" y1="23.5" x2="27" y2="29" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M13 18.2l2 2 3.5-3.5" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="30" cy="7" r="3.5" fill="#00a651"/>
+        <text x="44" y="26" font-family="Inter,sans-serif" font-weight="900" font-size="18" fill="#104c91">Inteli</text>
+        <text x="91" y="26" font-family="Inter,sans-serif" font-weight="300" font-size="18" fill="#00a651">audit</text>
+        <defs>
+          <linearGradient id="navGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#1561e1"/><stop offset="1" stop-color="#104c91"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#dolor">¿Por qué Inteliaudit?</a>
+      <a href="index.html#como-funciona">Cómo funciona</a>
+      <a href="index.html#funcionalidades">Funcionalidades</a>
+      <a href="index.html#precios">Precios</a>
+      <a href="index.html#faq">FAQ</a>
+    </div>
+    <a href="/app/login" class="btn-nav">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+      Ingresar al sistema
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="Menú"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
-<div class="container">
-  <header class="legal-header">
-    <h1>Términos de Uso</h1>
-    <p class="last-update">Última actualización: 5 de mayo de 2026</p>
-  </header>
-
-  <div class="legal-content">
-    <p>Bienvenido a <b>Inteliaudit</b>. Al acceder y utilizar este software, usted acepta cumplir con los siguientes términos y condiciones. Este servicio es operado por <b>Intellihouse Soluciones E.A.S.</b>, RUC 80144114-5.</p>
-
-    <h2>1. Naturaleza del Servicio</h2>
-    <p>Inteliaudit es una herramienta de soporte tecnológico para auditores profesionales en Paraguay. El software automatiza el procesamiento y cruce de datos tributarios, pero <b>no sustituye el juicio profesional del auditor</b> ni la responsabilidad final sobre los informes emitidos.</p>
-
-    <h2>2. Licencia de Uso</h2>
-    <p>Intellihouse otorga al usuario una licencia limitada, no exclusiva e intransferible para acceder y utilizar el software según el plan de suscripción contratado (Starter, Pro o Enterprise). El uso del software está estrictamente limitado a fines profesionales de auditoría y consultoría.</p>
-
-    <h2>3. Responsabilidad del Usuario</h2>
-    <p>El usuario es responsable de:</p>
-    <ul>
-      <li>La veracidad de los datos cargados en el sistema.</li>
-      <li>Contar con la autorización explícita de sus clientes para procesar su información tributaria.</li>
-      <li>Mantener la confidencialidad de sus credenciales de acceso.</li>
-    </ul>
-
-    <div class="highlight-box">
-      <b>Importante:</b> Inteliaudit no es un sistema de la DNIT. El usuario reconoce que Intellihouse no tiene vínculo oficial con el Ministerio de Economía o la Dirección Nacional de Ingresos Tributarios.
-    </div>
-
-    <h2>4. Propiedad Intelectual</h2>
-    <p>Inteliaudit es una marca y software desarrollado por Intellihouse Soluciones E.A.S. Todos los derechos sobre el código fuente, diseño, logotipos, algoritmos de IA y metodologías de análisis son propiedad exclusiva de Intellihouse dentro del ecosistema "Inteli".</p>
-
-    <h2>5. Limitación de Responsabilidad</h2>
-    <p>Dada la naturaleza cambiante de la normativa tributaria en Paraguay, Intellihouse se esfuerza por mantener el sistema actualizado con las últimas resoluciones (ej. Ley 6380/19, RG 90/21). Sin embargo, <b>Intellihouse no se hace responsable</b> por sanciones, multas o interpretaciones legales derivadas del uso de la herramienta o de omisiones en los datos del contribuyente.</p>
-
-    <h2>6. Suspensión y Terminación</h2>
-    <p>Intellihouse se reserva el derecho de suspender cuentas que incumplan con los términos de uso o que realicen actividades fraudulentas o ataques contra la infraestructura del software.</p>
-
-    <h2>7. Jurisdicción</h2>
-    <p>Cualquier controversia derivada de estos términos se someterá a la jurisdicción de los tribunales de la ciudad de Pedro Juan Caballero, República del Paraguay.</p>
+<div class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+  <div class="mobile-nav-panel">
+    <a href="index.html#dolor" class="mobile-nav-link">¿Por qué Inteliaudit?</a>
+    <a href="index.html#como-funciona" class="mobile-nav-link">Cómo funciona</a>
+    <a href="index.html#funcionalidades" class="mobile-nav-link">Funcionalidades</a>
+    <a href="index.html#precios" class="mobile-nav-link">Precios</a>
+    <a href="index.html#faq" class="mobile-nav-link">FAQ</a>
+    <a href="/app/login" class="mobile-nav-cta">Ingresar al sistema →</a>
   </div>
 </div>
 
-<footer>
-  <div class="container">
-    &copy; 2026 Intellihouse Soluciones E.A.S. · RUC 80144114-5 · Inteliaudit es parte del ecosistema Inteli.
+<!-- HERO -->
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <div class="hero-badge"><span>Documento legal · Inteliaudit</span></div>
+    <h1>Términos de Uso</h1>
+    <p>Última actualización: Mayo 2026 · Ley aplicable: República del Paraguay</p>
+  </div>
+</section>
+
+<!-- CONTENT -->
+<div class="content-outer">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="index.html" class="back-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Volver al inicio
+    </a>
+    <div class="sidebar-card">
+      <div class="sidebar-header"><h3>Índice rápido</h3></div>
+      <div class="sidebar-links">
+        <a href="#s1"><span class="num">01</span>Objeto y Partes</a>
+        <a href="#s2"><span class="num">02</span>Descripción del Servicio</a>
+        <a href="#s3"><span class="num">03</span>Registro y Cuenta</a>
+        <a href="#s4"><span class="num">04</span>Planes y Facturación</a>
+        <a href="#s5"><span class="num">05</span>Uso Aceptable</a>
+        <a href="#s6"><span class="num">06</span>Propiedad Intelectual</a>
+        <a href="#s7"><span class="num">07</span>Confidencialidad y Datos</a>
+        <a href="#s8"><span class="num">08</span>Disponibilidad y SLAs</a>
+        <a href="#s9"><span class="num">09</span>Limitación de Responsabilidad</a>
+        <a href="#s10"><span class="num">10</span>Modificaciones</a>
+        <a href="#s11"><span class="num">11</span>Terminación</a>
+        <a href="#s12"><span class="num">12</span>Ley Aplicable</a>
+        <a href="#s13"><span class="num">13</span>Contacto</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="legal-main">
+
+    <!-- Intro -->
+    <div class="section-block" style="margin-bottom:24px;">
+      <div class="section-block-body" style="padding-top:28px;">
+        <p>Al registrarse, acceder o utilizar <strong>Inteliaudit</strong>, usted acepta estos Términos de Uso en su totalidad. Si no está de acuerdo con alguna de las condiciones aquí establecidas, le solicitamos que se abstenga de utilizar el servicio. El uso continuado de la plataforma tras cualquier actualización de estos términos implica la aceptación de las nuevas condiciones.</p>
+        <div class="callout yellow">
+          <div class="callout-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <p><strong>Importante:</strong> Inteliaudit es una herramienta de apoyo profesional. No reemplaza al auditor habilitado, no genera declaraciones juradas y no tiene efectos tributarios directos ante la DNIT (Dirección Nacional de Ingresos Tributarios). La responsabilidad profesional final siempre recae en el contador o auditor matriculado.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1 -->
+    <div class="section-block" id="s1">
+      <div class="section-block-header">
+        <div class="section-num">01</div>
+        <h2>Objeto y Partes</h2>
+      </div>
+      <div class="section-block-body">
+        <p><strong>Inteliaudit</strong> es un software de auditoría impositiva en modalidad SaaS (Software as a Service) diseñado exclusivamente para el mercado paraguayo. Su función central es la automatización del trabajo del auditor impositivo: desde la descarga de datos en Marangatú hasta la generación de informes finales, pasando por el cruce de RG90, SIFEN y HECHAUKA con identificación de hallazgos fundados en la normativa tributaria vigente.</p>
+        <p>El <strong>proveedor del servicio</strong> es <strong>Intellihouse</strong>, empresa radicada en la ciudad de Pedro Juan Caballero, Departamento de Amambay, República del Paraguay. Intellihouse es la titular de la marca, el código fuente, los algoritmos de análisis y toda la propiedad intelectual asociada a Inteliaudit, dentro del ecosistema tecnológico denominado "Inteli".</p>
+        <p>El <strong>usuario</strong> es la firma auditora, estudio contable, contador independiente o empresa que se registra en la plataforma y acepta estos términos de uso al completar el proceso de alta. Cuando el usuario sea una persona jurídica, se entiende que la persona física que realiza el registro actúa con facultades suficientes para obligar a dicha entidad.</p>
+        <p>La relación entre el proveedor y el usuario se rige exclusivamente por estos Términos de Uso, la Política de Privacidad y, en su caso, el contrato Enterprise suscripto por escrito. En caso de contradicción entre estos documentos, prevalecerá el contrato Enterprise para los clientes que cuenten con uno; para el resto, prevalecerán estos Términos.</p>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="section-block" id="s2">
+      <div class="section-block-header">
+        <div class="section-num">02</div>
+        <h2>Descripción del Servicio</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Inteliaudit provee una plataforma de automatización de auditoría impositiva que incluye, según el plan contratado, las siguientes funcionalidades principales:</p>
+        <ul>
+          <li>Descarga automatizada de declaraciones juradas y datos desde el portal <strong>Marangatú</strong> (SET) mediante tecnología de automatización web.</li>
+          <li>Parsing y cruce del detalle de comprobantes de la <strong>RG 90/2021</strong> contra los totales declarados en el Formulario 120.</li>
+          <li>Validación de CDCs (Códigos de Control) de comprobantes electrónicos contra el sistema <strong>SIFEN</strong>.</li>
+          <li>Cruce de información recibida en <strong>HECHAUKA</strong> con las declaraciones del contribuyente auditado.</li>
+          <li>Verificación del estado y validez de RUC de proveedores y clientes.</li>
+          <li>Generación automática de <strong>hallazgos</strong> con base legal citada (Ley 6380/2019, Ley 125/1991, Decreto 3107/2019, Decreto 3181/2019, RG 90/2021 y demás normativa vigente).</li>
+          <li>Cálculo automático de contingencias fiscales: impuesto omitido, multas e intereses moratorios al día del análisis.</li>
+          <li>Generación de <strong>informes de auditoría</strong> en formato Word y PDF firmables.</li>
+          <li>Análisis narrativo con <strong>inteligencia artificial</strong> (Claude API de Anthropic) disponible en planes Pro y Enterprise.</li>
+        </ul>
+        <p>El servicio se presta exclusivamente a través de la plataforma web accesible en el dominio <strong>inteliaudit.com.py</strong> y sus subdominios. No se provee software instalable en servidores del usuario salvo acuerdo Enterprise específico.</p>
+        <p>Inteliaudit utiliza Marangatú como fuente principal de verdad. Todos los análisis parten de lo efectivamente presentado ante la SET. Las demás fuentes (SIFEN, HECHAUKA, contabilidad, banco) se emplean únicamente para contrastar y detectar diferencias.</p>
+        <div class="callout blue">
+          <div class="callout-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1561e1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <p><strong>Alcance profesional:</strong> Los hallazgos generados por Inteliaudit son indicativos y requieren validación del profesional auditor antes de ser incluidos en informes oficiales. La plataforma no emite dictámenes, no suscribe informes ante organismos públicos y no tiene personería ante la DNIT.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="section-block" id="s3">
+      <div class="section-block-header">
+        <div class="section-num">03</div>
+        <h2>Registro y Cuenta</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Para acceder al servicio, el usuario debe completar el proceso de registro proporcionando información veraz, completa y actualizada. El registro crea un <strong>tenant</strong> (espacio aislado) exclusivo para la firma auditora, completamente independiente del de otras firmas. No existe compartición de datos entre tenants.</p>
+        <p>El usuario es responsable exclusivo de <strong>mantener la confidencialidad de sus credenciales</strong> de acceso (usuario y contraseña) y de todas las acciones realizadas bajo su cuenta. Ante cualquier sospecha de acceso no autorizado, debe notificar de inmediato a <strong>hola@inteliaudit.com.py</strong>. Intellihouse no será responsable por daños o pérdidas derivadas del incumplimiento de esta obligación de confidencialidad.</p>
+        <p>El usuario administrador de la cuenta puede crear <strong>usuarios secundarios</strong> con distintos niveles de acceso (auditor senior, auditor junior, solo lectura). El usuario administrador asume plena responsabilidad por las acciones de los usuarios secundarios que él mismo habilite, incluyendo accesos a datos de clientes auditados, modificaciones a hallazgos y generación de informes.</p>
+        <p>Cada acción relevante dentro de la plataforma queda registrada en un <strong>audit trail</strong> inmutable con timestamp, usuario e IP de origen. Este registro está disponible para el usuario administrador y puede ser requerido por Intellihouse en caso de investigación de incidentes.</p>
+        <p>El usuario garantiza que cuenta con las autorizaciones legales y profesionales necesarias para ejercer la auditoría impositiva en Paraguay y para acceder, en nombre de sus clientes, a información tributaria a través de Marangatú. El uso de credenciales Marangatú de terceros en la plataforma implica que el usuario cuenta con mandato expreso del contribuyente para hacerlo.</p>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="section-block" id="s4">
+      <div class="section-block-header">
+        <div class="section-num">04</div>
+        <h2>Planes y Facturación</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Inteliaudit se ofrece en tres planes de suscripción, con las siguientes características y precios expresados en Guaraníes (PYG):</p>
+
+        <table class="plan-table">
+          <thead>
+            <tr>
+              <th>Plan</th>
+              <th>Precio mensual</th>
+              <th>Clientes activos</th>
+              <th>IA incluida</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Starter</td>
+              <td>Gs. 490.000</td>
+              <td>Hasta 5</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>Pro</td>
+              <td>Gs. 890.000</td>
+              <td>Hasta 15</td>
+              <td>Completa</td>
+            </tr>
+            <tr>
+              <td>Enterprise</td>
+              <td>Gs. 1.790.000</td>
+              <td>Ilimitados</td>
+              <td>Sin límites</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p><strong>Período de prueba:</strong> Los nuevos usuarios acceden a 7 días de uso gratuito con funcionalidades del plan Pro, sin necesidad de proporcionar datos de tarjeta de crédito ni compromisos de pago. Al finalizar el período de prueba, el usuario debe seleccionar un plan para continuar usando el servicio; de lo contrario, la cuenta queda suspendida automáticamente y los datos se conservan por 15 días adicionales antes de ser eliminados.</p>
+        <p><strong>Facturación:</strong> La suscripción puede ser mensual o anual. El plan anual tiene un descuento del 15% sobre el precio mensual acumulado. La facturación se realiza al inicio de cada período (mensual o anual). Intellihouse emitirá factura conforme a la normativa fiscal paraguaya vigente.</p>
+        <p><strong>Política de reembolsos:</strong> No se realizan reembolsos por períodos parciales ya transcurridos. Si el usuario cancela su suscripción antes del vencimiento del período pago, conserva acceso al servicio hasta el último día del período abonado, sin reembolso proporcional de los días no utilizados.</p>
+        <p><strong>Cancelación:</strong> El usuario puede cancelar su suscripción en cualquier momento desde el panel de administración de su cuenta o solicitándolo a través de hola@inteliaudit.com.py. La cancelación tiene efecto al finalizar el período de facturación vigente. No se generan cargos adicionales tras la cancelación.</p>
+        <p><strong>Modificación de precios:</strong> Intellihouse puede modificar los precios de los planes con un aviso previo mínimo de 30 días por email. Los usuarios con suscripción anual vigente no verán modificado su precio hasta el vencimiento del año en curso.</p>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="section-block" id="s5">
+      <div class="section-block-header">
+        <div class="section-num">05</div>
+        <h2>Uso Aceptable</h2>
+      </div>
+      <div class="section-block-body">
+        <p>El usuario se compromete a utilizar Inteliaudit exclusivamente para fines legítimos de auditoría e impositiva profesional. Queda expresamente prohibido:</p>
+        <ul>
+          <li><strong>Ingeniería inversa:</strong> Descompilar, desensamblar, modificar o intentar obtener el código fuente de la plataforma o sus algoritmos por cualquier medio.</li>
+          <li><strong>Reventa no autorizada:</strong> Comercializar, sublicenciar, arrendar o poner a disposición de terceros el acceso a Inteliaudit sin autorización escrita previa de Intellihouse.</li>
+          <li><strong>Uso fraudulento:</strong> Utilizar la plataforma para generar documentos o análisis falsos, alterar deliberadamente datos cargados para obtener resultados distorsionados, o cualquier conducta que configure fraude.</li>
+          <li><strong>Evasión fiscal:</strong> Usar la plataforma con el propósito de identificar brechas normativas para evadir obligaciones tributarias, ya sea del propio usuario o de sus clientes.</li>
+          <li><strong>Datos sin consentimiento:</strong> Cargar en la plataforma información tributaria de contribuyentes sin contar con su autorización expresa o mandato profesional debidamente acreditado.</li>
+          <li><strong>Acceso no autorizado:</strong> Intentar acceder a cuentas de otros usuarios, a datos de otros tenants, a la infraestructura del sistema o a bases de datos por fuera de la interfaz oficial.</li>
+          <li><strong>Ataques al sistema:</strong> Ejecutar scripts de automatización no autorizados, ataques de denegación de servicio (DoS/DDoS), inyección de código malicioso, o cualquier acción que afecte la disponibilidad o integridad del servicio.</li>
+          <li><strong>Uso masivo de credenciales Marangatú ajenas:</strong> Concentrar en la plataforma credenciales de acceso a Marangatú de un número de contribuyentes desproporcionado con la actividad profesional declarada del usuario, sin mandato justificable.</li>
+        </ul>
+        <p>El incumplimiento de cualquiera de estas restricciones puede resultar en la suspensión o cancelación inmediata de la cuenta sin derecho a reembolso, y eventualmente en acciones legales conforme a la normativa paraguaya aplicable.</p>
+        <div class="callout red">
+          <div class="callout-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          </div>
+          <p><strong>Tolerancia cero:</strong> Inteliaudit es una herramienta para auditar el cumplimiento tributario. Cualquier uso orientado a facilitar incumplimientos fiscales —propios o de clientes— viola estos términos y puede ser denunciado a las autoridades competentes.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="section-block" id="s6">
+      <div class="section-block-header">
+        <div class="section-num">06</div>
+        <h2>Propiedad Intelectual</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Inteliaudit, incluyendo su nombre, logotipo, diseño de interfaz, código fuente, algoritmos de cruce y análisis, templates de informes, metodologías de detección de hallazgos, y toda la documentación asociada, son propiedad exclusiva de <strong>Intellihouse</strong> y están protegidos por la legislación de propiedad intelectual de la República del Paraguay y tratados internacionales aplicables.</p>
+        <p>Intellihouse otorga al usuario una <strong>licencia de uso no exclusiva, no transferible, no sublicenciable y revocable</strong> para acceder y utilizar la plataforma durante el período de vigencia de la suscripción contratada y únicamente para los fines descritos en estos términos. Esta licencia no confiere al usuario ningún derecho de propiedad sobre el software ni sobre ninguno de sus componentes.</p>
+        <p>El usuario conserva en todo momento la propiedad de los <strong>datos que carga en la plataforma</strong>: datos de sus clientes auditados, archivos RG90, balances contables, documentos PDF y cualquier otro archivo subido al sistema. Intellihouse no reclama titularidad alguna sobre esos datos y los utiliza exclusivamente para prestar el servicio conforme a la Política de Privacidad.</p>
+        <p>Los informes de auditoría generados por la plataforma —una vez revisados y firmados por el auditor profesional responsable— son documentos del usuario. El hecho de que hayan sido generados con Inteliaudit no implica responsabilidad de Intellihouse sobre su contenido ni sobre las conclusiones profesionales que el auditor incorpore.</p>
+        <p>Queda prohibida la reproducción total o parcial de los algoritmos, metodologías de análisis o templates de Inteliaudit sin autorización escrita previa de Intellihouse. Las marcas "Inteliaudit", "Intellihouse" y el isotipo asociado son marcas registradas o en proceso de registro; su uso no autorizado puede dar lugar a acciones legales.</p>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="section-block" id="s7">
+      <div class="section-block-header">
+        <div class="section-num">07</div>
+        <h2>Confidencialidad y Datos</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Intellihouse asume un compromiso de <strong>estricta confidencialidad</strong> sobre todos los datos de los clientes auditados que el usuario cargue en la plataforma. Los datos tributarios de los contribuyentes son información sensible y son tratados como tal en toda la cadena de procesamiento del servicio.</p>
+        <p>Las <strong>credenciales de acceso a Marangatú</strong> (RUC y clave SET) que el usuario ingrese en la plataforma se almacenan únicamente de forma encriptada utilizando cifrado AES-256 en reposo. Estas credenciales nunca se transmiten en texto plano, nunca son accesibles para empleados de Intellihouse sin autorización expresa del usuario, y no son compartidas con terceros bajo ninguna circunstancia.</p>
+        <p>Inteliaudit <strong>no accede a datos tributarios</strong> de los contribuyentes auditados por iniciativa propia. Toda consulta a Marangatú, SIFEN o HECHAUKA se ejecuta exclusivamente bajo instrucción explícita del usuario dentro de la plataforma. El sistema no realiza descargas automáticas de información sin que el usuario lo haya solicitado activamente.</p>
+        <p>El acceso a los datos dentro de la plataforma está <strong>aislado por tenant</strong>: cada firma auditora solo puede ver sus propios clientes, hallazgos e informes. No existe posibilidad técnica de que una firma acceda a los datos de otra a través de la interfaz de usuario.</p>
+        <p>Para un detalle completo sobre cómo se recopilan, almacenan, procesan y eliminan los datos, se remite al usuario a la <a href="politica-de-privacidad.html" style="color:var(--primary-600);font-weight:600;">Política de Privacidad</a>, que forma parte integrante de estos Términos de Uso.</p>
+      </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="section-block" id="s8">
+      <div class="section-block-header">
+        <div class="section-num">08</div>
+        <h2>Disponibilidad y SLAs</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Inteliaudit opera sobre infraestructura cloud de <strong>Render.com</strong> con base de datos <strong>Neon PostgreSQL</strong>. Intellihouse se esfuerza por mantener una disponibilidad del servicio del <strong>99,5% mensual</strong>, medida como el porcentaje de minutos del mes en que la plataforma está accesible y funcional, excluyendo ventanas de mantenimiento programado.</p>
+        <p>Los <strong>mantenimientos programados</strong> se anunciarán con al menos 48 horas de anticipación por email y dentro de la plataforma. Se realizarán preferentemente en horarios de bajo tráfico (madrugada, hora de Paraguay UTC-4) y durarán el menor tiempo técnicamente posible.</p>
+        <p>La disponibilidad del servicio depende también de la disponibilidad de sistemas externos sobre los que Intellihouse no tiene control: Marangatú (portal de la SET), SIFEN, HECHAUKA, y la API de Claude (Anthropic). Interrupciones en estos sistemas externos no se computan como tiempo de inactividad de Inteliaudit y no generan derecho a créditos de servicio.</p>
+        <p>El <strong>plan Starter</strong> no incluye garantía de disponibilidad documentada ni créditos de servicio por interrupciones. El <strong>plan Pro</strong> incluye una disponibilidad objetivo del 99,5% mensual con soporte por email en días hábiles. El <strong>plan Enterprise</strong> incluye un SLA documentado con disponibilidad objetivo del 99,5%, soporte prioritario y tiempo de respuesta garantizado según contrato, con créditos de servicio proporcionales en caso de incumplimiento.</p>
+        <div class="callout blue">
+          <div class="callout-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1561e1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <p><strong>Estado del servicio:</strong> Cualquier incidente activo se comunica por email a los usuarios afectados. Para consultas sobre disponibilidad, escribir a hola@inteliaudit.com.py.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9 -->
+    <div class="section-block" id="s9">
+      <div class="section-block-header">
+        <div class="section-num">09</div>
+        <h2>Limitación de Responsabilidad</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Inteliaudit es una <strong>herramienta de apoyo al trabajo profesional</strong> del auditor. Los hallazgos, ajustes y contingencias que genera son el resultado de procedimientos algorítmicos sobre los datos disponibles y tienen carácter <strong>indicativo</strong>. Requieren, en todos los casos, revisión, validación y firma del profesional auditor habilitado antes de ser comunicados al cliente auditado o a cualquier organismo.</p>
+        <p>Intellihouse se esfuerza por mantener la plataforma actualizada con la normativa tributaria paraguaya vigente. Sin embargo, dado el dinamismo de la legislación fiscal (nuevas resoluciones generales, decretos, acordadas, criterios interpretativos de la DNIT), <strong>no se garantiza la exactitud legal absoluta</strong> de todos los análisis en todo momento. El usuario es responsable de verificar la vigencia y aplicabilidad de la normativa citada en cada hallazgo.</p>
+        <p>En ningún caso Intellihouse será responsable por:</p>
+        <ul>
+          <li>Sanciones, multas, recargos o intereses imputados al usuario o a sus clientes como consecuencia de hallazgos no detectados o incorrectamente clasificados por la plataforma.</li>
+          <li>Daños derivados de interrupciones del servicio de Marangatú, SIFEN, HECHAUKA u otros sistemas externos.</li>
+          <li>Pérdida de datos por causa ajena a la plataforma (fuerza mayor, interrupción de servicios de terceros, actos del usuario).</li>
+          <li>Daños indirectos, consecuentes, especiales o punitivos de cualquier naturaleza.</li>
+          <li>Pérdida de ingresos, oportunidades de negocio o reputación del usuario o sus clientes.</li>
+        </ul>
+        <p>La responsabilidad total de Intellihouse frente al usuario por cualquier causa relacionada con el uso del servicio estará <strong>limitada al monto total efectivamente pagado por el usuario en los últimos tres (3) meses</strong> anteriores al evento que dio origen al reclamo.</p>
+      </div>
+    </div>
+
+    <!-- 10 -->
+    <div class="section-block" id="s10">
+      <div class="section-block-header">
+        <div class="section-num">10</div>
+        <h2>Modificaciones al Servicio y Términos</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Intellihouse puede <strong>modificar, ampliar o reducir las funcionalidades</strong> de Inteliaudit en cualquier momento, con el objetivo de mejorar el servicio, adaptarlo a cambios normativos, o por razones técnicas o comerciales. Salvo que la modificación sea urgente por razones de seguridad o cumplimiento legal, se notificará a los usuarios con al menos <strong>15 días hábiles de anticipación</strong> mediante email y notificación dentro de la plataforma.</p>
+        <p>Funcionalidades no incluidas en el plan contratado por el usuario pueden ser incorporadas como parte de un plan superior o como módulos adicionales con costo extra. Nunca se reducirán las funcionalidades incluidas en el plan vigente del usuario sin ofrecerle la opción de cancelar sin penalidad.</p>
+        <p>Estos <strong>Términos de Uso</strong> pueden ser actualizados en cualquier momento. Las modificaciones sustanciales serán notificadas al usuario con al menos <strong>30 días de anticipación</strong> por email. Si el usuario no está de acuerdo con los nuevos términos, puede cancelar su suscripción antes de que entren en vigor. El uso continuado del servicio tras la fecha de vigencia de los nuevos términos implica su aceptación plena.</p>
+        <p>Las modificaciones menores (correcciones tipográficas, aclaraciones de redacción que no alteran el contenido sustancial, actualización de datos de contacto) pueden realizarse sin notificación previa y tendrán efecto inmediato. La fecha de "Última actualización" al inicio de este documento siempre reflejará la versión más reciente.</p>
+      </div>
+    </div>
+
+    <!-- 11 -->
+    <div class="section-block" id="s11">
+      <div class="section-block-header">
+        <div class="section-num">11</div>
+        <h2>Terminación</h2>
+      </div>
+      <div class="section-block-body">
+        <p>La relación contractual puede terminar por las siguientes causas:</p>
+        <p><strong>Terminación por incumplimiento (inmediata):</strong> Intellihouse puede terminar la cuenta y suspender el acceso de forma inmediata, sin previo aviso y sin derecho a reembolso, cuando el usuario incurra en violaciones graves de estos Términos de Uso, incluyendo pero no limitado a: uso fraudulento, intentos de acceso no autorizado a datos de terceros, uso orientado a facilitar evasión fiscal, o ataques a la infraestructura del servicio.</p>
+        <p><strong>Terminación voluntaria por el usuario:</strong> El usuario puede cancelar su cuenta en cualquier momento. La cancelación tiene efecto al finalizar el período de facturación vigente. El usuario conserva acceso completo al servicio hasta esa fecha.</p>
+        <p><strong>Terminación por falta de pago:</strong> Si el pago de la suscripción no se procesa exitosamente, Intellihouse enviará una notificación y otorgará un período de gracia de 7 días para regularizar. Si transcurrido ese plazo el pago no se efectúa, el acceso al servicio será suspendido. Los datos se conservan por 30 días adicionales desde la suspensión, durante los cuales el usuario puede reactivar su cuenta o exportar su información.</p>
+        <p><strong>Acceso a datos post-terminación:</strong> Independientemente de la causa de terminación, el usuario contará con un plazo de <strong>30 días calendario</strong> desde la fecha efectiva de terminación para exportar sus datos en los formatos disponibles en la plataforma. Vencido ese plazo, los datos serán eliminados de forma permanente de los sistemas de producción de Intellihouse, conforme a la Política de Privacidad.</p>
+      </div>
+    </div>
+
+    <!-- 12 -->
+    <div class="section-block" id="s12">
+      <div class="section-block-header">
+        <div class="section-num">12</div>
+        <h2>Ley Aplicable y Jurisdicción</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Estos Términos de Uso se rigen exclusivamente por las leyes de la <strong>República del Paraguay</strong>, sin perjuicio de las normas de derecho internacional privado que pudieran resultar aplicables.</p>
+        <p>Para cualquier controversia, reclamación o disputa derivada de o relacionada con estos Términos de Uso, la prestación del servicio, o la relación entre el usuario e Intellihouse, las partes se someten a la <strong>jurisdicción de los juzgados competentes de la ciudad de Pedro Juan Caballero, Departamento de Amambay, República del Paraguay</strong>, con renuncia expresa a cualquier otro fuero que pudiera corresponder.</p>
+        <p>Ante cualquier diferencia, las partes se comprometen a intentar una resolución amigable dentro de los 30 días de surgido el conflicto, antes de recurrir a la vía judicial. Las comunicaciones a tal efecto deben dirigirse a hola@inteliaudit.com.py con asunto "Disputa contractual".</p>
+      </div>
+    </div>
+
+    <!-- 13 -->
+    <div class="section-block" id="s13">
+      <div class="section-block-header">
+        <div class="section-num">13</div>
+        <h2>Contacto</h2>
+      </div>
+      <div class="section-block-body">
+        <p>Para consultas, reclamos o notificaciones relacionadas con estos Términos de Uso, podés comunicarte con Intellihouse a través de los siguientes canales:</p>
+        <ul>
+          <li><strong>Email:</strong> <a href="mailto:hola@inteliaudit.com.py" style="color:var(--primary-600);font-weight:600;">hola@inteliaudit.com.py</a></li>
+          <li><strong>Domicilio:</strong> Pedro Juan Caballero, Departamento de Amambay, República del Paraguay</li>
+          <li><strong>Soporte técnico:</strong> <a href="https://wa.me/595994516360" target="_blank" rel="noopener" style="color:var(--primary-600);font-weight:600;">WhatsApp +595 994 516 360</a></li>
+        </ul>
+        <p>El tiempo de respuesta habitual es de <strong>1 a 2 días hábiles</strong> para consultas por email, y más inmediato por WhatsApp en horario comercial de Paraguay (lunes a viernes, 8:00 a 18:00 hs, UTC-4).</p>
+        <div class="callout green">
+          <div class="callout-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00a651" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <p>Si tenés dudas sobre si una determinada actividad está permitida bajo estos términos, escribinos antes de realizarla. Preferimos aclarar cualquier duda de forma preventiva.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:32px;">
+          <rect x="0" y="2" width="36" height="36" rx="10" fill="url(#footGrad)"/>
+          <circle cx="16" cy="18" r="7" stroke="white" stroke-width="2.2"/>
+          <line x1="21.5" y1="23.5" x2="27" y2="29" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M13 18.2l2 2 3.5-3.5" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="30" cy="7" r="3.5" fill="#00a651"/>
+          <text x="44" y="26" font-family="Inter,sans-serif" font-weight="900" font-size="18" fill="#256ebf">Inteli</text>
+          <text x="91" y="26" font-family="Inter,sans-serif" font-weight="300" font-size="18" fill="#1ecb73">audit</text>
+          <defs>
+            <linearGradient id="footGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#1561e1"/><stop offset="1" stop-color="#104c91"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <p>Auditoría impositiva inteligente para Paraguay. La única herramienta construida desde cero para la realidad tributaria paraguaya.</p>
+        <p style="margin-top:8px;font-size:12px;">Parte del ecosistema <b style="color:rgba(255,255,255,0.6);">Intelihouse</b></p>
+      </div>
+      <div class="footer-col">
+        <h4>Producto</h4>
+        <a href="index.html#como-funciona">Cómo funciona</a>
+        <a href="index.html#funcionalidades">Funcionalidades</a>
+        <a href="index.html#precios">Precios</a>
+        <a href="index.html#faq">FAQ</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="ley-6380.html">Ley 6380/2019</a>
+        <a href="rg-90.html">RG 90/2021</a>
+        <a href="terminos-de-uso.html">Términos de uso</a>
+        <a href="politica-de-privacidad.html">Política de privacidad</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contacto</h4>
+        <a href="mailto:hola@inteliaudit.com.py">hola@inteliaudit.com.py</a>
+        <a href="https://wa.me/595994516360?text=Hola%21%20Necesito%20soporte%20con%20Inteliaudit" target="_blank" rel="noopener">WhatsApp soporte</a>
+        <a href="/app/login">Acceder al sistema</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-watermark">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:18px;opacity:0.5;">
+          <rect width="20" height="20" rx="5" fill="#1561e1"/>
+          <circle cx="9" cy="10" r="4" stroke="white" stroke-width="1.4"/>
+          <line x1="12" y1="13" x2="15" y2="16" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M7.5 10.2l1.2 1.2 2-2" stroke="#4ade80" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>© 2026 <b>Inteliaudit</b> · Desarrollado por <b>Intellihouse</b> · Pedro Juan Caballero, Paraguay</span>
+      </div>
+      <span style="font-size:12px;color:rgba(255,255,255,0.25);">Auditoría impositiva inteligente para Paraguay</span>
+    </div>
   </div>
 </footer>
 
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const mobileNav = document.getElementById('mobileNav');
+  const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+  function closeMobileNav() { hamburger.classList.remove('open'); mobileNav.classList.remove('open'); document.body.style.overflow = ''; }
+  hamburger.addEventListener('click', () => { const isOpen = mobileNav.classList.toggle('open'); hamburger.classList.toggle('open', isOpen); document.body.style.overflow = isOpen ? 'hidden' : ''; });
+  mobileNavOverlay.addEventListener('click', closeMobileNav);
+  document.querySelectorAll('.mobile-nav-link, .mobile-nav-cta').forEach(a => a.addEventListener('click', closeMobileNav));
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 20));
+</script>
 </body>
 </html>
