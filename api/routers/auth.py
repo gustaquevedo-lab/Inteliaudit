@@ -182,8 +182,33 @@ async def login(
 
 @router.get("/me")
 async def get_me(user: Usuario = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    from config.plans import get_plan, PLAN_ALIAS_MAP
+    from sqlalchemy import func, select
+    from db.models import Cliente
+
     firma_result = await db.execute(select(Firma).where(Firma.id == user.firma_id))
     firma = firma_result.scalar_one_or_none()
+
+    # Resolver plan real (trial → pro)
+    plan_key = PLAN_ALIAS_MAP.get(firma.plan, firma.plan) if firma else "starter"
+    plan_cfg = get_plan(plan_key)
+
+    # Contar clientes activos
+    clientes_count = await db.execute(
+        select(func.count(Cliente.id)).where(Cliente.firma_id == user.firma_id)
+    )
+    num_clientes = clientes_count.scalar() or 0
+
+    # Verificar si está en trial
+    en_trial = False
+    dias_trial_restantes = 0
+    if firma and firma.plan == "trial" and firma.trial_hasta:
+        from datetime import datetime, timezone
+        ahora = datetime.now(timezone.utc)
+        if ahora < firma.trial_hasta:
+            en_trial = True
+            dias_trial_restantes = (firma.trial_hasta - ahora).days
+
     return {
         "id": user.id,
         "email": user.email,
@@ -191,7 +216,15 @@ async def get_me(user: Usuario = Depends(get_current_user), db: AsyncSession = D
         "rol": user.rol,
         "firma_id": user.firma_id,
         "firma_nombre": firma.nombre if firma else "",
-        "firma_plan": firma.plan if firma else "",
+        "firma_plan": plan_cfg.nombre,
+        "firma_plan_id": plan_key,
+        "en_trial": en_trial,
+        "dias_trial_restantes": dias_trial_restantes,
+        "trial_hasta": firma.trial_hasta.isoformat() if firma and firma.trial_hasta else None,
+        "plan_features": plan_cfg.features,
+        "plan_tiene_ia": plan_cfg.tiene_ia,
+        "clientes_actuales": num_clientes,
+        "clientes_maximos": plan_cfg.max_clientes,
         "avatar_path": user.avatar_path,
         "ultimo_acceso": user.ultimo_acceso.isoformat() if user.ultimo_acceso else None,
     }
@@ -332,16 +365,19 @@ async def get_credencial(
 async def crear_firma(body: FirmaCreate, db: AsyncSession = Depends(get_db)):
     """
     Endpoint de onboarding: crea firma + primer usuario admin.
-    En producción debe estar protegido con una API key de super-admin o solo accesible internamente.
+    Todas las firmas nuevas inician con 7 días de trial del plan Pro.
     """
     from datetime import timedelta
+    from config.plans import get_plan
+
+    trial_plan = get_plan("pro")
     firma = Firma(
         nombre=body.nombre,
         ruc=body.ruc,
         email=body.email,
         eslogan=body.eslogan,
-        plan=body.plan,
-        trial_hasta=datetime.now(timezone.utc) + timedelta(days=30) if body.plan == "trial" else None,
+        plan="trial",
+        trial_hasta=datetime.now(timezone.utc) + timedelta(days=7),
     )
     db.add(firma)
     await db.flush()
@@ -356,7 +392,12 @@ async def crear_firma(body: FirmaCreate, db: AsyncSession = Depends(get_db)):
     db.add(admin)
     await db.flush()
 
-    return {"firma_id": firma.id, "admin_id": admin.id}
+    return {
+        "firma_id": firma.id,
+        "admin_id": admin.id,
+        "trial_hasta": firma.trial_hasta.isoformat(),
+        "plan_trial": trial_plan.nombre,
+    }
 
 
 # ============================================================

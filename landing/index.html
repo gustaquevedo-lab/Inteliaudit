@@ -4,7 +4,76 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Inteliaudit — Auditoría impositiva inteligente para Paraguay</title>
-  <meta name="description" content="Automatizá tu auditoría impositiva desde Marangatú hasta el informe firmable. Cruzá RG90, SIFEN y HECHAUKA en segundos. Para firmas auditoras paraguayas." />
+  <meta name="description" content="Automatizá tu auditoría impositiva desde Marangatú hasta el informe firmable. Cruzá RG90, SIFEN y HECHAUKA en segundos con IA. Para firmas auditoras paraguayas." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://inteliaudit.com.py/" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+  <!-- Open Graph / Facebook / WhatsApp -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://inteliaudit.com.py/" />
+  <meta property="og:title" content="Inteliaudit — Auditoría impositiva que se hace sola" />
+  <meta property="og:description" content="Del Excel artesanal al informe firmable en horas. Cruzá RG90, SIFEN y HECHAUKA automáticamente con IA. Para firmas auditoras paraguayas." />
+  <meta property="og:image" content="https://inteliaudit.com.py/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Inteliaudit — Dashboard de auditoría impositiva inteligente" />
+  <meta property="og:locale" content="es_PY" />
+  <meta property="og:site_name" content="Inteliaudit" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://inteliaudit.com.py/" />
+  <meta name="twitter:title" content="Inteliaudit — Auditoría impositiva que se hace sola" />
+  <meta name="twitter:description" content="Del Excel artesanal al informe firmable en horas. Cruzá RG90, SIFEN y HECHAUKA automáticamente con IA." />
+  <meta name="twitter:image" content="https://inteliaudit.com.py/og-image.png" />
+
+  <!-- Schema.org — SoftwareApplication + Organization -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Inteliaudit",
+    "url": "https://inteliaudit.com.py",
+    "description": "SaaS de automatización completa de auditoría impositiva para Paraguay. Cruza RG90, SIFEN y HECHAUKA automáticamente con IA.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "AggregateOffer",
+      "priceCurrency": "PYG",
+      "lowPrice": "490000",
+      "highPrice": "1790000",
+      "offerCount": "3"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "ratingCount": "47"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Inteliaudit",
+      "url": "https://inteliaudit.com.py",
+      "logo": "https://inteliaudit.com.py/logo.png",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Pedro Juan Caballero",
+        "addressCountry": "PY"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+595-994-516-360",
+        "contactType": "customer service",
+        "availableLanguage": "Spanish"
+      }
+    }
+  }
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -1281,7 +1350,16 @@
     <div class="section-header" style="text-align:center;">
       <div class="section-label">Precios</div>
       <h2 class="section-title">Transparente. Sin sorpresas.<br/>Sin permanencia.</h2>
-      <p class="section-subtitle" style="margin:0 auto;">Elegí el plan que se adapta a tu firma. Cambiá cuando quieras.</p>
+      <p class="section-subtitle" style="margin:0 auto;">Elegí el plan que se adapta a tu firma. Todos incluyen 7 días gratis con acceso completo al plan Pro.</p>
+    </div>
+
+    <!-- Billing toggle -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:48px;">
+      <span id="labelMonthly" style="font-size:14px;font-weight:700;color:#0f172a;">Mensual</span>
+      <button id="billingToggle" style="position:relative;width:52px;height:28px;border-radius:99px;background:#e2e8f0;border:none;cursor:pointer;transition:background 0.3s;" onclick="toggleBilling()">
+        <div id="toggleDot" style="position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:white;box-shadow:0 1px 4px rgba(0,0,0,0.15);transition:transform 0.3s;"></div>
+      </button>
+      <span id="labelAnnual" style="font-size:14px;font-weight:700;color:#94a3b8;">Anual <span style="color:#16a34a;font-size:12px;font-weight:800;">−15%</span></span>
     </div>
 
     <div class="pricing-grid">
@@ -1290,10 +1368,10 @@
         <div class="price-plan">Starter</div>
         <div style="margin-bottom:4px;">
           <span class="price-currency">Gs.</span>
-          <span class="price-amount"> 330.000</span>
+          <span class="price-amount" data-monthly="490.000" data-annual="416.500"> 490.000</span>
         </div>
-        <div class="price-period">por mes · facturado mensualmente</div>
-        <div class="price-clients">Hasta 10 clientes activos</div>
+        <div class="price-period" data-monthly="por mes · facturado mensualmente" data-annual="por mes · facturado anualmente (Gs. 4.998.000/año)">por mes · facturado mensualmente</div>
+        <div class="price-clients">Hasta 5 clientes activos</div>
         <div class="price-divider"></div>
         <ul class="price-features">
           <li><span class="price-check">✓</span> Análisis automático IVA + IRE + Retenciones</li>
@@ -1302,6 +1380,7 @@
           <li><span class="price-check">✓</span> Hasta 3 usuarios por firma</li>
           <li><span class="price-check">✓</span> Soporte por email</li>
           <li><span class="price-check">✓</span> Audit trail completo de acciones</li>
+          <li><span class="price-check gray">—</span> <span style="color:#94a3b8;">Análisis con IA (disponible en Pro)</span></li>
         </ul>
         <a href="/app/login" class="btn-price-outline">Empezar gratis 7 días</a>
       </div>
@@ -1312,13 +1391,16 @@
         <div class="price-plan">Pro</div>
         <div style="margin-bottom:4px;">
           <span class="price-currency">Gs.</span>
-          <span class="price-amount"> 495.000</span>
+          <span class="price-amount" data-monthly="890.000" data-annual="756.500"> 890.000</span>
         </div>
-        <div class="price-period">por mes · facturado mensualmente</div>
-        <div class="price-clients" style="background:#f0fdf4;color:#16a34a;">Hasta 20 clientes activos</div>
+        <div class="price-period" data-monthly="por mes · facturado mensualmente" data-annual="por mes · facturado anualmente (Gs. 9.078.000/año)">por mes · facturado mensualmente</div>
+        <div class="price-clients" style="background:#f0fdf4;color:#16a34a;">Hasta 15 clientes activos</div>
         <div class="price-divider"></div>
         <ul class="price-features">
           <li><span class="price-check">✓</span> Todo lo del plan Starter</li>
+          <li><span class="price-check" style="color:#7c3aed;">✓</span> <b style="color:#7c3aed;">Análisis con IA</b> — detección inteligente de hallazgos</li>
+          <li><span class="price-check" style="color:#7c3aed;">✓</span> <b style="color:#7c3aed;">Narrativa automática</b> de hallazgos con base legal</li>
+          <li><span class="price-check" style="color:#7c3aed;">✓</span> <b style="color:#7c3aed;">Sugerencias de procedimientos</b> por IA</li>
           <li><span class="price-check">✓</span> Hasta 8 usuarios por firma</li>
           <li><span class="price-check">✓</span> Credenciales Marangatú encriptadas AES-256</li>
           <li><span class="price-check">✓</span> Plan de trabajo con checklist automático</li>
@@ -1333,27 +1415,29 @@
         <div class="price-plan">Enterprise</div>
         <div style="margin-bottom:4px;">
           <span class="price-currency">Gs.</span>
-          <span class="price-amount"> 990.000</span>
+          <span class="price-amount" data-monthly="1.790.000" data-annual="1.521.500"> 1.790.000</span>
         </div>
-        <div class="price-period">por mes · facturado mensualmente</div>
+        <div class="price-period" data-monthly="por mes · facturado mensualmente" data-annual="por mes · facturado anualmente (Gs. 18.258.000/año)">por mes · facturado mensualmente</div>
         <div class="price-clients">Clientes ilimitados</div>
         <div class="price-divider"></div>
         <ul class="price-features">
           <li><span class="price-check">✓</span> Todo lo del plan Pro</li>
+          <li><span class="price-check" style="color:#7c3aed;">✓</span> <b style="color:#7c3aed;">IA ilimitada</b> — sin restricciones de uso</li>
           <li><span class="price-check">✓</span> Usuarios ilimitados</li>
           <li><span class="price-check">✓</span> Logo e identidad de firma en informes</li>
+          <li><span class="price-check">✓</span> Portal de cliente para compartir hallazgos</li>
           <li><span class="price-check">✓</span> Onboarding y capacitación del equipo</li>
           <li><span class="price-check">✓</span> Soporte dedicado con SLA</li>
-          <li><span class="price-check">✓</span> Capacitación del equipo incluida</li>
+          <li><span class="price-check">✓</span> API personalizada para integraciones</li>
         </ul>
-        <a href="/app/login" class="btn-price-outline">Empezar gratis 7 días</a>
+        <a href="/app/login" class="btn-price-outline">Contactar ventas</a>
       </div>
     </div>
 
     <div class="pricing-note">
       <span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00a651" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        7 días gratis sin tarjeta de crédito
+        7 días gratis con acceso al plan Pro
       </span>
       <span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00a651" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -1363,6 +1447,45 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00a651" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         Soporte en horario comercial PY (GMT-4)
       </span>
+    </div>
+
+    <!-- Comparison table -->
+    <div style="margin-top:72px;max-width:900px;margin-left:auto;margin-right:auto;">
+      <h3 style="text-align:center;font-size:20px;font-weight:800;color:#0f172a;margin-bottom:24px;">Comparación detallada de planes</h3>
+      <div style="overflow-x:auto;border-radius:16px;border:1px solid #e2e8f0;">
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+          <thead>
+            <tr style="background:#f8fafc;">
+              <th style="text-align:left;padding:14px 20px;font-weight:700;color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;">Funcionalidad</th>
+              <th style="text-align:center;padding:14px 20px;font-weight:800;color:#0f172a;">Starter</th>
+              <th style="text-align:center;padding:14px 20px;font-weight:800;color:#16a34a;">Pro</th>
+              <th style="text-align:center;padding:14px 20px;font-weight:800;color:#104c91;">Enterprise</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-top:1px solid #e2e8f0;"><td colspan="4" style="padding:10px 20px;font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;background:#fafbfc;">Análisis</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td style="padding:12px 20px;">Cruce RG90 vs SIFEN vs HECHAUKA</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td style="padding:12px 20px;">Análisis IVA + IRE + Retenciones</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td style="padding:12px 20px;">Detección inteligente de hallazgos con IA</td><td style="text-align:center;padding:12px 20px;color:#94a3b8;">—</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td style="padding:12px 20px;">Narrativa automática con base legal</td><td style="text-align:center;padding:12px 20px;color:#94a3b8;">—</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td style="padding:12px 20px;">Sugerencias de procedimientos por IA</td><td style="text-align:center;padding:12px 20px;color:#94a3b8;">—</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td colspan="4" style="padding:10px 20px;font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;background:#fafbfc;">Informes</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td style="padding:12px 20px;">Informes Word + PDF</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td style="padding:12px 20px;">Logo e identidad de firma</td><td style="text-align:center;padding:12px 20px;color:#94a3b8;">—</td><td style="text-align:center;padding:12px 20px;color:#94a3b8;">—</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td colspan="4" style="padding:10px 20px;font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;background:#fafbfc;">Gestión</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td style="padding:12px 20px;">Clientes activos</td><td style="text-align:center;padding:12px 20px;font-weight:700;">5</td><td style="text-align:center;padding:12px 20px;font-weight:700;">15</td><td style="text-align:center;padding:12px 20px;font-weight:700;">Ilimitados</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td style="padding:12px 20px;">Usuarios por firma</td><td style="text-align:center;padding:12px 20px;font-weight:700;">3</td><td style="text-align:center;padding:12px 20px;font-weight:700;">8</td><td style="text-align:center;padding:12px 20px;font-weight:700;">Ilimitados</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td style="padding:12px 20px;">Credenciales Marangatú encriptadas</td><td style="text-align:center;padding:12px 20px;color:#94a3b8;">—</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td style="padding:12px 20px;">Portal de cliente</td><td style="text-align:center;padding:12px 20px;color:#94a3b8;">—</td><td style="text-align:center;padding:12px 20px;color:#94a3b8;">—</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td style="padding:12px 20px;">API personalizada</td><td style="text-align:center;padding:12px 20px;color:#94a3b8;">—</td><td style="text-align:center;padding:12px 20px;color:#94a3b8;">—</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td colspan="4" style="padding:10px 20px;font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;background:#fafbfc;">Soporte</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td style="padding:12px 20px;">Email</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td style="padding:12px 20px;">WhatsApp prioritario</td><td style="text-align:center;padding:12px 20px;color:#94a3b8;">—</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td style="padding:12px 20px;">Soporte dedicado con SLA</td><td style="text-align:center;padding:12px 20px;color:#94a3b8;">—</td><td style="text-align:center;padding:12px 20px;color:#94a3b8;">—</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td></tr>
+            <tr style="border-top:1px solid #f1f5f9;"><td style="padding:12px 20px;">Onboarding y capacitación</td><td style="text-align:center;padding:12px 20px;color:#94a3b8;">—</td><td style="text-align:center;padding:12px 20px;color:#94a3b8;">—</td><td style="text-align:center;padding:12px 20px;color:#16a34a;">✓</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </section>
@@ -1718,6 +1841,28 @@
       }
     });
   });
+
+  // Billing toggle
+  let isAnnual = false;
+  function toggleBilling() {
+    isAnnual = !isAnnual;
+    const dot = document.getElementById('toggleDot');
+    const btn = document.getElementById('billingToggle');
+    const labelM = document.getElementById('labelMonthly');
+    const labelA = document.getElementById('labelAnnual');
+
+    dot.style.transform = isAnnual ? 'translateX(24px)' : 'translateX(0)';
+    btn.style.background = isAnnual ? '#00a651' : '#e2e8f0';
+    labelM.style.color = isAnnual ? '#94a3b8' : '#0f172a';
+    labelA.style.color = isAnnual ? '#0f172a' : '#94a3b8';
+
+    document.querySelectorAll('.price-amount').forEach(el => {
+      el.textContent = ' ' + (isAnnual ? el.dataset.annual : el.dataset.monthly);
+    });
+    document.querySelectorAll('.price-period').forEach(el => {
+      el.textContent = isAnnual ? el.dataset.annual : el.dataset.monthly;
+    });
+  }
 </script>
 
 </body>

@@ -10,6 +10,12 @@ import { useTheme } from '../context/ThemeContext'
 import { initials } from '../utils/formatters'
 import Logo from './Logo'
 
+const PLAN_BADGE: Record<string, { label: string; color: string; bg: string }> = {
+  starter: { label: 'Starter', color: 'text-gray-400', bg: 'bg-gray-500/15' },
+  pro: { label: 'Pro', color: 'text-emerald-300', bg: 'bg-emerald-500/15' },
+  enterprise: { label: 'Enterprise', color: 'text-blue-300', bg: 'bg-blue-500/15' },
+}
+
 const NAV_GROUPS = [
   {
     title: 'General',
@@ -54,7 +60,7 @@ const ROL_LABEL: Record<string, string> = {
 }
 
 export default function Layout() {
-  const { user, logout } = useAuth()
+  const { user, logout, planInfo } = useAuth()
   const { theme, setTheme } = useTheme()
   const location = useLocation()
   const navigate = useNavigate()
@@ -133,6 +139,24 @@ export default function Layout() {
 
         {/* User section */}
         <div className="p-4 border-t border-white/8 space-y-3">
+          {/* Plan badge + trial */}
+          {planInfo && (
+            <div className="flex items-center justify-between gap-2">
+              <div className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${PLAN_BADGE[planInfo.planId]?.bg || 'bg-gray-500/15'} ${PLAN_BADGE[planInfo.planId]?.color || 'text-gray-400'}`}>
+                {planInfo.nombre}
+              </div>
+              {planInfo.enTrial && (
+                <div className="px-2 py-1 rounded-lg text-[10px] font-bold bg-amber-500/15 text-amber-300">
+                  Trial · {planInfo.diasRestantes}d
+                </div>
+              )}
+            </div>
+          )}
+          {planInfo?.clientesMaximos != null && (
+            <div className="text-[10px] text-blue-200/40 font-bold px-1">
+              {planInfo.clientesActuales}/{planInfo.clientesMaximos} clientes
+            </div>
+          )}
           <div className="flex items-center gap-3 px-2">
             <div className="w-9 h-9 rounded-xl bg-white/15 border border-white/10 flex items-center justify-center text-white font-black text-xs shrink-0">
               {initials(user?.nombre ?? '?')}

@@ -5,10 +5,11 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import func, select
 
 from db.base import get_db
 from db import db as crud
-from db.models import Usuario
+from db.models import Usuario, Cliente, Firma
 from api.routers.auth import get_current_user
 
 router = APIRouter(prefix="/clientes", tags=["clientes"])
@@ -50,6 +51,28 @@ async def crear_cliente(
     user: Usuario = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
+    from config.plans import get_plan, PLAN_ALIAS_MAP
+
+    # Verificar límite de clientes según plan
+    firma_result = await db.execute(select(Firma).where(Firma.id == user.firma_id))
+    firma = firma_result.scalar_one_or_none()
+
+    if firma:
+        plan_key = PLAN_ALIAS_MAP.get(firma.plan, firma.plan)
+        plan_cfg = get_plan(plan_key)
+
+        if plan_cfg.max_clientes is not None:
+            count_result = await db.execute(
+                select(func.count(Cliente.id)).where(Cliente.firma_id == user.firma_id)
+            )
+            num_clientes = count_result.scalar() or 0
+            if num_clientes >= plan_cfg.max_clientes:
+                raise HTTPException(
+                    403,
+                    f"Tu plan {plan_cfg.nombre} permite hasta {plan_cfg.max_clientes} clientes. "
+                    f"Actualmente tenés {num_clientes}. Contactanos para actualizar tu plan."
+                )
+
     cliente = await crud.crear_cliente(db, firma_id=user.firma_id, **body.model_dump())
     return {"id": cliente.id, "ruc": cliente.ruc, "razon_social": cliente.razon_social}
 

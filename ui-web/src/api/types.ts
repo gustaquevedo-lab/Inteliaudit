@@ -7,6 +7,13 @@ export interface AuthUser {
   firma_id: string
   firma_nombre: string
   firma_plan: string
+  firma_plan_id: string
+  en_trial: boolean
+  dias_trial_restantes: number
+  plan_tiene_ia: boolean
+  clientes_actuales: number
+  clientes_maximos: number | null
+  plan_features: string[]
   avatar_path?: string
   ultimo_acceso?: string
 }
