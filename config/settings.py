@@ -15,11 +15,14 @@ class Settings(BaseSettings):
     @property
     def async_database_url(self) -> str:
         url = self.database_url
-        # Railway / Heroku usan postgres:// — SQLAlchemy asyncpg necesita postgresql+asyncpg://
+        # Normalizar scheme para asyncpg
         if url.startswith("postgres://"):
             url = url.replace("postgres://", "postgresql+asyncpg://", 1)
         elif url.startswith("postgresql://") and "+asyncpg" not in url:
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        # asyncpg no acepta ?sslmode= — lo reemplazamos por ?ssl=
+        url = url.replace("?sslmode=require", "?ssl=require")
+        url = url.replace("&sslmode=require", "&ssl=require")
         return url
 
     # Claude API
