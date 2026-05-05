@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: inteliaudit
+    runtime: python
+    region: oregon
+    plan: starter
+    buildCommand: pip install -e . && cd ui-web && npm ci && npm run build && cd ..
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: inteliaudit-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "false"
+      - key: STORAGE_PATH
+        value: /opt/render/project/src/storage
+      - key: ANTHROPIC_API_KEY
+        sync: false   # lo cargás manualmente en el dashboard si lo tenés
+
+databases:
+  - name: inteliaudit-db
+    databaseName: inteliaudit
+    plan: starter
+    region: oregon
