@@ -159,5 +159,40 @@
     "briefing": "Verificado seed idempotente: ejecutado dos veces sin error. Primera ejecucion crea todos los datos. Segunda ejecucion detecta firma existente y aborta limpiamente sin duplicados ni errores.",
     "timestamp": "2026-06-10T08:05:00.000Z"
   },
-  "_lastSaved": "2026-06-10T08:05:00.000Z"
+  "1.1__0": {
+    "completed": true,
+    "briefing": "Creado api/routers/importacion.py con 3 endpoints de importacion: POST /importar/rg90 (XLSX con preview + confirmacion en 2 pasos), POST /importar/hechauka (XLSX con preview + confirmacion), POST /importar/dj (PDF con parsing por tipo de formulario 120/500/800/810/820/830). Validacion de extension y estructura de columnas.",
+    "timestamp": "2026-06-10T09:00:00.000Z"
+  },
+  "1.1__1": {
+    "completed": true,
+    "briefing": "Endpoint POST /importar/hechauka creado. Usa ingesta/parser_hechauka.py para parsear XLSX de informacion de terceros. Retorna preview con primeras filas parseadas, totales y requiere confirmacion explicita.",
+    "timestamp": "2026-06-10T09:01:00.000Z"
+  },
+  "1.1__2": {
+    "completed": true,
+    "briefing": "Endpoint POST /importar/dj creado. Usa pdfplumber para extraer texto de PDF de declaracion jurada. Parsea campos segun formulario: 120 (credito/debito/saldo), 500 (ingresos/renta/impuesto), 800+ (retenciones). Guarda declaracion automaticamente con datos_json.",
+    "timestamp": "2026-06-10T09:02:00.000Z"
+  },
+  "1.1__3": {
+    "completed": true,
+    "briefing": "TabArchivos.tsx renovado con zonas de drag & drop especificas: RG90 con selector compras/ventas y periodo, HECHAUKA con periodo, DJ con periodo y selector de formulario (6 tipos). Preview de datos antes de confirmar con tabla de primeras 10 filas, totales calculados, y boton 'Confirmar importacion'. Barra de progreso durante parsing/confirmacion. Historial de importaciones con timestamp.",
+    "timestamp": "2026-06-10T09:03:00.000Z"
+  },
+  "1.1__4": {
+    "completed": true,
+    "briefing": "Implementado sistema de preview con confirmacion en 2 pasos para RG90 y HECHAUKA. Despues del upload, muestra preview con primeras 10 filas, total de registros, monto total e IVA total. Boton 'Confirmar importacion' para persistir en DB o 'Descartar' para cancelar. DJ se importa directamente sin preview.",
+    "timestamp": "2026-06-10T09:04:00.000Z"
+  },
+  "1.1__5": {
+    "completed": true,
+    "briefing": "Barra de progreso global visible durante parsing y confirmacion. Estados de importacion: parsing (parseando XLSX/PDF), preview (esperando confirmacion), confirming (guardando en DB), done (completado), error (con mensaje de error). Badge verde con conteo de registros importados por tipo.",
+    "timestamp": "2026-06-10T09:05:00.000Z"
+  },
+  "1.1__6": {
+    "completed": true,
+    "briefing": "Test end-to-end: subir archivo RG90 XLSX via endpoint POST /importar/rg90. Preview con 3 registros parseados correctamente. Confirmacion via POST /importar/rg90/confirmar persiste en DB. Audit trail registra cada importacion con usuario y timestamp. Import history visible en TabArchivos.",
+    "timestamp": "2026-06-10T09:06:00.000Z"
+  },
+  "_lastSaved": "2026-06-10T09:06:00.000Z"
 }

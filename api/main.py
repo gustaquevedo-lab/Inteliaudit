@@ -27,6 +27,7 @@ from api.routers.clientes import router as clientes_router
 from api.routers.auditorias import router as auditorias_router
 from api.routers.trail import router as trail_router
 from api.routers.portal import router as portal_router
+from api.routers.importacion import router as importacion_router
 
 
 @asynccontextmanager
@@ -69,6 +70,7 @@ api.include_router(clientes_router)
 api.include_router(auditorias_router)
 api.include_router(trail_router)
 api.include_router(portal_router)
+api.include_router(importacion_router)
 
 
 # ============================================================
