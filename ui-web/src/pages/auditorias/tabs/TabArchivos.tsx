@@ -35,6 +35,7 @@ interface ImportState {
   total_iva?: number
   campos_extraidos?: Record<string, unknown>
   registros_importados?: number
+  confirmada?: boolean
   error_msg?: string
 }
 
