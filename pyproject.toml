@@ -47,6 +47,7 @@ dev = [
     "pytest-cov>=5.0",
     "ruff>=0.4",
     "mypy>=1.10",
+    "node>=18",  # Node.js required for UI build
 ]
 
 [project.scripts]

@@ -1,0 +1,2789 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inteliaudit — Roadmap de Implementación</title>
+<style>
+  :root {
+    --blue: #2E84F0;
+    --blue-dark: #1558B0;
+    --green: #22C47E;
+    --green-dark: #169058;
+    --navy: #091624;
+    --navy-light: #0f2236;
+    --gray-text: #A8B4C8;
+    --gray-muted: #6B7A90;
+    --border: #1a3352;
+    --bg: #060e18;
+    --bg-card: #0c1a2e;
+    --bg-card-hover: #112240;
+    --risk-high: #E53E3E;
+    --risk-medium: #D97706;
+    --risk-low: #22C47E;
+    --risk-info: #2E84F0;
+    --font: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: #e2e8f0;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(135deg, var(--navy) 0%, #0a1929 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(20px);
+  }
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 700; color: #fff;
+  }
+  .logo-text { font-size: 22px; font-weight: 700; }
+  .logo-text .inteli { color: var(--blue); }
+  .logo-text .audit { color: var(--green); font-weight: 300; }
+  .logo-text .roadmap { color: var(--gray-text); font-weight: 300; font-size: 16px; margin-left: 8px; }
+
+  /* ── Stats Bar ── */
+  .stats-bar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  .stat-value {
+    font-weight: 700;
+    font-size: 16px;
+    font-family: var(--mono);
+  }
+  .stat-label { color: var(--gray-text); }
+  .stat.completed .stat-value { color: var(--green); }
+  .stat.pending .stat-value { color: var(--risk-medium); }
+  .stat.total .stat-value { color: var(--blue); }
+
+  .progress-global {
+    width: 200px;
+    height: 8px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-global-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue), var(--green));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+
+  /* ── Main Layout ── */
+  .main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px;
+    display: flex;
+    gap: 32px;
+  }
+
+  /* ── Sidebar Nav ── */
+  .sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 100px;
+    align-self: flex-start;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .nav-section {
+    margin-bottom: 8px;
+  }
+  .nav-phase {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-text);
+    border: 1px solid transparent;
+  }
+  .nav-phase:hover {
+    background: var(--bg-card);
+    color: #e2e8f0;
+    border-color: var(--border);
+  }
+  .nav-phase.active {
+    background: rgba(46, 132, 240, 0.1);
+    color: var(--blue);
+    border-color: rgba(46, 132, 240, 0.3);
+  }
+  .nav-phase .nav-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: var(--mono);
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.06);
+  }
+  .nav-phase.phase-complete .nav-badge {
+    background: rgba(34, 196, 126, 0.15);
+    color: var(--green);
+  }
+  .nav-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .nav-dot.dot-0 { background: var(--gray-muted); }
+  .nav-dot.dot-1 { background: var(--blue); }
+  .nav-dot.dot-2 { background: #8B5CF6; }
+  .nav-dot.dot-3 { background: var(--risk-medium); }
+  .nav-dot.dot-4 { background: var(--risk-high); }
+  .nav-dot.dot-5 { background: #EC4899; }
+  .nav-dot.dot-6 { background: var(--green); }
+
+  /* ── Content ── */
+  .content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* ── Phase Card ── */
+  .phase {
+    margin-bottom: 48px;
+    scroll-margin-top: 110px;
+  }
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .phase-number {
+    font-size: 36px;
+    font-weight: 800;
+    font-family: var(--mono);
+    background: linear-gradient(135deg, var(--blue), var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+  .phase-title {
+    font-size: 24px;
+    font-weight: 700;
+  }
+  .phase-weeks {
+    font-size: 13px;
+    color: var(--gray-muted);
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+  .phase-objective {
+    color: var(--gray-text);
+    font-size: 15px;
+    margin-bottom: 20px;
+    padding-left: 4px;
+    border-left: 3px solid var(--border);
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 0 8px 8px 0;
+  }
+  .phase-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--gray-muted);
+  }
+  .phase-progress-bar {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .phase-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue), var(--green));
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  /* ── Task Group ── */
+  .task-group {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .task-group-header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    user-select: none;
+  }
+  .task-group-header:hover {
+    background: var(--bg-card-hover);
+  }
+  .task-group-toggle {
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gray-muted);
+    transition: transform 0.3s;
+    flex-shrink: 0;
+    font-size: 12px;
+  }
+  .task-group.expanded .task-group-toggle {
+    transform: rotate(90deg);
+  }
+  .task-group-id {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--blue);
+    background: rgba(46, 132, 240, 0.1);
+    padding: 2px 10px;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+  .task-group-name {
+    font-weight: 600;
+    font-size: 15px;
+    flex: 1;
+  }
+  .task-group-effort {
+    font-size: 12px;
+    color: var(--gray-muted);
+    padding: 3px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  .task-group-status {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  .status-pending { background: rgba(255,255,255,0.06); color: var(--gray-muted); }
+  .status-in-progress { background: rgba(46, 132, 240, 0.15); color: var(--blue); }
+  .status-done { background: rgba(34, 196, 126, 0.15); color: var(--green); }
+
+  .task-group-body {
+    display: none;
+    border-top: 1px solid var(--border);
+  }
+  .task-group.expanded .task-group-body {
+    display: block;
+  }
+
+  /* ── Description block ── */
+  .task-desc {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .task-desc p {
+    color: var(--gray-text);
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .task-desc .dep-tag {
+    display: inline-block;
+    font-size: 12px;
+    padding: 2px 8px;
+    background: rgba(139, 92, 246, 0.12);
+    color: #a78bfa;
+    border-radius: 4px;
+    margin-right: 6px;
+  }
+
+  /* ── Individual Task ── */
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    transition: background 0.15s;
+  }
+  .task-item:last-child { border-bottom: none; }
+  .task-item:hover { background: rgba(255,255,255,0.02); }
+
+  .task-check {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 5px;
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    margin-top: 1px;
+  }
+  .task-check:hover {
+    border-color: var(--blue);
+    background: rgba(46, 132, 240, 0.1);
+  }
+  .task-check.checked {
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .task-check.checked::after {
+    content: '✓';
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .task-content { flex: 1; min-width: 0; }
+  .task-label {
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .task-item.completed .task-label {
+    color: var(--gray-muted);
+    text-decoration: line-through;
+  }
+  .task-briefing {
+    margin-top: 6px;
+    padding: 8px 12px;
+    background: rgba(34, 196, 126, 0.08);
+    border-left: 3px solid var(--green);
+    border-radius: 0 6px 6px 0;
+    font-size: 13px;
+    color: var(--green);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .task-briefing .briefing-icon { flex-shrink: 0; margin-top: 1px; }
+  .task-briefing-input {
+    display: none;
+    margin-top: 8px;
+    width: 100%;
+  }
+  .task-item.completing .task-briefing-input {
+    display: flex;
+    gap: 8px;
+  }
+  .task-briefing-input textarea {
+    flex: 1;
+    background: var(--navy);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: #e2e8f0;
+    font-family: var(--font);
+    font-size: 13px;
+    resize: vertical;
+    min-height: 60px;
+  }
+  .task-briefing-input textarea:focus {
+    outline: none;
+    border-color: var(--blue);
+  }
+  .task-briefing-input button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    align-self: flex-end;
+  }
+  .btn-save {
+    background: var(--green);
+    color: #fff;
+  }
+  .btn-cancel {
+    background: rgba(255,255,255,0.08);
+    color: var(--gray-text);
+  }
+
+  .task-timestamp {
+    font-size: 11px;
+    color: var(--gray-muted);
+    margin-top: 4px;
+  }
+
+  /* ── Prompt Block ── */
+  .prompt-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 4px 10px;
+    background: rgba(46, 132, 240, 0.08);
+    border: 1px solid rgba(46, 132, 240, 0.2);
+    border-radius: 6px;
+    color: var(--blue);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .prompt-toggle:hover {
+    background: rgba(46, 132, 240, 0.15);
+    border-color: rgba(46, 132, 240, 0.4);
+  }
+  .prompt-block {
+    display: none;
+    margin-top: 12px;
+    padding: 16px;
+    background: rgba(9, 22, 36, 0.8);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    position: relative;
+  }
+  .prompt-block.visible { display: block; }
+  .prompt-block pre {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #cbd5e1;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .prompt-copy {
+    position: absolute;
+    top: 8px; right: 8px;
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--gray-text);
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .prompt-copy:hover { background: rgba(255,255,255,0.15); }
+  .prompt-copy.copied { color: var(--green); border-color: var(--green); }
+
+  /* ── Stack Table ── */
+  .stack-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .stack-table th {
+    text-align: left;
+    padding: 10px 16px;
+    background: rgba(255,255,255,0.04);
+    color: var(--gray-text);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .stack-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .main { flex-direction: column; }
+    .sidebar { width: 100%; position: static; max-height: none; display: flex; flex-wrap: wrap; gap: 4px; }
+    .nav-phase { padding: 6px 10px; font-size: 12px; }
+    .header-inner { flex-direction: column; align-items: flex-start; }
+  }
+
+  /* ── Export Button ── */
+  .export-btn {
+    padding: 6px 12px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--gray-text);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .export-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: #e2e8f0;
+  }
+
+  .last-saved {
+    font-size: 11px;
+    color: var(--gray-muted);
+    padding: 4px 10px;
+  }
+
+  /* ── Decisions section ── */
+  .decisions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .decision-card {
+    padding: 14px 18px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .decision-card .dc-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--blue);
+    margin-bottom: 4px;
+  }
+  .decision-card .dc-q { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+  .decision-card .dc-rec { font-size: 13px; color: var(--green); }
+  .decision-card .dc-alt { font-size: 12px; color: var(--gray-muted); }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">iA</div>
+      <div class="logo-text">
+        <span class="inteli">Inteli</span><span class="audit">audit</span>
+        <span class="roadmap">/ roadmap</span>
+      </div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat completed"><span class="stat-label">Completadas</span> <span class="stat-value" id="stat-done">0</span></div>
+      <div class="stat pending"><span class="stat-label">Pendientes</span> <span class="stat-value" id="stat-pending">0</span></div>
+      <div class="stat total"><span class="stat-label">Total</span> <span class="stat-value" id="stat-total">0</span></div>
+      <div class="progress-global"><div class="progress-global-fill" id="global-progress"></div></div>
+      <span class="last-saved" id="last-saved"></span>
+      <span class="last-saved" id="conn-status" style="font-weight:600"></span>
+      <button class="export-btn" onclick="connectToFile()" title="Guardar estado en un archivo local persistente (Chrome/Edge)">📁 Conectar archivo</button>
+      <button class="export-btn" onclick="loadFromFile()" title="Cargar estado desde un archivo guardado previamente">📂 Cargar archivo</button>
+      <button class="export-btn" onclick="exportData()">Exportar JSON</button>
+      <label class="export-btn" style="cursor:pointer">Importar <input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="main">
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar"></nav>
+  <!-- Content -->
+  <div class="content" id="content"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  ROADMAP DATA — Inteliaudit Implementation Plan
+// ═══════════════════════════════════════════════════════════════
+
+const ROADMAP = [
+  {
+    id: "fase-0",
+    phase: 0,
+    title: "Cimientos",
+    weeks: "Semana 1-2",
+    objective: "Base técnica sólida: migraciones, tests y CI/CD para que todo lo que viene después se construya sobre terreno firme.",
+    groups: [
+      {
+        id: "0.1",
+        name: "Migraciones Alembic",
+        effort: "2-3 horas",
+        description: "Inicializar Alembic y generar migration inicial desde los 20+ modelos ORM existentes. Sin esto, cada deploy a producción requiere recrear la DB a mano.",
+        dependencies: [],
+        prompt: `Necesito que inicialices Alembic en el proyecto Inteliaudit para manejar migraciones de base de datos. El proyecto usa SQLAlchemy 2.0 async con modelos definidos en db/models.py y el engine en db/base.py. La configuración de conexión está en config/settings.py (propiedad async_database_url).
+
+Pasos:
+1. Ejecutar alembic init alembic en la raíz del proyecto
+2. Configurar alembic/env.py para:
+   - Importar Base desde db.base y todos los modelos desde db.models
+   - Usar config.settings.async_database_url como sqlalchemy.url
+   - Soportar modo async (run_async_migrations)
+3. Generar la primera migración automática: alembic revision --autogenerate -m "initial_schema"
+4. Verificar que la migración se ejecuta correctamente contra SQLite local
+5. Actualizar render.yaml para agregar "alembic upgrade head" antes del startCommand
+6. Actualizar el Procfile si existe
+
+Contexto técnico:
+- Los modelos incluyen: Firma, Usuario, Cliente, Auditoria, Declaracion, DeclaracionJurada, RG90, SifenComprobante, Hechauka, Hallazgo, Tarea, Cedula, Informe, CredencialMarangatu, AuditTrail
+- En producción se usa PostgreSQL (Neon), en dev SQLite con aiosqlite
+- La DB URL se normaliza en settings.py (postgres:// → postgresql+asyncpg://)
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Ejecutar alembic init alembic en raíz del proyecto",
+          "Configurar alembic/env.py con async support e importación de todos los modelos",
+          "Generar primera migración automática (initial_schema)",
+          "Verificar ejecución de migración contra SQLite local",
+          "Agregar alembic upgrade head al buildCommand de render.yaml y Procfile"
+        ]
+      },
+      {
+        id: "0.2",
+        name: "Tests fundamentales",
+        effort: "1 semana",
+        description: "Crear suite de tests con pytest + pytest-asyncio para los módulos financieros críticos. Un bug en cálculo de contingencia o cruce IVA destruye la credibilidad del producto.",
+        dependencies: [],
+        prompt: `Necesito que crees la suite de tests fundamentales para Inteliaudit. El proyecto usa Python 3.12, pytest, pytest-asyncio, y SQLAlchemy async. Los tests deben cubrir la lógica financiera crítica que no puede fallar.
+
+Estructura a crear:
+tests/
+├── conftest.py           — fixtures: DB SQLite in-memory async, firma/usuario/cliente de prueba
+├── fixtures/
+│   ├── rg90_compras.xlsx — archivo RG90 de ejemplo con datos sintéticos paraguayos
+│   ├── rg90_ventas.xlsx  — archivo RG90 ventas de ejemplo
+│   ├── hechauka.xlsx     — archivo HECHAUKA de ejemplo
+│   └── sifen_de.xml      — XML de comprobante electrónico e-Kuatia
+├── test_iva.py           — tests de los 5 cruces IVA (RG90 vs Form.120, RG90 vs SIFEN, SIFEN vs RG90, RG90 vs HECHAUKA, RUC proveedores)
+├── test_riesgo.py        — cálculo de contingencia, multas (50%), intereses (1% mensual), clasificación de riesgo
+├── test_auth.py          — login, generación JWT, validación token, permisos por rol (admin vs auditor)
+├── test_parser_rg90.py   — parsing del XLSX RG90 (columnas: RUC, nro comprobante, CDC, fecha, base10, base5, exento, IVA)
+├── test_sifen.py         — parsing XML e-Kuatia, extracción de CDC, montos, validación estructura
+
+Contexto clave:
+- Montos siempre en Guaraníes (PYG), sin decimales
+- Períodos en formato YYYY-MM
+- Formularios sin guiones: "120", "500", "800"
+- IVA alícuotas: 10%, 5%, 0% (exportaciones)
+- Multa omisión simple: 50% del impuesto omitido
+- Interés moratorio: 1% mensual
+- Los cruces IVA están en analisis/iva.py (clase AuditoriaIVA)
+- El cálculo de riesgo está en analisis/riesgo.py (calcular_contingencia, clasificar_riesgo)
+- El parser RG90 está en ingesta/parser_rg90.py
+- Auth está en api/routers/auth.py (JWT HS256, bcrypt)
+
+En conftest.py crear un async engine con SQLite in-memory, crear todas las tablas, y fixtures que inserten datos de prueba para una firma, usuario admin, cliente con RUC paraguayo (ej: 80012345-6), y registros RG90/SIFEN/HECHAUKA.
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Crear tests/conftest.py con fixtures async de DB in-memory y datos de prueba paraguayos",
+          "Crear archivos de ejemplo en tests/fixtures/ (RG90 XLSX, HECHAUKA XLSX, SIFEN XML)",
+          "Implementar tests/test_iva.py — 5 cruces IVA con datos sintéticos",
+          "Implementar tests/test_riesgo.py — contingencia, multas 50%, intereses 1% mensual",
+          "Implementar tests/test_auth.py — login, JWT, permisos por rol",
+          "Implementar tests/test_parser_rg90.py — parsing XLSX con estructura RG90 real",
+          "Implementar tests/test_sifen.py — parsing XML e-Kuatia, extracción CDC y montos",
+          "Verificar que todos los tests pasan con pytest -v"
+        ]
+      },
+      {
+        id: "0.3",
+        name: "CI/CD con GitHub Actions",
+        effort: "3-4 horas",
+        description: "Pipeline automático: lint (ruff) → type check (mypy) → test (pytest) → build frontend (npm) → deploy. GitHub Actions free tier: 2000 min/mes.",
+        dependencies: ["0.2"],
+        prompt: `Necesito que configures CI/CD con GitHub Actions para el proyecto Inteliaudit. El proyecto tiene backend Python 3.12 y frontend React/Vite en ui-web/.
+
+Crear .github/workflows/ci.yml con:
+
+1. Trigger: push a main, pull requests a main
+2. Jobs:
+   a. lint-and-type:
+      - ruff check (ya configurado en pyproject.toml: line-length=100, target py312)
+      - mypy (strict=false, ignore_missing_imports=true)
+   b. test:
+      - Python 3.12
+      - pip install -e ".[dev]"
+      - playwright install chromium (necesario para imports)
+      - pytest --cov --cov-report=xml
+   c. build-frontend:
+      - Node 20
+      - cd ui-web && npm ci && npm run build
+   d. deploy (solo en push a main, después de test+build):
+      - Trigger deploy en Render.com via deploy hook (si existe)
+      - O simplemente confirmar que Render auto-deploys desde main
+
+3. Agregar badge de CI status al README (si existe) o crear README mínimo
+
+Contexto:
+- pyproject.toml tiene [project.optional-dependencies] dev = ["pytest>=8.2", "pytest-asyncio>=0.23", "pytest-cov>=5.0", "ruff>=0.4", "mypy>=1.10"]
+- asyncio_mode = "auto" en pytest config
+- Frontend usa TypeScript 5.5 con tsc -b && vite build
+- Render.com ya tiene auto-deploy configurado desde el repo
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Crear .github/workflows/ci.yml con jobs de lint, test, build-frontend",
+          "Configurar matrix para Python 3.12 + Node 20",
+          "Agregar step de playwright install para dependencias de importación",
+          "Verificar que pipeline pasa en push a main",
+          "Agregar badge de CI status"
+        ]
+      },
+      {
+        id: "0.4",
+        name: "Seed de datos realistas para demo",
+        effort: "4-5 horas",
+        description: "Datos de demostración completos con RUCs paraguayos válidos, declaraciones, comprobantes y hallazgos pre-generados para demos y testing manual.",
+        dependencies: ["0.1"],
+        prompt: `Necesito que mejores los scripts de seed (seed.py y/o seed_saas.py) del proyecto Inteliaudit para crear datos de demostración completos y realistas.
+
+El seed debe crear:
+
+1. Firma demo: "Auditores Asociados SRL" con plan "trial" (7 días)
+2. Usuarios:
+   - Admin: admin@demo.com / password: demo123
+   - Auditor Senior: senior@demo.com / demo123
+   - Auditor: auditor@demo.com / demo123
+3. Clientes (3):
+   - "Comercial Guaraní SA" — RUC 80012345-6, régimen general, actividad: comercio
+   - "Servicios Delta SRL" — RUC 80098765-4, régimen general, actividad: servicios
+   - "Importadora Sur SA" — RUC 80054321-0, régimen general, actividad: importación
+4. Para el primer cliente, crear auditoría completa período 2024-01 a 2024-12 con:
+   - Registros RG90 compras (30+ registros por mes) con RUCs de proveedores variados
+   - Registros RG90 ventas (20+ registros por mes)
+   - Algunos comprobantes con CDC válido, otros sin CDC
+   - Comprobantes SIFEN asociados a los CDCs
+   - Registros HECHAUKA con retenciones
+   - Declaraciones Form. 120 con totales que cuadren parcialmente (para generar hallazgos)
+   - 8-10 hallazgos pre-generados de diferentes tipos: IVA_CREDITO_RUC_INACTIVO, IVA_CREDITO_SIN_CDC, IVA_DIFERENCIA_RG90_DJ, etc.
+   - Cada hallazgo con artículo legal, monto de ajuste, multa e intereses calculados
+5. Tareas de plan de trabajo para la auditoría
+
+Contexto:
+- Montos en Guaraníes sin decimales (rangos típicos: facturas de 500,000 a 50,000,000 PYG)
+- IVA 10% es lo más común, 5% para servicios profesionales
+- Los modelos están en db/models.py: Firma, Usuario, Cliente, Auditoria, RG90, SifenComprobante, Hechauka, Hallazgo, Tarea, etc.
+- Usar db/base.py get_db() para la sesión async
+- El seed debe ser idempotente (verificar si ya existen datos antes de insertar)
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Crear firma demo con 3 usuarios (admin, senior, auditor) con passwords funcionales",
+          "Crear 3 clientes con RUCs paraguayos válidos y datos completos",
+          "Generar registros RG90 (compras y ventas) para 12 meses con montos realistas en PYG",
+          "Generar comprobantes SIFEN con CDCs y registros HECHAUKA asociados",
+          "Crear 8-10 hallazgos pre-generados con artículo legal, ajuste, multa e intereses",
+          "Crear tareas de plan de trabajo para la auditoría demo",
+          "Verificar seed idempotente ejecutándolo dos veces sin error"
+        ]
+      },
+      {
+        id: "0.5",
+        name: "Migración de Render a Railway PRO",
+        effort: "1-2 días",
+        description: "Migrar toda la infraestructura de Render (con Neon PostgreSQL externo) a Railway PRO, que ya está pago y unused. Unificar hosting, base de datos, dominio y deployment en una sola plataforma para eliminar cold starts, simplificar ops y ahorrar $20-40/mes.",
+        dependencies: ["0.1"],
+        prompt: `Necesito migrar Inteliaudit de Render (plan free, con Neon PostgreSQL externo) a Railway PRO (suscripción ya pagada). El proyecto YA tiene railway.json y Procfile configurados, y settings.py ya normaliza DATABASE_URL para asyncpg. La migración debe ser zero-downtime.
+
+ORDEN DE EJECUCIÓN OBLIGATORIO:
+
+FASE A — Preparación (local):
+1. Verificar que railway.json y Procfile están correctos:
+   - railway.json: builder NIXPACKS, buildCommand = "pip install -e . && cd ui-web && npm ci && npm run build && cd .."
+   - Procfile: web: uvicorn api.main:app --host 0.0.0.0 --port \$PORT
+   - Confirmar que el health check path /api/health funciona correctamente
+
+2. Verificar settings.py:
+   - La propiedad async_database_url ya normaliza postgres:// a postgresql+asyncpg:// (líneas 16-26)
+   - Confirmar que ALLOWED_ORIGINS en producción solo tiene el dominio real
+   - SECRET_KEY debe ser única y fuerte (no "dev-secret-change-in-production")
+
+3. Hacer backup completo local:
+   - git push a origin main (todo el código actual)
+   - Exportar dump de Neon PostgreSQL: pg_dump --no-owner "postgresql://..." > neon_backup.sql
+   - Guardar backup en lugar seguro (no en el repo)
+
+FASE B — Railway PostgreSQL (sin downtime):
+1. Crear proyecto en Railway:
+   - railway init --name "Inteliaudit"
+   - railway link (vincular con el repo GitHub existente: gustaquevedo-lab/Inteliaudit)
+
+2. Agregar PostgreSQL plugin:
+   - railway add --plugin postgresql
+   - Railway inyecta DATABASE_URL automáticamente como variable de entorno
+   - Railway PostgreSQL NO tiene ?sslmode=require — settings.py ya maneja esto
+
+3. Migrar datos de Neon a Railway PostgreSQL:
+   Opción A (recomendada, con downtime mínimo):
+   - Poner Render en maintenance mode temporalmente
+   - railway run psql \$(railway variables get DATABASE_URL) < neon_backup.sql
+   - Verificar datos: railway run psql \$(railway variables get DATABASE_URL) -c "SELECT count(*) FROM clientes;"
+
+   Opción B (para cero downtime - opcional):
+   - Configurar Railway PostgreSQL como replica de Neon
+   - O simplemente importar datos en un momento de baja actividad
+   - El seed demo (seed_saas.py) puede regenerar datos de prueba si es necesario
+
+FASE C — Variables de entorno en Railway:
+Configurar en Railway Dashboard → Variables (o via CLI):
+   - SECRET_KEY = <generar una fuerte con python -c "import secrets; print(secrets.token_urlsafe(32))">
+   - DEBUG = "false"
+   - STORAGE_PATH = "/app/storage"
+   - ANTHROPIC_API_KEY = <valor existente>
+   - ENCRYPTION_KEY = <valor existente>
+   - CORS: ALLOWED_ORIGINS cambiar a ["https://inteliaudit.com", "https://www.inteliaudit.com"] (o el dominio real)
+
+NO configurar DATABASE_URL como variable — Railway la inyecta automáticamente desde el plugin PostgreSQL.
+Railway PRO no duerme servicios — no hay cold starts.
+
+FASE D — Deploy y verificación:
+1. Hacer deploy: railway up --detach (o push a main si está vinculado)
+2. Verificar health check: curl https://<railway-url>/api/health
+3. Verificar frontend: navegar a /app/ → debe cargar React SPA
+4. Verificar landing page: / → debe cargar landing/index.html
+5. Verificar API docs: /api/docs → Swagger UI
+6. Verificar login: POST /api/auth/login con credenciales demo
+7. Verificar base de datos: ejecutar seed_saas.py o verificar datos migrados
+8. Verificar el roadmap: /roadmap → debe cargar ROADMAP.html y persistir estado
+
+FASE E — Dominio personalizado y SSL:
+1. Agregar dominio personalizado en Railway Dashboard:
+   - Settings → Domains → "inteliaudit.com" (o el que corresponda)
+   - Railway genera automáticamente certificado SSL (Let's Encrypt)
+   - Railway maneja terminación SSL automática — la app recibe HTTP
+
+2. Actualizar DNS:
+   - Agregar registro CNAME: @ → <railway-provided-domain>.railway.app
+   - O registro A apuntando a la IP de Railway si aplica
+   - TTL bajo (300s) durante migración
+   - Esperar propagación DNS (5-30 minutos)
+
+3. Verificar SSL: curl -I https://inteliaudit.com → 200 OK + SSL válido
+4. Verificar redirect HTTP→HTTPS (Railway lo maneja automáticamente en PRO)
+
+FASE F — Desactivar Render:
+SOLO después de verificar que Railway funciona correctamente:
+1. Render Dashboard → Services → Inteliaudit → Settings → Disable service
+2. Neon Dashboard → Project settings → Delete project (opcional, para no generar costo)
+3. DNS: actualizar TTL a valor normal (3600+)
+
+FASE G — Post-migración:
+1. Actualizar deploy-railway.ps1:
+   - Corregir el path (tiene "Gustavo" sin espacio → debe ser "Gustavo Quevedo")
+   - Agregar step de migración Alembic automática: railway run alembic upgrade head
+   - Mejorar mensajes y logging del script
+
+2. Actualizar railway.json:
+   - Agregar healthcheckTimeout: 60 (más tolerante para primer deploy con build pesado)
+   - Agregar restartPolicyType: "ON_FAILURE"
+
+3. Actualizar render.yaml:
+   - No borrarlo (útil como referencia), pero comentar que Railway es el primary deploy target
+   - Agregar comentario: "# NOTA: Railway PRO es el deploy principal. Render solo como respaldo."
+
+4. Actualizar documentación:
+   - Agregar sección en README sobre cómo deployar a Railway
+   - Railway CLI commands útiles: railway run, railway logs, railway variables
+
+5. Verificar Railway logs: railway logs --service <service-name> → no debe haber errores 500
+
+FRONTEND POST-MIGRACIÓN:
+La arquitectura frontend NO cambia en Railway — FastAPI sirve el SPA de React desde ui-web-dist/ en /app/. El buildCommand de railway.json ya compila el frontend. Diferencias post-migración:
+
+| Aspecto | Render Free (antes) | Railway PRO (después) |
+|---------|---------------------|----------------------|
+| Cold start | ~30s tras inactividad | 0 — nunca duerme |
+| Build speed | Limitado (500 min/mes) | Ilimitado |
+| SSL | Manual (Let's Encrypt) | Automático |
+| DB | Neon externa | PostgreSQL integrado |
+| Dominio | Custom DNS manual | Integrated domain mgmt |
+| Deploy speed | Variable | Más rápido (Nixpacks) |
+| Logs | Dashboard básico | railway logs en tiempo real |
+| Costo | $0 (free) o $20-40/mo con PRO+Neon | $0 extra (ya pagado) |
+
+RAILWAY CLI ÚTILES:
+- railway login — login a Railway
+- railway init — crear proyecto
+- railway link — vincular repo GitHub
+- railway add --plugin postgresql — agregar BD
+- railway variables — listar/editar variables
+- railway up — deployar
+- railway logs — ver logs en tiempo real
+- railway run <cmd> — ejecutar comando en el entorno Railway
+- railway status — estado del proyecto
+- railway domain — gestionar dominios
+- railway volume — gestionar volúmenes persistentes
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "FASE A: Verificar railway.json, Procfile, settings.py y hacer backup local (git push + pg_dump de Neon)",
+          "FASE B: Crear proyecto Railway, agregar PostgreSQL plugin y migrar datos de Neon a Railway",
+          "FASE C: Configurar todas las variables de entorno en Railway (SECRET_KEY, ANTHROPIC_API_KEY, etc.)",
+          "FASE D: Hacer deploy inicial en Railway y verificar health check, frontend (/app/), landing (/), API (/api/docs), login y DB",
+          "FASE E: Configurar dominio personalizado y SSL automático en Railway, actualizar DNS",
+          "FASE F: Desactivar servicios en Render y Neon solo después de verificar Railway funcionando",
+          "FASE G: Actualizar deploy-railway.ps1 (corregir path, agregar alembic), railway.json (healthcheck), y documentación"
+        ]
+      }
+    ]
+  },
+  {
+    id: "fase-1",
+    phase: 1,
+    title: "Core funcional completo",
+    weeks: "Semana 3-5",
+    objective: "Que el producto pueda ejecutar una auditoría IVA end-to-end sin depender del scraper de Marangatú, usando archivos subidos manualmente por el auditor.",
+    groups: [
+      {
+        id: "1.1",
+        name: "Flujo de importación manual (upload)",
+        effort: "1 semana",
+        description: "UI y endpoints para subir archivos RG90, HECHAUKA y Form.120 manualmente. PRIORIDAD MÁXIMA: el producto debe funcionar sin scraper, usando archivos que el auditor ya descarga de Marangatú.",
+        dependencies: [],
+        prompt: `Necesito implementar el flujo completo de importación manual de archivos en Inteliaudit. El auditor descarga archivos de Marangatú manualmente y los sube a la plataforma para análisis.
+
+BACKEND — Crear/completar endpoints en api/routers/auditorias.py o un nuevo router api/routers/importacion.py:
+
+1. POST /api/auditorias/{id}/importar-rg90
+   - Recibe archivo XLSX (multipart)
+   - Parámetro: tipo ("compras" | "ventas"), periodo (YYYY-MM)
+   - Usa ingesta/parser_rg90.py para parsear
+   - Inserta registros en tabla rg90 con firma_id del usuario autenticado
+   - Retorna resumen: total_registros, total_monto, total_iva, errores_parsing
+   - Validación: rechazar si estructura de columnas no coincide con formato RG90
+
+2. POST /api/auditorias/{id}/importar-hechauka
+   - Recibe archivo XLSX
+   - Usa ingesta/parser_hechauka.py para parsear
+   - Inserta en tabla hechauka
+   - Retorna resumen similar
+
+3. POST /api/auditorias/{id}/importar-dj
+   - Recibe PDF de declaración jurada
+   - Parámetro: formulario ("120", "500", "800")
+   - Usa pdfplumber para extraer texto
+   - Parsea campos clave según formulario
+   - Inserta en tabla declaraciones con datos_json
+   - Retorna campos extraídos para verificación
+
+FRONTEND — Actualizar ui-web/src/pages/auditorias/tabs/TabArchivos.tsx:
+
+1. Zona de drag & drop por tipo de archivo:
+   - "RG90 Compras" (XLSX)
+   - "RG90 Ventas" (XLSX)
+   - "HECHAUKA" (XLSX)
+   - "Declaración Jurada" (PDF) con selector de formulario
+2. Progress bar durante upload y parsing
+3. Preview de datos antes de confirmar importación:
+   - Mostrar primeras 10 filas parseadas
+   - Totales calculados
+   - Alertas si hay errores de formato
+4. Botón "Confirmar importación"
+5. Estado post-import: badge con cantidad de registros importados por tipo
+6. Historial de importaciones con fecha y usuario
+
+Contexto:
+- El parser RG90 (ingesta/parser_rg90.py) ya existe y parsea XLSX
+- El parser HECHAUKA (ingesta/parser_hechauka.py) ya existe
+- FileUploadZone.tsx ya existe como componente reutilizable
+- API client está en ui-web/src/api/client.ts
+- Auth usa JWT Bearer token (AuthContext.tsx)
+- Todos los montos en Guaraníes (PYG) sin decimales
+- Identidad visual: azul #2E84F0, verde #22C47E, navy #091624
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Crear endpoint POST /api/auditorias/{id}/importar-rg90 con parsing y validación",
+          "Crear endpoint POST /api/auditorias/{id}/importar-hechauka con parsing",
+          "Crear endpoint POST /api/auditorias/{id}/importar-dj para PDFs de declaraciones",
+          "Actualizar TabArchivos.tsx con zonas de drag & drop por tipo de archivo",
+          "Implementar preview de datos parseados antes de confirmar importación",
+          "Agregar progress bar, estado post-import y historial de importaciones",
+          "Test end-to-end: subir archivo RG90 XLSX y verificar registros en DB"
+        ]
+      },
+      {
+        id: "1.2",
+        name: "Orquestador de análisis desde la UI",
+        effort: "3-4 días",
+        description: "Botón 'Ejecutar análisis' en TabAnalisis.tsx que lance los cruces IVA en background con progreso en tiempo real.",
+        dependencies: ["1.1"],
+        prompt: `Necesito implementar el orquestador de análisis que permite ejecutar la auditoría IVA completa desde la interfaz web.
+
+BACKEND:
+1. Endpoint POST /api/auditorias/{id}/ejecutar-analisis
+   - Parámetro body: { impuestos: ["iva", "ire", "retenciones"], periodos: ["2024-01", ...] }
+   - Ejecuta AuditoriaIVA.ejecutar_auditoria_completa() (analisis/iva.py)
+   - El análisis debe correr en background (asyncio.create_task o background task de FastAPI)
+   - Guardar progreso en una tabla o en memoria (estado por cruce)
+   - Registrar inicio y fin en audit_trail
+
+2. Endpoint GET /api/auditorias/{id}/estado-analisis
+   - Retorna: { estado: "ejecutando"|"completado"|"error", progreso: 60, cruces: [{nombre, estado, hallazgos}], error?: string }
+   - Frontend hace polling cada 2 segundos durante ejecución
+
+3. Actualizar el estado de la auditoría: "pendiente_datos" → "analizando" → "analisis_completado"
+
+FRONTEND — Actualizar ui-web/src/pages/auditorias/tabs/TabAnalisis.tsx:
+1. Si no hay datos importados: mostrar mensaje "Importá los archivos RG90 y HECHAUKA primero"
+2. Si hay datos: mostrar resumen de datos disponibles (X registros RG90, Y HECHAUKA, Z declaraciones)
+3. Selector de impuestos a analizar (checkboxes: IVA, IRE, Retenciones)
+4. Botón "Ejecutar análisis" (estilo primario, azul Inteliaudit)
+5. Durante ejecución:
+   - Barra de progreso general
+   - Lista de cruces con estado: ⏳ pendiente / 🔄 ejecutando / ✅ completado / ❌ error
+   - Contador de hallazgos encontrados en tiempo real
+6. Al completar: resumen con total de hallazgos por nivel de riesgo y link a TabHallazgos
+
+Contexto:
+- Los 5 cruces IVA están en analisis/iva.py: cruce_rg90_vs_form120, cruce_rg90_vs_sifen, cruce_sifen_vs_rg90, cruce_rg90_vs_hechauka, cruce_ruc_proveedores
+- Cada cruce retorna ResultadoCruceIVA con hallazgos_generados y monto_ajuste
+- La auditoría se identifica por auditoria.id (UUID string)
+- Logging en audit_trail: api/routers/trail.py
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Crear endpoint POST /api/auditorias/{id}/ejecutar-analisis con ejecución en background",
+          "Crear endpoint GET /api/auditorias/{id}/estado-analisis para polling de progreso",
+          "Implementar lógica de progreso por cruce (5 cruces IVA = 20% cada uno)",
+          "Actualizar TabAnalisis.tsx con resumen de datos, selector de impuestos y botón ejecutar",
+          "Implementar UI de progreso en tiempo real con estado por cruce",
+          "Mostrar resumen final con hallazgos por nivel de riesgo",
+          "Registrar inicio/fin de análisis en audit_trail"
+        ]
+      },
+      {
+        id: "1.3",
+        name: "Completar IRE y Retenciones (lógica real)",
+        effort: "1 semana",
+        description: "Implementar la lógica de análisis de IRE y Retenciones que actualmente son stubs con NotImplementedError y TODO comments.",
+        dependencies: ["1.1"],
+        prompt: `Necesito completar la lógica de análisis de IRE (Impuesto a la Renta Empresarial) y Retenciones que actualmente son stubs en analisis/ire.py y analisis/retenciones.py.
+
+IRE (analisis/ire.py):
+La clase AuditoriaIRE ya tiene estructura. Completar:
+
+1. conciliar_resultado_contable():
+   - Obtener Form.500 de tabla declaraciones (formulario="500", periodo=ejercicio)
+   - Parsear datos_json para extraer renta_neta_imponible, total_ingresos, total_gastos_deducidos
+   - Cruzar total_ingresos vs suma de ventas en RG90 del mismo ejercicio
+   - Si hay diferencia > materialidad → generar hallazgo IRE_INGRESO_NO_DECLARADO
+   - Calcular contingencia: diferencia × 10% (alícuota IRE) + multa + intereses
+
+2. verificar_depreciaciones():
+   - Por ahora, implementar verificación contra datos que vengan en datos_json del Form.500
+   - Si se detecta depreciación que excede tasa máxima del Decreto 3107 → hallazgo IRE_DEPRECIACION_EXCEDIDA
+   - Usar constantes TASAS_DEPRECIACION ya definidas en el archivo
+
+3. verificar_gastos_sin_comprobante():
+   - Comparar total gastos declarados en Form.500 vs total de comprobantes de compra en RG90
+   - Si gastos_declarados > compras_rg90 × 1.1 (margen 10%) → hallazgo IRE_GASTO_SIN_COMPROBANTE
+   - La diferencia son gastos sin respaldo documental
+
+RETENCIONES (analisis/retenciones.py):
+La clase AuditoriaRetenciones ya tiene estructura. Completar:
+
+1. cruce_hechauka_vs_declaraciones():
+   - Obtener registros HECHAUKA donde tipo_operacion contiene "retencion"
+   - Obtener Forms. 800/820 de tabla declaraciones
+   - Comparar: sum(retenciones_hechauka) vs sum(retenciones_declaradas_en_forms)
+   - Si diferencia > materialidad → hallazgo RET_DIFERENCIA_HECHAUKA
+   - Detectar retenciones en HECHAUKA sin correspondencia en formularios → RET_NO_DEPOSITADA
+
+2. Agregar nuevo método: verificar_retenciones_omitidas()
+   - Buscar pagos a proveedores (compras en RG90) de servicios personales sin retención
+   - Si el proveedor es persona física y el monto > umbral → debió retener
+   - Generar hallazgo RET_NO_PRACTICADA
+
+Para ambos módulos:
+- Generar hallazgos usando crud.crear_hallazgo() con todos los campos: impuesto, periodo, tipo_hallazgo, descripcion, articulo_legal, base_ajuste, impuesto_omitido, multa_estimada, intereses_estimados, total_contingencia, nivel_riesgo
+- Usar calcular_contingencia() de analisis/riesgo.py para multas e intereses
+- Usar clasificar_riesgo() para determinar nivel alto/medio/bajo
+- Citar siempre el artículo legal específico (usar dicts ARTICULOS ya definidos)
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Implementar conciliar_resultado_contable() — cruce Form.500 vs RG90 ventas",
+          "Implementar verificar_depreciaciones() — validar tasas vs Decreto 3107",
+          "Implementar verificar_gastos_sin_comprobante() — cruce gastos vs comprobantes RG90",
+          "Implementar cruce_hechauka_vs_declaraciones() con lógica real de comparación",
+          "Implementar verificar_retenciones_omitidas() — pagos sin retención practicada",
+          "Generar hallazgos con artículo legal, contingencia y nivel de riesgo para cada caso",
+          "Integrar IRE y Retenciones en el orquestador de análisis (1.2)"
+        ]
+      },
+      {
+        id: "1.4",
+        name: "Validación de CDC en SIFEN — batch",
+        effort: "2-3 días",
+        description: "Validar CDCs de comprobantes RG90 contra el portal SIFEN en lote, con throttling para no saturar el servicio público.",
+        dependencies: ["1.1"],
+        prompt: `Necesito implementar la validación batch de CDCs (Código de Control Digital) contra el portal SIFEN para verificar la autenticidad de comprobantes electrónicos.
+
+BACKEND:
+1. Endpoint POST /api/auditorias/{id}/validar-sifen
+   - Toma todos los registros RG90 de la auditoría que tengan CDC (campo cdc no vacío)
+   - Para cada CDC, consulta SIFEN usando ingesta/sifen.py (ya implementado)
+   - Throttling: máximo 3 consultas por segundo (asyncio.sleep entre requests)
+   - Actualiza en tabla rg90: cdc_valido (bool), en_sifen (bool)
+   - Si el CDC existe en SIFEN, guarda el comprobante completo en sifen_comprobantes
+   - Si el CDC no existe o es inválido → marcar cdc_valido=False
+   - Ejecución en background (asyncio task)
+   - Retorna job_id para seguimiento
+
+2. Endpoint GET /api/auditorias/{id}/estado-validacion-sifen
+   - Retorna: { total_cdcs, validados, validos, invalidos, no_encontrados, en_progreso, errores }
+
+3. Al completar la validación, generar hallazgos automáticamente:
+   - CDC inválido → hallazgo IVA_CREDITO_SIN_CDC con monto del IVA como ajuste potencial
+   - Si el comprobante en SIFEN tiene montos diferentes a lo declarado en RG90 → hallazgo IVA_DIFERENCIA_RG90_DJ
+
+FRONTEND — Agregar en TabAnalisis.tsx o TabArchivos.tsx:
+1. Botón "Validar CDCs en SIFEN" (solo visible si hay registros RG90 con CDC)
+2. Progreso: "Validando 45 de 230 CDCs..." con barra de progreso
+3. Al completar: tabla resumen con CDCs válidos/inválidos/no encontrados
+4. Link a hallazgos generados automáticamente
+
+Contexto técnico:
+- ingesta/sifen.py tiene la clase SifenClient con método consultar_cdc(cdc: str) que retorna datos del comprobante
+- La consulta pública de CDC está en https://ekuatia.set.gov.py/consultas/
+- CDC tiene exactamente 44 dígitos
+- El throttling es importante: SIFEN es servicio público y puede bloquear IPs con demasiadas consultas
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Crear endpoint POST /api/auditorias/{id}/validar-sifen con ejecución batch en background",
+          "Implementar throttling de 3 consultas/segundo contra SIFEN",
+          "Crear endpoint GET para polling de estado de validación",
+          "Actualizar campos cdc_valido y en_sifen en tabla rg90",
+          "Generar hallazgos automáticos por CDCs inválidos o no encontrados",
+          "Implementar UI con botón, progreso y tabla resumen de resultados"
+        ]
+      }
+    ]
+  },
+  {
+    id: "fase-2",
+    phase: 2,
+    title: "Experiencia de usuario completa",
+    weeks: "Semana 6-8",
+    objective: "Un auditor puede usar el producto de punta a punta sin necesitar documentación externa ni soporte técnico.",
+    groups: [
+      {
+        id: "2.1",
+        name: "Onboarding self-service",
+        effort: "3-4 días",
+        description: "Registro de firma desde la landing page con trial automático de 7 días del plan Pro. El endpoint POST /api/auth/firmas ya existe, falta la UI y los emails.",
+        dependencies: [],
+        prompt: `Necesito implementar el flujo completo de onboarding self-service para Inteliaudit. El usuario debe poder registrar su firma de auditoría y empezar a usar el producto en menos de 2 minutos.
+
+FRONTEND:
+1. Crear página /registro en React (ui-web/src/pages/Registro.tsx):
+   - Formulario en 2 pasos (wizard):
+     Paso 1: Datos de la firma
+       - Nombre de la firma (required)
+       - RUC de la firma (opcional, con validación de dígito verificador paraguayo)
+       - Email de contacto
+     Paso 2: Cuenta del administrador
+       - Nombre completo
+       - Email (será el login)
+       - Password (min 8 chars, mostrar/ocultar)
+       - Confirmar password
+   - Botón "Crear cuenta — 7 días gratis"
+   - Link a términos y política de privacidad
+   - Diseño: fondo navy #091624, card centrada, logo Inteliaudit arriba
+   - Animación suave entre pasos (framer-motion)
+
+2. Post-registro:
+   - Redirect automático al dashboard
+   - Auto-login (guardar JWT del response de /api/auth/firmas)
+   - Mostrar modal de bienvenida con 3 pasos: "1. Creá un cliente → 2. Subí archivos RG90 → 3. Ejecutá el análisis"
+
+3. Banner de trial en Dashboard:
+   - Si firma.plan === "trial": mostrar banner "Trial Pro — Te quedan X días"
+   - Countdown dinámico calculado desde trial_hasta
+   - Botón "Ver planes" que lleva a /planes
+   - Al vencer: banner rojo "Trial expirado — Elegí un plan para continuar"
+
+4. Agregar ruta /registro en App.tsx (pública, sin auth)
+5. Agregar botón "Registrarse gratis" en la landing page (landing/index.html) con link a /registro
+
+BACKEND:
+- El endpoint POST /api/auth/firmas ya existe y crea firma + admin + trial de 7 días
+- Agregar validación: email único (ya existe), nombre firma no vacío
+- Retornar access_token en el response para auto-login
+
+Contexto:
+- Validación RUC paraguayo: último dígito es verificador (módulo 11)
+- AuthContext.tsx maneja el estado de login (token en localStorage)
+- react-router-dom 6.23 para routing
+- Paleta: azul #2E84F0, verde #22C47E, navy #091624
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Crear página /registro con formulario wizard de 2 pasos y validación RUC paraguayo",
+          "Implementar auto-login post-registro con JWT",
+          "Crear modal de bienvenida con guía de 3 pasos para nuevos usuarios",
+          "Implementar banner de trial con countdown en Dashboard",
+          "Agregar lógica de trial expirado (banner rojo + funcionalidad read-only)",
+          "Conectar botón 'Registrarse gratis' desde landing page a /registro"
+        ]
+      },
+      {
+        id: "2.2",
+        name: "Dashboard mejorado con KPIs reales",
+        effort: "3-4 días",
+        description: "Dashboard con métricas reales de la firma: contingencia acumulada, auditorías en progreso, hallazgos por riesgo, actividad reciente.",
+        dependencies: ["1.2"],
+        prompt: `Necesito mejorar el Dashboard de Inteliaudit (ui-web/src/pages/Dashboard.tsx) para mostrar KPIs reales calculados desde la base de datos, no datos estáticos.
+
+BACKEND — Crear endpoint GET /api/dashboard:
+Retorna JSON con:
+{
+  "kpis": {
+    "total_contingencia": 45000000,  // Suma de total_contingencia de todos los hallazgos activos
+    "auditorias_activas": 3,
+    "auditorias_cerradas": 7,
+    "hallazgos_pendientes": 12,
+    "hallazgos_alto_riesgo": 4,
+    "clientes_total": 8
+  },
+  "hallazgos_por_riesgo": [
+    { "nivel": "alto", "cantidad": 4, "monto": 25000000 },
+    { "nivel": "medio", "cantidad": 5, "monto": 15000000 },
+    { "nivel": "bajo", "cantidad": 3, "monto": 5000000 }
+  ],
+  "hallazgos_por_impuesto": [
+    { "impuesto": "IVA", "cantidad": 8 },
+    { "impuesto": "IRE", "cantidad": 3 },
+    { "impuesto": "Retenciones", "cantidad": 1 }
+  ],
+  "top_clientes_contingencia": [
+    { "razon_social": "Comercial Guaraní SA", "ruc": "80012345-6", "contingencia": 25000000 }
+  ],
+  "actividad_reciente": [
+    { "accion": "Análisis IVA completado", "usuario": "Juan Pérez", "timestamp": "...", "auditoria": "..." }
+  ],
+  "tendencia_mensual": [
+    { "mes": "2024-01", "hallazgos": 5, "contingencia": 8000000 }
+  ]
+}
+- Filtrar todo por firma_id del usuario autenticado (multi-tenant)
+
+FRONTEND — Rediseñar Dashboard.tsx:
+1. Fila de KPI cards (usar KPICard.tsx existente):
+   - Contingencia total (formato: Gs. 45.000.000) con icono alerta
+   - Auditorías activas / cerradas
+   - Hallazgos pendientes de revisión
+   - Clientes en cartera
+2. Gráfico de dona: hallazgos por nivel de riesgo (usar RiskMatrix.tsx o Recharts)
+   - Colores: alto=#E53E3E, medio=#D97706, bajo=#22C47E
+3. Gráfico de barras: hallazgos por impuesto (Recharts)
+4. Top 5 clientes con mayor contingencia (tabla con barras de progreso relativas)
+5. Timeline de actividad reciente (últimas 10 acciones del audit_trail)
+6. Si no hay datos: EmptyState con CTA "Creá tu primer cliente"
+
+Contexto:
+- KPICard.tsx, RiskMatrix.tsx, EmptyState.tsx ya existen como componentes
+- Recharts 2.12 ya está instalado
+- Formatter de moneda: formatters.ts tiene formatPYG() o similar
+- Montos siempre en Guaraníes sin decimales
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Crear endpoint GET /api/dashboard con KPIs, gráficos y actividad reciente",
+          "Implementar fila de KPI cards con datos reales y formateo PYG",
+          "Agregar gráfico de dona de hallazgos por riesgo con Recharts",
+          "Agregar gráfico de barras de hallazgos por impuesto",
+          "Implementar tabla top 5 clientes con mayor contingencia",
+          "Agregar timeline de actividad reciente desde audit_trail",
+          "Manejar estado vacío con EmptyState y CTA"
+        ]
+      },
+      {
+        id: "2.3",
+        name: "Flujo de hallazgos completo",
+        effort: "4-5 días",
+        description: "Ciclo de vida completo del hallazgo: pendiente → revisado → aceptado/descartado → incluido en informe. Con edición, evidencias y filtros.",
+        dependencies: ["1.2"],
+        prompt: `Necesito implementar el ciclo de vida completo de hallazgos en Inteliaudit, desde la detección automática hasta la inclusión en el informe final.
+
+BACKEND:
+1. PATCH /api/hallazgos/{id}/estado
+   - Body: { estado: "revisado"|"aceptado"|"descartado", notas_auditor?: string }
+   - Validaciones:
+     - Solo auditor_senior o admin pueden cambiar estado
+     - Transiciones válidas: pendiente→revisado, revisado→aceptado|descartado, descartado→revisado (reabrir)
+     - No se puede cerrar auditoría si hay hallazgos en estado "pendiente"
+   - Registrar cambio en audit_trail
+
+2. PATCH /api/hallazgos/{id}
+   - Permitir editar: descripcion, nivel_riesgo, base_ajuste, impuesto_omitido, notas_auditor
+   - Recalcular multa_estimada, intereses_estimados y total_contingencia automáticamente
+   - Solo auditor_senior o admin
+
+3. POST /api/hallazgos/{id}/evidencias
+   - Vincular comprobantes (rg90_id o sifen_id) como evidencia del hallazgo
+   - Guardar como JSON array en campo evidencias
+
+4. GET /api/auditorias/{id}/hallazgos con filtros:
+   - ?impuesto=iva&nivel_riesgo=alto&estado=pendiente&periodo=2024-03
+   - Ordenar por total_contingencia descendente por defecto
+
+5. GET /api/auditorias/{id}/hallazgos/export-excel
+   - Generar XLSX con todos los hallazgos filtrados
+   - Columnas: #, Impuesto, Período, Tipo, Descripción, Art. Legal, Base Ajuste, Impuesto Omitido, Multa, Intereses, Total, Riesgo, Estado
+
+FRONTEND — Mejorar TabHallazgos.tsx y HallazgoPanel.tsx:
+1. Tabla de hallazgos con columnas: checkbox, #, Impuesto, Período, Descripción (truncada), Contingencia, Riesgo (badge color), Estado
+2. Filtros en header: dropdown por impuesto, riesgo, estado, período
+3. Click en fila → panel lateral (HallazgoPanel.tsx) con:
+   - Detalle completo del hallazgo
+   - Artículo legal citado
+   - Desglose: base ajuste, impuesto omitido, multa (50%), intereses (1%/mes), total
+   - Botones de cambio de estado con confirmación
+   - Textarea para notas del auditor
+   - Sección de evidencias vinculadas
+   - Historial de cambios (audit_trail filtrado)
+4. Edición inline de montos (base_ajuste) con recálculo automático
+5. Botón "Exportar a Excel" en header
+6. Acciones batch: seleccionar múltiples y cambiar estado masivamente
+
+Contexto:
+- Badge.tsx ya existe para tags de riesgo
+- Colores riesgo: alto=#E53E3E, medio=#D97706, bajo=#22C47E
+- Montos en Guaraníes sin decimales
+- El campo evidencias en DB es Text (JSON array de strings con IDs)
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Implementar PATCH /api/hallazgos/{id}/estado con validación de transiciones y permisos",
+          "Implementar PATCH /api/hallazgos/{id} con recálculo automático de contingencia",
+          "Implementar POST /api/hallazgos/{id}/evidencias para vincular comprobantes",
+          "Agregar filtros por impuesto, riesgo, estado y período en GET hallazgos",
+          "Crear endpoint de exportación a Excel con openpyxl",
+          "Rediseñar TabHallazgos.tsx con tabla, filtros y panel lateral de detalle",
+          "Implementar edición inline de montos con recálculo y acciones batch"
+        ]
+      },
+      {
+        id: "2.4",
+        name: "Generación de informes desde UI",
+        effort: "3 días",
+        description: "Botón para generar informe de auditoría en Word/PDF desde la UI, con selección de tipo y preview HTML.",
+        dependencies: ["2.3"],
+        prompt: `Necesito implementar la generación de informes de auditoría desde la interfaz web de Inteliaudit.
+
+BACKEND:
+1. POST /api/auditorias/{id}/generar-informe
+   - Body: { tipo: "auditoria_completa"|"carta_gerencia"|"resumen_ejecutivo", formato: "docx"|"pdf"|"ambos" }
+   - Usa informes/render.py → word_profesional.py / pdf_profesional.py (ya implementados)
+   - Incluye solo hallazgos con estado "aceptado"
+   - Guarda archivos en storage y registra en tabla informes
+   - Retorna: { informe_id, archivo_docx?: url, archivo_pdf?: url }
+
+2. GET /api/informes/{id}/preview
+   - Retorna HTML renderizado del informe (Jinja2 template) para preview en browser
+   - No genera archivo, solo el HTML
+
+3. GET /api/informes/{id}/descargar/{formato}
+   - Descarga el archivo DOCX o PDF generado
+   - Content-Disposition: attachment
+
+4. Para plan Enterprise: incluir logo de la firma en el informe
+   - Leer logo_path de la tabla firmas
+   - Insertarlo en header del documento Word/PDF
+
+FRONTEND — Actualizar TabInformes.tsx:
+1. Selector de tipo de informe:
+   - Auditoría completa — informe técnico con todos los hallazgos y detalle
+   - Carta a la gerencia — resumen ejecutivo para el directorio del cliente
+   - Resumen ejecutivo — una página con KPIs y hallazgos principales
+2. Selector de formato: Word, PDF o ambos
+3. Botón "Generar informe"
+4. Preview HTML en iframe o modal antes de generar
+5. Lista de informes generados con:
+   - Tipo, versión, fecha, estado
+   - Botones de descarga (DOCX / PDF)
+   - Badge de versión (v1, v2, etc.)
+6. Si no hay hallazgos aceptados: advertencia "Revisá y aceptá hallazgos antes de generar el informe"
+
+Contexto:
+- informes/render.py ya tiene la lógica de orquestación
+- word_profesional.py (27KB) genera documentos Word con python-docx
+- pdf_profesional.py (15KB) genera PDF con WeasyPrint
+- Jinja2 para templates HTML
+- Storage path: config/settings.py → settings.storage_path (default: ./storage)
+- Identidad Inteliaudit: azul #2E84F0, verde #22C47E
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Crear endpoint POST /api/auditorias/{id}/generar-informe con selector de tipo y formato",
+          "Crear endpoint GET /api/informes/{id}/preview para preview HTML",
+          "Crear endpoint GET /api/informes/{id}/descargar/{formato} para descarga de archivos",
+          "Implementar inclusión de logo de firma para plan Enterprise",
+          "Rediseñar TabInformes.tsx con selector de tipo, formato, preview y lista de generados",
+          "Agregar validación: solo incluir hallazgos aceptados en el informe"
+        ]
+      },
+      {
+        id: "2.5",
+        name: "Portal del cliente",
+        effort: "3 días",
+        description: "Vista read-only para que el cliente auditado vea sus hallazgos y descargue informes mediante link compartible con token.",
+        dependencies: ["2.3"],
+        prompt: `Necesito implementar el portal del cliente en Inteliaudit — una vista compartible donde el cliente auditado puede ver el estado de su auditoría sin necesidad de cuenta.
+
+BACKEND:
+1. POST /api/portal/generar-link
+   - Body: { auditoria_id, hallazgos_visibles: ["id1", "id2", ...], expira_en_dias: 30 }
+   - Genera token JWT específico para portal (claims: auditoria_id, firma_id, tipo: "portal")
+   - Retorna: { url: "https://app.inteliaudit.com/portal/{token}", expira: "..." }
+   - Solo admin/auditor_senior puede generar links
+
+2. GET /api/portal/{token}
+   - Valida token JWT
+   - Retorna datos de la auditoría para vista pública:
+     - Cliente: razón social, RUC, período auditado
+     - Resumen: total hallazgos, contingencia total
+     - Hallazgos marcados como visibles (no todos — el auditor selecciona cuáles mostrar)
+     - Desglose por impuesto y riesgo
+     - NO incluir: notas internas del auditor, evidencias detalladas, datos de otros clientes
+
+3. GET /api/portal/{token}/informe
+   - Descarga el informe PDF si fue generado y está disponible
+   - Solo el informe final (no borradores)
+
+4. Gate por plan: solo Enterprise puede usar portal (validar firma.plan)
+
+FRONTEND:
+1. Crear página /portal/:token (pública, sin auth) en PortalCliente.tsx (ya existe como stub):
+   - Header: logo Inteliaudit + nombre de la firma auditora
+   - Sección hero: "Informe de Auditoría Impositiva" + cliente + período
+   - KPIs: total contingencia, hallazgos por riesgo
+   - Tabla de hallazgos: descripción, impuesto, período, contingencia, riesgo
+   - Botón "Descargar informe PDF"
+   - Footer: disclaimer "Este informe es confidencial..."
+   - Diseño: limpio, profesional, sin sidebar, sin navegación de app
+
+2. En la auditoría (para el auditor): botón "Compartir con cliente" que abre modal para:
+   - Seleccionar qué hallazgos serán visibles
+   - Configurar expiración del link
+   - Copiar link generado
+
+Contexto:
+- PortalCliente.tsx ya existe en ui-web/src/pages/
+- api/routers/portal.py ya tiene estructura básica (6.3KB)
+- Plans gate: config/plans.py → get_plan().tiene_portal_cliente
+- JWT tokens: python-jose, settings.secret_key
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Implementar POST /api/portal/generar-link con JWT de portal y selección de hallazgos",
+          "Implementar GET /api/portal/{token} con datos filtrados para vista pública",
+          "Implementar descarga de informe PDF desde el portal",
+          "Agregar gate por plan Enterprise en portal.py",
+          "Completar PortalCliente.tsx con diseño profesional, KPIs y tabla de hallazgos",
+          "Agregar botón 'Compartir con cliente' en la auditoría con modal de configuración"
+        ]
+      }
+    ]
+  },
+  {
+    id: "fase-3",
+    phase: 3,
+    title: "IA y diferenciación",
+    weeks: "Semana 9-10",
+    objective: "Funcionalidades con IA que justifiquen el precio del plan Pro y Enterprise, y diferencien a Inteliaudit de una simple hoja de cálculo.",
+    groups: [
+      {
+        id: "3.1",
+        name: "Análisis narrativo de hallazgos con Claude",
+        effort: "3-4 días",
+        description: "Generar descripción en lenguaje natural de cada hallazgo con fundamento legal usando la API de Claude.",
+        dependencies: ["1.3"],
+        prompt: `Necesito implementar la generación de narrativa profesional para hallazgos de auditoría usando la API de Claude (Anthropic).
+
+BACKEND — Mejorar analisis/claude_analisis.py:
+1. Función generar_narrativa_hallazgo(hallazgo, cliente, auditoria):
+   - Prompt a Claude con:
+     - Rol: "Sos un auditor impositivo senior en Paraguay especializado en Ley 6380/2019"
+     - Contexto: datos del cliente (razón social, RUC, actividad), período auditado
+     - Hallazgo: tipo, artículo legal, monto, datos del comprobante
+     - Instrucción: "Redactá una narrativa profesional de este hallazgo en español, en 2-3 párrafos, citando el artículo legal aplicable, explicando por qué constituye una observación y cuantificando la contingencia fiscal. Tono: formal, objetivo, técnico pero comprensible para el directorio de la empresa."
+   - Usar claude-sonnet-4-6 para balance costo/calidad
+   - Guardar resultado en hallazgo.descripcion (actualizar en DB)
+   - Marcar hallazgo.sugerencia_ai = True
+
+2. Endpoint POST /api/hallazgos/{id}/generar-narrativa
+   - Solo planes Pro y Enterprise (validar con can_use_ia())
+   - Rate limiting: máximo 50 llamadas por firma por mes (plan Pro), ilimitado Enterprise
+   - Retorna la narrativa generada
+
+3. Endpoint POST /api/auditorias/{id}/generar-narrativas-batch
+   - Genera narrativa para todos los hallazgos pendientes de la auditoría
+   - Progreso: X de Y hallazgos narrados
+
+FRONTEND:
+1. En HallazgoPanel.tsx: botón "✨ Generar narrativa con IA" (si el plan tiene IA)
+2. Loading state durante generación (2-5 segundos)
+3. Resultado editable por el auditor en textarea
+4. Badge "Generado por IA" junto a la narrativa
+5. Si el plan no tiene IA: botón deshabilitado con tooltip "Disponible en plan Pro"
+6. En TabAnalisis.tsx: botón batch "Generar todas las narrativas"
+7. Contador de uso mensual de IA visible en el dashboard o configuración
+
+Contexto:
+- anthropic SDK ya instalado (anthropic>=0.28)
+- claude_analisis.py ya tiene estructura básica
+- config/plans.py: can_use_ia(plan_id) → bool
+- ANTHROPIC_API_KEY en settings.py
+- Modelo recomendado: claude-sonnet-4-6 (rápido, económico, suficiente para narrativas)
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Implementar generar_narrativa_hallazgo() con prompt engineering específico para auditoría PY",
+          "Crear endpoint POST /api/hallazgos/{id}/generar-narrativa con gate por plan",
+          "Implementar rate limiting mensual por firma (50/mes Pro, ilimitado Enterprise)",
+          "Crear endpoint batch para generar narrativas de todos los hallazgos",
+          "Agregar botón 'Generar narrativa con IA' en HallazgoPanel.tsx con loading state",
+          "Implementar edición post-generación y badge 'Generado por IA'",
+          "Mostrar contador de uso mensual de IA en configuración"
+        ]
+      },
+      {
+        id: "3.2",
+        name: "Sugerencias de procedimientos por IA",
+        effort: "3 días",
+        description: "IA analiza los datos importados y sugiere en qué procedimientos enfocarse: concentración de proveedores, facturas redondas, patrones sospechosos.",
+        dependencies: ["1.1", "3.1"],
+        prompt: `Necesito implementar un sistema de sugerencias inteligentes que analice los datos de auditoría y recomiende al auditor en qué enfocarse.
+
+BACKEND:
+1. Función analizar_patrones(auditoria_id) en analisis/ai_auditor.py:
+   Analizar datos de RG90 y generar alertas de patrones:
+   a. Concentración de proveedores: si un proveedor representa >20% del crédito fiscal total
+   b. Facturas redondas: comprobantes con montos exactos (ej: 10.000.000, 5.000.000) — indicador de facturas simuladas
+   c. Proveedores nuevos con montos altos: proveedores que aparecen solo 1-2 veces con montos superiores al promedio
+   d. Picos atípicos: períodos donde las compras duplican el promedio mensual
+   e. Comprobantes de fin de mes: concentración de facturas en los últimos 3 días del mes
+   f. Mismo monto repetido: el mismo importe exacto aparece en múltiples comprobantes
+
+2. Función sugerir_procedimientos(patrones, auditoria) usando Claude API:
+   - Enviar los patrones detectados a Claude
+   - Prompt: "Dado estos patrones detectados en los datos de auditoría de [cliente], sugiere los 5 procedimientos de auditoría más relevantes a ejecutar, ordenados por prioridad y riesgo. Contexto: legislación paraguaya, Ley 6380/2019."
+   - Retorna lista de sugerencias priorizadas
+
+3. Endpoint GET /api/auditorias/{id}/sugerencias-ia
+   - Ejecuta análisis de patrones + Claude
+   - Cache resultado por 24 horas (no recalcular en cada request)
+   - Solo planes Pro/Enterprise
+
+FRONTEND — Actualizar TabPlanTrabajo.tsx:
+1. Sección "Sugerencias de IA" con cards priorizadas:
+   - Prioridad: Alta/Media/Baja con color
+   - Título del procedimiento sugerido
+   - Razón: qué patrón lo disparó
+   - Botón "Agregar al plan de trabajo" → crea tarea en la auditoría
+2. Sección separada de "Patrones detectados" con visualización:
+   - Concentración de proveedores: pie chart
+   - Timeline de compras por mes: line chart
+   - Tabla de facturas sospechosas (redondas, duplicadas)
+3. Checklist de plan de trabajo: tareas existentes + las agregadas desde sugerencias
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Implementar analizar_patrones() con 6 detectores: concentración, redondas, nuevos, picos, fin de mes, repetidos",
+          "Implementar sugerir_procedimientos() con Claude API para priorizar procedimientos",
+          "Crear endpoint GET /api/auditorias/{id}/sugerencias-ia con cache de 24h",
+          "Actualizar TabPlanTrabajo.tsx con sección de sugerencias IA y patrones detectados",
+          "Agregar visualizaciones: pie chart de proveedores, timeline de compras",
+          "Implementar botón 'Agregar al plan de trabajo' que crea tarea desde sugerencia"
+        ]
+      },
+      {
+        id: "3.3",
+        name: "Resumen ejecutivo automático",
+        effort: "2 días",
+        description: "Claude genera un resumen ejecutivo de la auditoría completa para incluir automáticamente en el informe final.",
+        dependencies: ["3.1"],
+        prompt: `Necesito implementar la generación automática de resumen ejecutivo de auditoría usando Claude API.
+
+BACKEND:
+1. Función generar_resumen_ejecutivo(auditoria_id) en analisis/claude_analisis.py:
+   - Recopilar contexto completo:
+     - Cliente: razón social, RUC, actividad, régimen
+     - Período auditado
+     - Impuestos en alcance
+     - Todos los hallazgos aceptados con contingencia
+     - Totales: contingencia total, hallazgos por riesgo, por impuesto
+   - Prompt a Claude:
+     "Redactá un resumen ejecutivo de auditoría impositiva de 3-4 párrafos para presentar al directorio de [cliente]. Incluir: alcance de la auditoría, principales hallazgos ordenados por materialidad, contingencia fiscal total cuantificada, y recomendaciones generales. Tono: profesional, directo, sin tecnicismos innecesarios. Legislación: Ley 6380/2019 de Paraguay."
+   - Modelo: claude-sonnet-4-6
+
+2. Endpoint POST /api/auditorias/{id}/resumen-ejecutivo
+   - Solo si hay hallazgos aceptados
+   - Retorna texto del resumen
+   - Opción de incluirlo automáticamente en el informe al generarlo
+
+3. Integrar en informes/render.py:
+   - Si tiene resumen generado → insertarlo como primera sección del informe
+   - Sección titulada "Resumen Ejecutivo" en el Word/PDF
+
+FRONTEND:
+1. En TabInformes.tsx: botón "Generar resumen ejecutivo con IA"
+2. Preview editable del resumen antes de incluirlo en el informe
+3. Indicador de que el resumen se incluirá en el próximo informe generado
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Implementar generar_resumen_ejecutivo() con recopilación de contexto completo",
+          "Crear endpoint POST /api/auditorias/{id}/resumen-ejecutivo",
+          "Integrar resumen en informes/render.py como primera sección del informe",
+          "Agregar botón y preview editable en TabInformes.tsx",
+          "Verificar inclusión del resumen en informes Word y PDF generados"
+        ]
+      }
+    ]
+  },
+  {
+    id: "fase-4",
+    phase: 4,
+    title: "Producción y monetización",
+    weeks: "Semana 11-13",
+    objective: "Producto que pueda cobrar suscripciones, manejar errores en producción, enviar emails y almacenar archivos de forma persistente.",
+    groups: [
+      {
+        id: "4.1",
+        name: "Seguridad de producción",
+        effort: "3-4 días",
+        description: "Rate limiting, headers de seguridad, validación de configuración, y hardening general para un entorno de producción real.",
+        dependencies: [],
+        prompt: `Necesito hardening de seguridad para el deploy de producción de Inteliaudit.
+
+1. Rate limiting con slowapi (pip install slowapi):
+   - Login: 5 intentos por minuto por IP
+   - API general: 100 requests por minuto por usuario
+   - Endpoints de IA: 10 por minuto por firma
+   - Upload de archivos: 20 por minuto por usuario
+
+2. Headers de seguridad como middleware FastAPI:
+   - Strict-Transport-Security: max-age=31536000; includeSubDomains
+   - X-Content-Type-Options: nosniff
+   - X-Frame-Options: DENY
+   - Content-Security-Policy: default-src 'self'
+   - Referrer-Policy: strict-origin-when-cross-origin
+
+3. Validación de configuración en startup:
+   - En producción (DEBUG=false): SECRET_KEY no puede ser "dev-secret-change-in-production"
+   - ENCRYPTION_KEY no puede estar vacío si hay credenciales Marangatú guardadas
+   - DATABASE_URL debe ser PostgreSQL (no SQLite)
+   - Loggear advertencias si ANTHROPIC_API_KEY está vacío
+
+4. CORS restringido:
+   - En producción: solo el dominio real (ej: app.inteliaudit.com)
+   - Eliminar localhost de allowed_origins en producción
+
+5. Sanitización de inputs:
+   - Validar que todos los Pydantic models usen validators adecuados
+   - RUC: regex ^\\d{1,8}-\\d$
+   - Período: regex ^\\d{4}-(0[1-9]|1[0-2])$
+   - Formulario: solo valores permitidos ("120", "500", "800", "810", "820", "830")
+
+6. Logging estructurado:
+   - Configurar logging con formato JSON para producción
+   - Log de cada request con duración, status code, usuario
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Instalar y configurar slowapi con rate limits por endpoint",
+          "Agregar middleware de headers de seguridad (HSTS, CSP, X-Frame-Options)",
+          "Implementar validación de configuración crítica en startup",
+          "Restringir CORS a dominio de producción",
+          "Agregar validators de Pydantic para RUC, período, formulario",
+          "Configurar logging estructurado JSON para producción"
+        ]
+      },
+      {
+        id: "4.2",
+        name: "Emails transaccionales",
+        effort: "3 días",
+        description: "Emails automáticos en momentos clave: bienvenida, trial por vencer, auditoría completada, invitación a usuario.",
+        dependencies: ["2.1"],
+        prompt: `Necesito implementar el sistema de emails transaccionales para Inteliaudit usando Resend (free: 100 emails/día) o Brevo (free: 300/día).
+
+BACKEND — Crear módulo notificaciones/email.py:
+1. Configuración:
+   - Agregar RESEND_API_KEY y EMAIL_FROM en config/settings.py
+   - pip install resend (o sib-api-v3-sdk para Brevo)
+
+2. Templates HTML con identidad Inteliaudit:
+   - Header: logo + nombre firma
+   - Body: contenido variable
+   - Footer: "Inteliaudit — Auditoría impositiva inteligente para Paraguay" + link unsubscribe
+   - Paleta: fondo blanco, header navy #091624, CTA button azul #2E84F0
+
+3. Emails a implementar:
+   a. Bienvenida (post-registro):
+      - "Bienvenido a Inteliaudit" — instrucciones para empezar, CTA "Ir al dashboard"
+      - Trigger: después de crear firma en POST /api/auth/firmas
+   b. Trial por vencer (3 días antes):
+      - "Tu trial Pro vence en 3 días" — CTA "Ver planes"
+      - Trigger: cron job diario o scheduled task
+   c. Trial expirado:
+      - "Tu trial ha expirado" — CTA "Elegí un plan"
+   d. Auditoría completada:
+      - "Auditoría de [cliente] finalizada" — resumen de hallazgos
+      - Trigger: al cambiar estado de auditoría a "completada"
+   e. Invitación a nuevo usuario:
+      - "[Firma] te invitó a Inteliaudit" — CTA "Activar cuenta"
+      - Trigger: POST /api/auth/usuarios
+
+4. Función de envío async: enviar_email(to, template, data) — no bloquea la API
+
+5. Tabla email_log (opcional): to, template, enviado_en, status — para debugging
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Instalar y configurar Resend SDK con API key en settings",
+          "Crear módulo notificaciones/email.py con función de envío async",
+          "Diseñar templates HTML base con identidad Inteliaudit",
+          "Implementar email de bienvenida post-registro",
+          "Implementar emails de trial por vencer (3 días) y expirado",
+          "Implementar email de auditoría completada con resumen de hallazgos",
+          "Implementar email de invitación a nuevo usuario"
+        ]
+      },
+      {
+        id: "4.3",
+        name: "Suscripciones y cobro",
+        effort: "1 semana",
+        description: "Sistema de suscripciones con cobro manual inicial (transferencia bancaria) y preparación para Bancard vPOS.",
+        dependencies: ["2.1"],
+        prompt: `Necesito implementar el sistema de suscripciones y cobro para Inteliaudit. Enfoque pragmático: cobro manual primero (transferencia bancaria), con arquitectura preparada para Bancard vPOS.
+
+BACKEND:
+1. Nuevo modelo Suscripcion en db/models.py:
+   - id, firma_id (FK), plan_id, estado ("activa"|"vencida"|"cancelada"),
+   - fecha_inicio, fecha_fin, metodo_pago ("transferencia"|"bancard"|"manual")
+   - monto_pyg, comprobante_nro, notas_admin
+   - creado_en
+
+2. Endpoints en api/routers/suscripciones.py:
+   - GET /api/suscripciones/planes — retorna PLANES de config/plans.py con precios
+   - POST /api/suscripciones/solicitar — el usuario solicita un plan (genera pedido)
+   - PATCH /api/suscripciones/{id}/confirmar — admin confirma pago recibido
+   - GET /api/suscripciones/mi-plan — estado de suscripción de la firma actual
+
+3. Lógica de expiración:
+   - Trial vencido (trial_hasta < now): degradar a read-only
+   - Read-only: puede ver datos pero no crear auditorías, no ejecutar análisis, no generar informes
+   - Suscripción vencida: 7 días de gracia, luego read-only
+   - Middleware que valide en cada request protegido si la firma tiene acceso activo
+
+4. Lógica de upgrade:
+   - Cambiar plan de firma cuando suscripción se confirma
+   - Recalcular límites (max_clientes, max_usuarios, tiene_ia)
+
+FRONTEND:
+1. Página /planes (ui-web/src/pages/Planes.tsx):
+   - 3 cards de planes con precios en Guaraníes, features, botón CTA
+   - Plan actual resaltado
+   - Toggle mensual/anual con descuento 15%
+   - Para cobro manual: "Al solicitar, te enviaremos los datos de transferencia por email"
+
+2. Modal de solicitud:
+   - Confirmar plan elegido
+   - Seleccionar período (mensual/anual)
+   - Datos de facturación (RUC de la firma, razón social)
+   - Botón "Solicitar plan"
+
+3. En Dashboard: alerta si trial/suscripción está por vencer o ya venció
+
+Datos de planes (de config/plans.py):
+- Starter: Gs. 490.000/mes (anual: Gs. 4.998.000)
+- Pro: Gs. 890.000/mes (anual: Gs. 9.078.000)
+- Enterprise: Gs. 1.790.000/mes (anual: Gs. 18.258.000)
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Crear modelo Suscripcion en db/models.py y generar migración Alembic",
+          "Crear api/routers/suscripciones.py con endpoints de planes, solicitar, confirmar",
+          "Implementar lógica de expiración: trial vencido → read-only, suscripción vencida → gracia 7 días",
+          "Crear middleware de validación de acceso activo en cada request protegido",
+          "Crear página /planes con cards, precios PYG, toggle mensual/anual",
+          "Implementar modal de solicitud con datos de facturación",
+          "Agregar alertas en Dashboard para trial/suscripción por vencer"
+        ]
+      },
+      {
+        id: "4.4",
+        name: "Monitoreo y error tracking",
+        effort: "2-3 horas",
+        description: "Sentry free tier para capturar errores 500 en producción con alertas automáticas por email.",
+        dependencies: [],
+        prompt: `Necesito configurar Sentry para error tracking y monitoreo básico de performance en Inteliaudit.
+
+1. Instalar: pip install sentry-sdk[fastapi]
+2. Agregar SENTRY_DSN en config/settings.py (opcional, no falla si vacío)
+3. Inicializar en api/main.py:
+   - sentry_sdk.init(dsn=settings.sentry_dsn, traces_sample_rate=0.1, environment="production" if not settings.debug else "development")
+   - Integración automática con FastAPI y SQLAlchemy
+4. Configurar en Sentry web:
+   - Alertas por email cuando hay errores 500
+   - Ignorar errores 401/403/404 (no son bugs)
+5. Agregar user context: en cada request autenticado, set sentry user con user_id y firma_id (sin datos sensibles)
+6. Agregar breadcrumbs para operaciones clave: análisis IVA, generación de informes, consulta SIFEN
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Instalar sentry-sdk[fastapi] y agregar SENTRY_DSN en settings",
+          "Inicializar Sentry en api/main.py con FastAPI integration",
+          "Configurar alertas por email para errores 500",
+          "Agregar user context y breadcrumbs para operaciones clave",
+          "Verificar que errores se reportan correctamente en Sentry dashboard"
+        ]
+      },
+      {
+        id: "4.5",
+        name: "File storage persistente",
+        effort: "2-3 días",
+        description: "Migrar storage de archivos del filesystem efímero de Render a Cloudflare R2 (10 GB free, compatible S3).",
+        dependencies: [],
+        prompt: `Necesito migrar el file storage de Inteliaudit del filesystem local (efímero en Render) a un storage persistente compatible con S3.
+
+Opciones evaluadas:
+- Cloudflare R2: 10 GB gratis, sin costo de egress, API compatible S3 — RECOMENDADO
+- Supabase Storage: 1 GB gratis, API REST
+- AWS S3: free tier 5 GB primer año
+
+IMPLEMENTACIÓN:
+1. Crear módulo storage/adapter.py con interface abstracta:
+   class StorageAdapter:
+       async def upload(self, key: str, data: bytes, content_type: str) -> str  # retorna URL
+       async def download(self, key: str) -> bytes
+       async def delete(self, key: str) -> None
+       async def get_url(self, key: str, expires_in: int = 3600) -> str  # presigned URL
+
+2. Implementar LocalStorageAdapter (para dev):
+   - Guarda en settings.storage_path (./storage)
+   - get_url retorna path relativo
+
+3. Implementar R2StorageAdapter (para producción):
+   - pip install boto3 (S3-compatible)
+   - Configuración: R2_ACCOUNT_ID, R2_ACCESS_KEY, R2_SECRET_KEY, R2_BUCKET en settings
+   - Endpoint: https://{account_id}.r2.cloudflarestorage.com
+   - Usar presigned URLs para descarga (no exponer keys)
+
+4. Factory function get_storage() → StorageAdapter:
+   - Si R2_ACCOUNT_ID está configurado → R2StorageAdapter
+   - Si no → LocalStorageAdapter
+
+5. Migrar usos existentes:
+   - api/routers/archivos.py: upload/download de archivos de auditoría
+   - informes/render.py: guardado de informes Word/PDF generados
+   - Credenciales: no tocar (están en DB, no en filesystem)
+
+6. Organización de keys en R2:
+   - {firma_id}/auditorias/{auditoria_id}/rg90/{archivo}
+   - {firma_id}/auditorias/{auditoria_id}/informes/{archivo}
+   - {firma_id}/auditorias/{auditoria_id}/evidencias/{archivo}
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Crear storage/adapter.py con interface StorageAdapter abstracta",
+          "Implementar LocalStorageAdapter para desarrollo local",
+          "Implementar R2StorageAdapter con boto3 (S3-compatible)",
+          "Agregar configuración R2 en settings.py con fallback a local",
+          "Migrar api/routers/archivos.py para usar StorageAdapter",
+          "Migrar informes/render.py para guardar archivos via StorageAdapter",
+          "Verificar upload/download funcional en desarrollo y simular R2"
+        ]
+      }
+    ]
+  },
+  {
+    id: "fase-5",
+    phase: 5,
+    title: "Marangatú scraper",
+    weeks: "Semana 14-16",
+    objective: "Automatización completa de la descarga de datos desde el portal tributario SET. Fase más frágil del proyecto — depende de un portal gubernamental que puede cambiar sin aviso.",
+    groups: [
+      {
+        id: "5.1",
+        name: "Ingeniería reversa de Marangatú",
+        effort: "1 semana",
+        description: "Investigar el portal real de Marangatú: selectores del DOM, manejo de CAPTCHA, tokens CSRF/ViewState (JSF), timeouts de sesión.",
+        dependencies: [],
+        prompt: `Necesito hacer ingeniería reversa del portal Marangatú (https://marangatu.set.gov.py) para completar el scraper de Inteliaudit.
+
+INVESTIGACIÓN NECESARIA:
+1. Login:
+   - Identificar selectores reales del formulario de login (los actuales en marangatu.py son placeholders)
+   - Verificar si hay CAPTCHA (reCAPTCHA, imagen, etc.)
+   - Identificar tokens CSRF / ViewState (Marangatú usa JSF, que genera ViewState en cada página)
+   - Manejar cookies de sesión y redirecciones post-login
+
+2. Navegación a secciones clave:
+   - Ruta de menú a "Declaraciones > Mis Declaraciones"
+   - Ruta de menú a "Declaraciones > RG 90"
+   - Ruta de menú a "HECHAUKA > Información Recibida"
+   - Ruta a "Estado de Cuenta"
+   - Ruta a "Datos del Contribuyente"
+   - Identificar si usa frames/iframes, popups, o AJAX para cargar contenido
+
+3. Descarga de archivos:
+   - RG90: identificar el mecanismo de exportación a XLSX (botón, formulario, AJAX)
+   - Declaraciones PDF: mecanismo de descarga de PDF de cada DJ
+   - HECHAUKA: mecanismo de exportación
+
+4. Manejo de sesión:
+   - Timeout de sesión (¿cuántos minutos?)
+   - Detección de sesión expirada
+   - Reconexión automática
+
+5. Verificación de RUC (portal público):
+   - https://www.set.gov.py/portal/PARAGUAY-SET/InformacionTributaria → consulta de RUC
+   - Este no requiere autenticación, puede ser más sencillo
+
+ENTREGABLE:
+- Documento con todos los selectores CSS/XPath identificados
+- Capturas de pantalla del DOM de cada sección
+- Actualizar ingesta/marangatu.py con selectores reales
+- Implementar login funcional como primera prueba
+
+NOTA: Usar una cuenta de prueba propia para la investigación. Nunca usar credenciales de clientes en desarrollo.
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Identificar selectores reales del formulario de login de Marangatú",
+          "Determinar si hay CAPTCHA y evaluar estrategias de manejo",
+          "Mapear tokens CSRF/ViewState de JSF en cada página",
+          "Documentar rutas de navegación a cada sección (DJ, RG90, HECHAUKA, Estado de Cuenta)",
+          "Identificar mecanismos de descarga de archivos (XLSX, PDF)",
+          "Determinar timeout de sesión y estrategia de reconexión",
+          "Implementar login funcional con selectores reales y verificar"
+        ]
+      },
+      {
+        id: "5.2",
+        name: "Implementar métodos del scraper",
+        effort: "1 semana",
+        description: "Completar todos los métodos NotImplementedError del MarangatuScraper con la lógica real de navegación y descarga.",
+        dependencies: ["5.1"],
+        prompt: `Necesito completar todos los métodos del MarangatuScraper en ingesta/marangatu.py que actualmente tienen NotImplementedError.
+
+Implementar en este orden de prioridad:
+
+1. verificar_ruc(ruc: str) — portal público, no requiere login
+   - Navegar a la página de consulta pública de RUC en SET
+   - Ingresar RUC, submit
+   - Parsear resultado: razón_social, estado (activo/inactivo/cancelado), fecha_inscripción
+   - Retornar dict
+
+2. descargar_rg90(periodo: str) — PRIORIDAD MÁXIMA
+   - Navegar a Declaraciones > RG90
+   - Seleccionar período (formato YYYY-MM)
+   - Hacer click en exportar/descargar XLSX
+   - Esperar descarga con page.expect_download()
+   - Guardar en storage_path/rg90/rg90_{periodo}.xlsx
+   - Retornar Path al archivo
+
+3. listar_declaraciones(formulario, periodo_desde, periodo_hasta)
+   - Navegar a Declaraciones > Mis Declaraciones
+   - Aplicar filtros si se proporcionan
+   - Parsear tabla de resultados
+   - Retornar lista de dicts con: formulario, periodo, fecha_presentacion, estado, nro_rectificativa
+
+4. descargar_declaracion_pdf(url_pdf, nombre_archivo)
+   - Ya tiene estructura, completar con manejo de errores
+
+5. descargar_hechauka(periodo)
+   - Navegar a HECHAUKA > Información Recibida
+   - Seleccionar período
+   - Exportar XLSX
+
+6. descargar_estado_cuenta(impuesto)
+   - Navegar a Estado de Cuenta
+   - Filtrar por impuesto si se proporciona
+   - Descargar PDF
+
+7. descargar_datos_contribuyente()
+   - Navegar a perfil del contribuyente
+   - Parsear datos de la página
+
+Para cada método:
+- Usar los selectores identificados en 5.1
+- Manejar ViewState de JSF (submit con parámetros de formulario JSF)
+- Agregar reintentos (max 3) con backoff exponencial
+- Loggear cada acción con rich console
+- Manejar errores: timeout, sesión expirada, elemento no encontrado
+- Agregar sleep de 1-2 segundos entre páginas (cortesía al portal)
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Implementar verificar_ruc() via portal público SET (sin login)",
+          "Implementar descargar_rg90() con navegación, selección de período y descarga XLSX",
+          "Implementar listar_declaraciones() con filtros y parsing de tabla",
+          "Completar descargar_declaracion_pdf() con manejo de errores robusto",
+          "Implementar descargar_hechauka() con navegación y descarga",
+          "Implementar descargar_estado_cuenta() con filtro por impuesto",
+          "Implementar descargar_datos_contribuyente() con parsing de perfil",
+          "Agregar reintentos con backoff exponencial y logging en todos los métodos"
+        ]
+      },
+      {
+        id: "5.3",
+        name: "Ejecución como background worker",
+        effort: "3-4 días",
+        description: "El scraper debe correr como worker separado para no bloquear la API. Cola de trabajos con estado y retry.",
+        dependencies: ["5.2"],
+        prompt: `Necesito implementar una cola de trabajos para ejecutar el scraper de Marangatú en background, separado de la API principal.
+
+BACKEND:
+1. Modelo Job en db/models.py:
+   - id, firma_id, tipo ("scraper_rg90"|"scraper_hechauka"|"scraper_dj"|"validar_sifen")
+   - params_json (argumentos: ruc, periodo, credenciales)
+   - estado ("pendiente"|"ejecutando"|"completado"|"error"|"cancelado")
+   - progreso (0-100)
+   - resultado_json, error_msg
+   - creado_en, iniciado_en, completado_en
+   - reintentos (int, max 3)
+
+2. Endpoints:
+   - POST /api/scraper/encolar — encola un job de scraping
+     Body: { tipo, cliente_ruc, periodo_desde, periodo_hasta }
+     Usa credenciales cifradas de CredencialMarangatu
+   - GET /api/scraper/jobs — lista jobs de la firma con filtros
+   - GET /api/scraper/jobs/{id} — detalle con progreso
+   - POST /api/scraper/jobs/{id}/cancelar — marca como cancelado
+
+3. Worker (worker.py o modificar main.py con flag --worker):
+   - Loop infinito: consultar jobs pendientes → ejecutar el más antiguo
+   - Para cada job:
+     a. Descifrar credenciales de la firma
+     b. Crear MarangatuScraper con context manager
+     c. Ejecutar el método correspondiente
+     d. Actualizar progreso en DB
+     e. Al completar: guardar resultado, importar datos parseados automáticamente
+     f. En error: guardar error_msg, incrementar reintentos, re-encolar si reintentos < 3
+   - Un solo job a la vez (Playwright no es thread-safe)
+   - Graceful shutdown con signal handling
+
+4. Opción de Render background worker:
+   - Agregar worker al render.yaml como servicio tipo "worker"
+   - O usar asyncio.create_task si se corre en el mismo proceso
+
+FRONTEND:
+1. Sección en TabArchivos.tsx o nueva sección "Automatización":
+   - Estado del scraper (online/offline)
+   - Botón "Descargar de Marangatú" → modal con selección de qué descargar
+   - Lista de jobs con progreso en tiempo real
+   - Log de cada job expandible
+   - Botón cancelar para jobs en ejecución
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Crear modelo Job en db/models.py con estado, progreso, reintentos",
+          "Crear endpoints de cola: encolar, listar, detalle, cancelar",
+          "Implementar worker loop con descifrado de credenciales y ejecución del scraper",
+          "Implementar retry con backoff exponencial (max 3 reintentos)",
+          "Agregar worker como servicio en render.yaml",
+          "Implementar UI de automatización con lista de jobs y progreso en tiempo real",
+          "Agregar importación automática de datos descargados post-scraping"
+        ]
+      }
+    ]
+  },
+  {
+    id: "fase-6",
+    phase: 6,
+    title: "Pulido y go-to-market",
+    weeks: "Semana 17-18",
+    objective: "Últimos ajustes, documentación, y preparación para abrir el producto al público con un programa beta de 3-5 firmas.",
+    groups: [
+      {
+        id: "6.1",
+        name: "Documentación y API docs",
+        effort: "2-3 días",
+        description: "Documentación de API (OpenAPI ya generado por FastAPI), guía de usuario con screenshots, y FAQ.",
+        dependencies: [],
+        prompt: `Necesito completar la documentación de Inteliaudit para que usuarios y desarrolladores puedan entender y usar el producto.
+
+1. API Documentation:
+   - FastAPI ya genera OpenAPI automáticamente en /docs (Swagger UI)
+   - Agregar descriptions detalladas a TODOS los endpoints en cada router
+   - Agregar examples en los Pydantic schemas (model_config con json_schema_extra)
+   - Agrupar endpoints por tags: Auth, Clientes, Auditorías, Hallazgos, Informes, Scraper, Portal
+   - Documentar códigos de error específicos
+
+2. Guía de usuario (landing/guia.html o sección en la app):
+   - 5 secciones con screenshots:
+     a. Registro y configuración inicial
+     b. Crear cliente y cargar credenciales Marangatú
+     c. Crear auditoría e importar archivos (RG90, HECHAUKA, DJ)
+     d. Ejecutar análisis y revisar hallazgos
+     e. Generar y compartir informe
+   - Cada sección con pasos numerados y screenshots
+   - Diseño: misma identidad visual del landing page
+
+3. FAQ en landing/index.html (nueva sección):
+   - ¿Qué es Inteliaudit?
+   - ¿Necesito instalar algo?
+   - ¿Mis datos están seguros?
+   - ¿Qué impuestos cubre?
+   - ¿Cómo funciona el trial?
+   - ¿Puedo cancelar en cualquier momento?
+   - ¿Funciona con e-Kuatia?
+   - ¿Necesito dar mis credenciales de Marangatú?
+
+4. Video demo (script para grabar):
+   - Guión de 3-5 minutos mostrando flujo completo
+   - Desde login → crear cliente → importar RG90 → análisis → hallazgos → informe
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Agregar descriptions y examples a todos los endpoints de FastAPI",
+          "Agrupar endpoints por tags y documentar códigos de error",
+          "Crear guía de usuario con 5 secciones y screenshots del flujo completo",
+          "Agregar sección FAQ en la landing page",
+          "Preparar script/guión para video demo de 3-5 minutos"
+        ]
+      },
+      {
+        id: "6.2",
+        name: "Landing page final",
+        effort: "2 días",
+        description: "Landing page optimizada para conversión con CTA claro, demo visual, comparativa de planes y SEO reforzado.",
+        dependencies: ["4.3"],
+        prompt: `Necesito optimizar la landing page de Inteliaudit (landing/index.html) para maximizar conversiones de visitante a registro.
+
+MEJORAS:
+1. Hero section:
+   - Headline: "Automatizá tu auditoría impositiva en Paraguay"
+   - Subtitle: "Cruce automático RG90 × SIFEN × HECHAUKA. Hallazgos con base legal. Informes profesionales en minutos."
+   - CTA principal: "Empezá gratis — 7 días de trial Pro" → link a /registro
+   - CTA secundario: "Ver demo" → scroll a sección demo o video
+
+2. Sección "Cómo funciona" (3 pasos con iconos):
+   - 1. Subí tus archivos RG90 y HECHAUKA
+   - 2. El sistema ejecuta 5 cruces automáticos
+   - 3. Recibí hallazgos con base legal e informe profesional
+
+3. Sección de features con screenshots/mockups del dashboard
+
+4. Comparativa de planes actualizada (datos de config/plans.py):
+   - Starter: Gs. 490.000/mes
+   - Pro: Gs. 890.000/mes (con IA)
+   - Enterprise: Gs. 1.790.000/mes (portal cliente, ilimitado)
+   - Toggle mensual/anual
+   - CTA en cada plan: "Empezar trial" / "Contactanos"
+
+5. Sección de confianza:
+   - "Tus datos están cifrados con AES-256"
+   - "Auditoría completa de acciones"
+   - "Cumplimiento Ley 6534/2020 de protección de datos"
+
+6. FAQ actualizada
+
+7. SEO:
+   - Title: "Inteliaudit — Auditoría Impositiva Automatizada para Paraguay"
+   - Meta description optimizada
+   - Keywords: auditoría impositiva Paraguay, RG90, SIFEN, Ley 6380, cruce IVA automático
+   - Structured data (JSON-LD) para SoftwareApplication
+   - Open Graph tags para compartir en redes
+
+8. Footer: links a Términos, Privacidad, contacto WhatsApp
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Rediseñar hero section con headline, CTA principal y secundario",
+          "Agregar sección 'Cómo funciona' con 3 pasos visuales",
+          "Actualizar comparativa de planes con precios PYG y toggle mensual/anual",
+          "Agregar sección de confianza (cifrado, audit trail, protección datos)",
+          "Optimizar SEO: meta tags, structured data JSON-LD, Open Graph",
+          "Actualizar FAQ y footer con links actualizados"
+        ]
+      },
+      {
+        id: "6.3",
+        name: "Legal y compliance",
+        effort: "1-2 días",
+        description: "Revisión de términos de servicio, política de privacidad, y disclaimers legales necesarios para operar en Paraguay.",
+        dependencies: [],
+        prompt: `Necesito revisar y completar la documentación legal de Inteliaudit para compliance con la legislación paraguaya.
+
+REVISIÓN:
+1. Términos de servicio (landing/terminos.html — ya existe):
+   - Verificar que cubre: descripción del servicio, planes y precios, limitaciones de responsabilidad
+   - Agregar cláusula de uso de IA: "Las narrativas y sugerencias generadas por IA son asistencia, no reemplazan el criterio profesional del auditor"
+   - Agregar cláusula de almacenamiento de credenciales Marangatú: consentimiento explícito
+   - Cláusula de terminación y portabilidad de datos
+
+2. Política de privacidad (landing/privacidad.html — ya existe):
+   - Verificar compliance con Ley 6534/2020 de Protección de Datos Personales de Paraguay
+   - Datos recolectados: nombre, email, RUC, credenciales Marangatú (cifradas)
+   - Datos procesados: declaraciones juradas, comprobantes, hallazgos de auditoría
+   - Propósito: prestación del servicio de auditoría impositiva
+   - Retención: mientras la cuenta esté activa + 5 años (prescripción tributaria)
+   - Derechos: acceso, rectificación, cancelación, oposición
+   - Transferencias internacionales: servidores en USA (Render.com, Neon) — necesita mención
+
+3. Disclaimer en la aplicación:
+   - Footer de cada página: "Inteliaudit es una herramienta de asistencia para profesionales. No sustituye el criterio profesional del auditor ni constituye asesoría legal o tributaria."
+   - En informes generados: disclaimer al pie
+
+4. Contrato de procesamiento de datos:
+   - Si la firma auditora nos confía credenciales de sus clientes, somos procesadores de datos personales
+   - Documento breve que establece responsabilidades
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Revisar y actualizar términos de servicio con cláusulas de IA y credenciales",
+          "Verificar compliance de política de privacidad con Ley 6534/2020",
+          "Agregar disclaimer legal en footer de la app y en informes generados",
+          "Crear contrato de procesamiento de datos para credenciales de terceros"
+        ]
+      },
+      {
+        id: "6.4",
+        name: "Programa beta",
+        effort: "ongoing",
+        description: "Invitar 3-5 firmas de auditoría a probar gratis por 30 días con canal de feedback directo.",
+        dependencies: ["6.1", "6.2"],
+        prompt: `Necesito preparar y lanzar un programa beta para Inteliaudit con 3-5 firmas de auditoría en Paraguay.
+
+PREPARACIÓN:
+1. Crear plan "beta" en config/plans.py:
+   - Igual a Enterprise pero con trial de 30 días
+   - Badge "Beta Tester" visible en la app
+   - Acceso a todas las features
+
+2. Landing page /beta con formulario de aplicación:
+   - Nombre de la firma
+   - RUC
+   - Cantidad de auditores
+   - Cantidad de clientes que auditan por año
+   - Impuestos que más auditan
+   - Email de contacto
+   - ¿Por qué les interesa Inteliaudit?
+   - Formulario envía a nuestro email (o guardar en DB)
+
+3. Kit de onboarding para beta testers:
+   - Email de bienvenida con link de registro + plan beta activado
+   - Guía rápida de primeros pasos (PDF o email)
+   - Link a grupo WhatsApp de feedback
+   - Calendario de call de onboarding (15 min)
+
+4. Tracking de uso:
+   - Agregar eventos en audit_trail para métricas clave:
+     - Primer login, primer cliente creado, primera auditoría
+     - Primer análisis ejecutado, primer informe generado
+     - Feature de IA usada
+   - Dashboard interno (admin) para ver actividad de beta testers
+
+5. Feedback loop:
+   - Botón "Enviar feedback" en la app (abre formulario o WhatsApp)
+   - Encuesta semanal automática (email): "¿Qué te pareció esta semana? ¿Qué faltó?"
+   - Reunión quincenal de 15 minutos con cada firma beta
+
+Hacerlo con innovación y profesionalismo y siempre registrar los avances y la información pertinente en el roadmap.`,
+        tasks: [
+          "Crear plan 'beta' en config/plans.py con 30 días y acceso Enterprise completo",
+          "Crear landing page /beta con formulario de aplicación",
+          "Preparar kit de onboarding: email, guía rápida, grupo WhatsApp",
+          "Agregar tracking de eventos clave en audit_trail para métricas de uso",
+          "Agregar botón 'Enviar feedback' en la app",
+          "Contactar 3-5 firmas de auditoría y lanzar beta"
+        ]
+      }
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════
+//  STATE MANAGEMENT — Multi-layer persistence
+//  Priority: 1) Server API  2) File System Access API  3) localStorage
+// ═══════════════════════════════════════════════════════════════
+
+const STORAGE_KEY = 'inteliaudit_roadmap_v2';
+const STATE_FILENAME = 'roadmap-state.json';
+
+// Try multiple server ports (roadmap-server.py on 4900, FastAPI on 8000)
+const API_CANDIDATES = (() => {
+  const loc = window.location;
+  const urls = [];
+  if (loc.protocol !== 'file:') urls.push(`${loc.origin}/api`);
+  if (loc.port !== '4900') urls.push('http://localhost:4900/api');
+  if (loc.port !== '8000') urls.push('http://localhost:8000/api');
+  return urls;
+})();
+
+let _stateCache = null;
+let _saveDebounce = null;
+let _apiBase = null;           // resolved server URL (null = no server)
+let _fileHandle = null;        // File System Access API handle
+let _persistMode = 'local';    // 'server' | 'file' | 'local'
+
+async function initState() {
+  // 1) Try server APIs
+  for (const base of API_CANDIDATES) {
+    try {
+      const res = await fetch(`${base}/roadmap-state`, { signal: AbortSignal.timeout(2000) });
+      if (res.ok) {
+        _stateCache = await res.json();
+        _apiBase = base;
+        _persistMode = 'server';
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(_stateCache));
+        updateConnectionStatus();
+        return;
+      }
+    } catch {}
+  }
+
+  // 2) Try loading from localStorage (always available as baseline)
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    _stateCache = raw ? JSON.parse(raw) : {};
+  } catch { _stateCache = {}; }
+
+  _persistMode = 'local';
+  updateConnectionStatus();
+}
+
+function loadState() {
+  return _stateCache || {};
+}
+
+function saveState(state) {
+  state._lastSaved = new Date().toISOString();
+  _stateCache = state;
+  // Always save to localStorage immediately
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  updateLastSaved(state._lastSaved);
+  // Debounced persist to durable storage
+  if (_saveDebounce) clearTimeout(_saveDebounce);
+  _saveDebounce = setTimeout(() => persistState(state), 300);
+}
+
+async function persistState(state) {
+  const json = JSON.stringify(state, null, 2);
+
+  // Try server
+  if (_apiBase) {
+    try {
+      const res = await fetch(`${_apiBase}/roadmap-state`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: json,
+        signal: AbortSignal.timeout(5000),
+      });
+      if (res.ok) { _persistMode = 'server'; updateConnectionStatus(); return; }
+    } catch {}
+    _apiBase = null; // server went away
+  }
+
+  // Try File System Access API handle
+  if (_fileHandle) {
+    try {
+      const writable = await _fileHandle.createWritable();
+      await writable.write(json);
+      await writable.close();
+      _persistMode = 'file';
+      updateConnectionStatus();
+      return;
+    } catch { _fileHandle = null; }
+  }
+
+  _persistMode = 'local';
+  updateConnectionStatus();
+}
+
+// Let user pick a file to persist to (File System Access API)
+async function connectToFile() {
+  if (!('showSaveFilePicker' in window)) {
+    alert('Tu navegador no soporta File System Access API.\nUsá Chrome o Edge, o iniciá roadmap-server.py.');
+    return;
+  }
+  try {
+    _fileHandle = await window.showSaveFilePicker({
+      suggestedName: STATE_FILENAME,
+      types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }],
+    });
+    // Write current state immediately
+    const state = loadState();
+    const writable = await _fileHandle.createWritable();
+    await writable.write(JSON.stringify(state, null, 2));
+    await writable.close();
+    _persistMode = 'file';
+    updateConnectionStatus();
+  } catch (e) {
+    if (e.name !== 'AbortError') alert('Error al conectar archivo: ' + e.message);
+  }
+}
+
+// Load state from a previously saved file
+async function loadFromFile() {
+  if (!('showOpenFilePicker' in window)) {
+    alert('Tu navegador no soporta File System Access API.\nUsá Chrome o Edge.');
+    return;
+  }
+  try {
+    const [handle] = await window.showOpenFilePicker({
+      types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }],
+    });
+    _fileHandle = handle;
+    const file = await handle.getFile();
+    const text = await file.text();
+    _stateCache = JSON.parse(text);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(_stateCache));
+    _persistMode = 'file';
+    updateConnectionStatus();
+    render();
+  } catch (e) {
+    if (e.name !== 'AbortError') alert('Error al cargar archivo: ' + e.message);
+  }
+}
+
+function updateConnectionStatus() {
+  const el = document.getElementById('conn-status');
+  if (!el) return;
+  const modes = {
+    server: { text: `Servidor (${_apiBase})`, color: 'var(--green)', icon: '●' },
+    file:   { text: 'Archivo local (persistente)', color: 'var(--green)', icon: '●' },
+    local:  { text: 'Solo localStorage', color: 'var(--risk-medium)', icon: '○' },
+  };
+  const m = modes[_persistMode];
+  el.innerHTML = `<span style="color:${m.color}">${m.icon}</span> ${m.text}`;
+  el.style.color = m.color;
+}
+
+function getTaskKey(groupId, taskIdx) {
+  return `${groupId}__${taskIdx}`;
+}
+
+function isTaskCompleted(state, groupId, taskIdx) {
+  const key = getTaskKey(groupId, taskIdx);
+  return state[key]?.completed || false;
+}
+
+function getTaskBriefing(state, groupId, taskIdx) {
+  const key = getTaskKey(groupId, taskIdx);
+  return state[key]?.briefing || null;
+}
+
+function getTaskTimestamp(state, groupId, taskIdx) {
+  const key = getTaskKey(groupId, taskIdx);
+  return state[key]?.timestamp || null;
+}
+
+function toggleTask(groupId, taskIdx, briefing = null) {
+  const state = loadState();
+  const key = getTaskKey(groupId, taskIdx);
+  if (!state[key]) state[key] = {};
+
+  if (state[key].completed) {
+    state[key].completed = false;
+    state[key].briefing = null;
+    state[key].timestamp = null;
+  } else {
+    state[key].completed = true;
+    state[key].briefing = briefing;
+    state[key].timestamp = new Date().toISOString();
+  }
+  saveState(state);
+  render();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════════════
+
+function render() {
+  const state = loadState();
+  renderSidebar(state);
+  renderContent(state);
+  updateStats(state);
+  updateLastSaved(state._lastSaved);
+}
+
+function updateLastSaved(ts) {
+  const el = document.getElementById('last-saved');
+  if (ts) {
+    const d = new Date(ts);
+    el.textContent = `Guardado: ${d.toLocaleDateString('es-PY')} ${d.toLocaleTimeString('es-PY', {hour:'2-digit',minute:'2-digit'})}`;
+  }
+}
+
+function getPhaseStats(phase, state) {
+  let total = 0, done = 0;
+  phase.groups.forEach(g => {
+    g.tasks.forEach((_, ti) => {
+      total++;
+      if (isTaskCompleted(state, g.id, ti)) done++;
+    });
+  });
+  return { total, done, pct: total ? Math.round(done/total*100) : 0 };
+}
+
+function updateStats(state) {
+  let total = 0, done = 0;
+  ROADMAP.forEach(p => {
+    const s = getPhaseStats(p, state);
+    total += s.total;
+    done += s.done;
+  });
+  document.getElementById('stat-done').textContent = done;
+  document.getElementById('stat-pending').textContent = total - done;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('global-progress').style.width = (total ? (done/total*100) : 0) + '%';
+}
+
+function renderSidebar(state) {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.innerHTML = ROADMAP.map(p => {
+    const s = getPhaseStats(p, state);
+    const isComplete = s.done === s.total && s.total > 0;
+    return `<div class="nav-section">
+      <div class="nav-phase ${isComplete ? 'phase-complete' : ''}" onclick="scrollToPhase('${p.id}')">
+        <span class="nav-dot dot-${p.phase}"></span>
+        Fase ${p.phase}: ${p.title}
+        <span class="nav-badge">${s.done}/${s.total}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderContent(state) {
+  const content = document.getElementById('content');
+  content.innerHTML = ROADMAP.map(phase => {
+    const ps = getPhaseStats(phase, state);
+    return `
+    <div class="phase" id="${phase.id}">
+      <div class="phase-header">
+        <span class="phase-number">${phase.phase}</span>
+        <span class="phase-title">${phase.title}</span>
+        <span class="phase-weeks">${phase.weeks}</span>
+      </div>
+      <div class="phase-objective">${phase.objective}</div>
+      <div class="phase-progress">
+        <span>${ps.pct}% completado</span>
+        <div class="phase-progress-bar"><div class="phase-progress-fill" style="width:${ps.pct}%"></div></div>
+        <span>${ps.done}/${ps.total}</span>
+      </div>
+      ${phase.groups.map(group => renderGroup(group, state)).join('')}
+    </div>`;
+  }).join('');
+}
+
+function renderGroup(group, state) {
+  let totalTasks = group.tasks.length;
+  let doneTasks = group.tasks.filter((_, i) => isTaskCompleted(state, group.id, i)).length;
+  let statusClass = doneTasks === 0 ? 'status-pending' : doneTasks === totalTasks ? 'status-done' : 'status-in-progress';
+  let statusText = doneTasks === 0 ? 'Pendiente' : doneTasks === totalTasks ? 'Completado' : `${doneTasks}/${totalTasks}`;
+
+  const deps = group.dependencies.length > 0
+    ? `<p>${group.dependencies.map(d => `<span class="dep-tag">Depende de ${d}</span>`).join('')}</p>`
+    : '';
+
+  return `
+  <div class="task-group" id="group-${group.id}">
+    <div class="task-group-header" onclick="toggleGroup('${group.id}')">
+      <span class="task-group-toggle">&#9654;</span>
+      <span class="task-group-id">${group.id}</span>
+      <span class="task-group-name">${group.name}</span>
+      <span class="task-group-effort">${group.effort}</span>
+      <span class="task-group-status ${statusClass}">${statusText}</span>
+    </div>
+    <div class="task-group-body">
+      <div class="task-desc">
+        <p>${group.description}</p>
+        ${deps}
+        <div class="prompt-toggle" onclick="togglePrompt(event, '${group.id}')">
+          <span>&#128203;</span> Ver prompt de implementación
+        </div>
+        <div class="prompt-block" id="prompt-${group.id}">
+          <button class="prompt-copy" onclick="copyPrompt(event, '${group.id}')">Copiar</button>
+          <pre>${escapeHtml(group.prompt)}</pre>
+        </div>
+      </div>
+      ${group.tasks.map((task, ti) => renderTask(group.id, ti, task, state)).join('')}
+    </div>
+  </div>`;
+}
+
+function renderTask(groupId, taskIdx, taskText, state) {
+  const completed = isTaskCompleted(state, groupId, taskIdx);
+  const briefing = getTaskBriefing(state, groupId, taskIdx);
+  const timestamp = getTaskTimestamp(state, groupId, taskIdx);
+  const taskId = `task-${groupId}-${taskIdx}`;
+
+  let briefingHtml = '';
+  if (completed && briefing) {
+    briefingHtml = `<div class="task-briefing">
+      <span class="briefing-icon">&#9989;</span>
+      <span>${escapeHtml(briefing)}</span>
+    </div>`;
+    if (timestamp) {
+      briefingHtml += `<div class="task-timestamp">${new Date(timestamp).toLocaleString('es-PY')}</div>`;
+    }
+  }
+
+  return `
+  <div class="task-item ${completed ? 'completed' : ''}" id="${taskId}">
+    <div class="task-check ${completed ? 'checked' : ''}" onclick="handleTaskClick('${groupId}', ${taskIdx})"></div>
+    <div class="task-content">
+      <span class="task-label" onclick="handleTaskClick('${groupId}', ${taskIdx})">${escapeHtml(taskText)}</span>
+      ${briefingHtml}
+      <div class="task-briefing-input">
+        <textarea id="briefing-${groupId}-${taskIdx}" placeholder="Breve descripción de lo que se hizo..."></textarea>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <button class="btn-save" onclick="saveBriefing('${groupId}', ${taskIdx})">Guardar</button>
+          <button class="btn-cancel" onclick="cancelBriefing('${groupId}', ${taskIdx})">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INTERACTIONS
+// ═══════════════════════════════════════════════════════════════
+
+function toggleGroup(groupId) {
+  const el = document.getElementById(`group-${groupId}`);
+  el.classList.toggle('expanded');
+}
+
+function scrollToPhase(phaseId) {
+  document.getElementById(phaseId).scrollIntoView({ behavior: 'smooth' });
+  // Highlight briefly
+  document.querySelectorAll('.nav-phase').forEach(n => n.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+function togglePrompt(e, groupId) {
+  e.stopPropagation();
+  document.getElementById(`prompt-${groupId}`).classList.toggle('visible');
+}
+
+function copyPrompt(e, groupId) {
+  e.stopPropagation();
+  const group = ROADMAP.flatMap(p => p.groups).find(g => g.id === groupId);
+  navigator.clipboard.writeText(group.prompt).then(() => {
+    const btn = e.target;
+    btn.textContent = '✓ Copiado';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function handleTaskClick(groupId, taskIdx) {
+  const state = loadState();
+  const completed = isTaskCompleted(state, groupId, taskIdx);
+
+  if (completed) {
+    // Uncomplete — remove briefing
+    toggleTask(groupId, taskIdx);
+  } else {
+    // Show briefing input
+    const taskEl = document.getElementById(`task-${groupId}-${taskIdx}`);
+    taskEl.classList.add('completing');
+    const textarea = document.getElementById(`briefing-${groupId}-${taskIdx}`);
+    textarea.focus();
+  }
+}
+
+function saveBriefing(groupId, taskIdx) {
+  const textarea = document.getElementById(`briefing-${groupId}-${taskIdx}`);
+  const briefing = textarea.value.trim() || 'Completado';
+  toggleTask(groupId, taskIdx, briefing);
+}
+
+function cancelBriefing(groupId, taskIdx) {
+  const taskEl = document.getElementById(`task-${groupId}-${taskIdx}`);
+  taskEl.classList.remove('completing');
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  EXPORT / IMPORT
+// ═══════════════════════════════════════════════════════════════
+
+function exportData() {
+  const state = loadState();
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `inteliaudit-roadmap-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      _stateCache = data;
+      saveState(data);
+      render();
+      alert('Datos importados correctamente');
+    } catch {
+      alert('Error: archivo JSON inválido');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════
+(async () => {
+  await initState();
+  render();
+})();
+</script>
+</body>
+</html>

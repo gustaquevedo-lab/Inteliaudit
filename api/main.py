@@ -2,6 +2,7 @@
 FastAPI — servidor web principal de Inteliaudit.
 """
 import json
+import subprocess
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
@@ -14,7 +15,7 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.settings import settings
-from db.base import get_db, init_db
+from db.base import get_db
 from db import db as crud
 
 # Routers
@@ -30,7 +31,8 @@ from api.routers.portal import router as portal_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
+    if not settings.is_sqlite:
+        subprocess.run(["alembic", "upgrade", "head"], check=False)
     yield
 
 
@@ -79,6 +81,26 @@ async def health():
 
 
 # ============================================================
+#  Roadmap state persistence
+# ============================================================
+
+_ROADMAP_STATE = Path(__file__).parent.parent / "roadmap-state.json"
+
+
+@api.get("/roadmap-state")
+async def get_roadmap_state():
+    if _ROADMAP_STATE.exists():
+        return json.loads(_ROADMAP_STATE.read_text(encoding="utf-8"))
+    return {}
+
+
+@api.put("/roadmap-state")
+async def save_roadmap_state(body: dict):
+    _ROADMAP_STATE.write_text(json.dumps(body, ensure_ascii=False, indent=2), encoding="utf-8")
+    return {"ok": True}
+
+
+# ============================================================
 #  Registrar el router principal en la app
 # ============================================================
 
@@ -91,6 +113,14 @@ app.include_router(api)
 
 _LANDING_DIR = Path(__file__).parent.parent / "landing"
 _LANDING = _LANDING_DIR / "index.html"
+
+
+_ROADMAP_HTML = Path(__file__).parent.parent / "ROADMAP.html"
+
+
+@app.get("/roadmap", response_class=FileResponse, include_in_schema=False)
+async def serve_roadmap():
+    return FileResponse(str(_ROADMAP_HTML))
 
 
 @app.get("/", response_class=FileResponse, include_in_schema=False)

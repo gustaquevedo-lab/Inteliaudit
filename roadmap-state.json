@@ -1,0 +1,63 @@
+{
+  "0.1__0": {
+    "completed": true,
+    "briefing": "Ejecutado `alembic init alembic` en la ra\u00c3\u00adz del proyecto. Se cre\u00c3\u00b3 directorio alembic/ con env.py, script.py.mako, y alembic.ini",
+    "timestamp": "2026-06-10T05:06:00.000Z"
+  },
+  "0.1__1": {
+    "completed": true,
+    "briefing": "Configurado alembic/env.py con importaci\u00c3\u00b3n de Base desde db.base y todos los modelos desde db.models. Soporte async completo con async_engine_from_config y run_sync. render_as_batch=True para SQLite",
+    "timestamp": "2026-06-10T05:06:30.000Z"
+  },
+  "0.1__2": {
+    "completed": true,
+    "briefing": "Generada migraci\u00c3\u00b3n autom\u00c3\u00a1tica `alembic revision --autogenerate -m \"initial_schema\"`. Crea las 14 tablas del modelo: firmas, usuarios, clientes, auditorias, declaraciones, declaraciones_juradas, rg90, sifen_comprobantes, hechauka, hallazgos, tareas, cedulas, informes, credenciales_marangatu, audit_trail",
+    "timestamp": "2026-06-10T05:07:24.000Z"
+  },
+  "0.1__3": {
+    "completed": true,
+    "briefing": "Verificado: `alembic upgrade head` ejecutado correctamente contra SQLite local. Todas las tablas creadas sin errores. Se elimin\u00c3\u00b3 la DB existente para regenerar la migraci\u00c3\u00b3n desde cero con batch mode",
+    "timestamp": "2026-06-10T05:07:45.000Z"
+  },
+  "0.1__4": {
+    "completed": true,
+    "briefing": "render.yaml: startCommand actualizado a `alembic upgrade head && uvicorn ...`. railway.json: idem + healthcheckTimeout subido a 60s. Procfile: agregado release phase con alembic. api/main.py: lifespan reemplaza init_db() por alembic upgrade head autom\u00c3\u00a1tico en producci\u00c3\u00b3n",
+    "timestamp": "2026-06-10T05:08:00.000Z"
+  },
+  "0.5__0": {
+    "completed": true,
+    "briefing": "INICIO: Comenzando migracion de Render a Railway PRO (ruta simplificada - nueva base de datos PostgreSQL). Verificado: RAILWAY_PRO ya pagado, git remote: gustaquevedo-lab/Inteliaudit, railway.json y Procfile listos para deploy.",
+    "timestamp": "2026-06-10T06:00:00.000Z"
+  },
+  "0.5__1": {
+    "completed": false,
+    "briefing": null,
+    "timestamp": null
+  },
+  "0.5__2": {
+    "completed": false,
+    "briefing": null,
+    "timestamp": null
+  },
+  "0.5__3": {
+    "completed": false,
+    "briefing": null,
+    "timestamp": null
+  },
+  "0.5__4": {
+    "completed": false,
+    "briefing": null,
+    "timestamp": null
+  },
+  "0.5__5": {
+    "completed": false,
+    "briefing": null,
+    "timestamp": null
+  },
+  "0.5__6": {
+    "completed": false,
+    "briefing": null,
+    "timestamp": null
+  },
+  "_lastSaved": "2026-06-10T06:05:00.000Z"
+}
