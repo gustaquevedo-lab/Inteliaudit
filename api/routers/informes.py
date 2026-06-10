@@ -28,6 +28,11 @@ class GenerarInformeBody(BaseModel):
     incluir_descartados: bool = False
 
 
+class InformeConfig(BaseModel):
+    notas_auditor: Optional[str] = None
+    incluir_descartados: bool = False
+
+
 # ============================================================
 #  Helpers
 # ============================================================
