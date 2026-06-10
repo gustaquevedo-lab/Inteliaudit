@@ -36,7 +36,7 @@ export default function TabPlanTrabajo({ auditoria, onUpdate }: Props) {
   const [cargandoTarea, setCargandoTarea] = useState<string | null>(null)
 
   useEffect(() => {
-    api.get(`/auditorias/${auditoria.id}/sugerencias-ia`)
+    api.get<{ patrones: Patron[]; sugerencias: Sugerencia[] }>(`/auditorias/${auditoria.id}/sugerencias-ia`)
       .then(setSugerenciasData)
       .catch(() => {})
   }, [auditoria.id])
@@ -44,7 +44,7 @@ export default function TabPlanTrabajo({ auditoria, onUpdate }: Props) {
   const cargarSugerencias = async () => {
     setLoadingSugerencias(true)
     try {
-      setSugerenciasData(await api.get(`/auditorias/${auditoria.id}/sugerencias-ia?force=true`))
+      setSugerenciasData(await api.get<{ patrones: Patron[]; sugerencias: Sugerencia[] }>(`/auditorias/${auditoria.id}/sugerencias-ia?force=true`))
     } catch { error('Error al cargar sugerencias') }
     setLoadingSugerencias(false)
   }

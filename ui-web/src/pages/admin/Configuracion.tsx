@@ -216,7 +216,7 @@ function IaUsageCard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    api.get('/auth/ia-usage').then(setData).catch(() => {}).finally(() => setLoading(false))
+    api.get<{ periodo: string; llamadas_realizadas: number; limite_mensual: string; tiene_ia: boolean; plan: string }>('/auth/ia-usage').then(setData).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
   if (loading) return <div className="card p-5"><Loader2 size={18} className="animate-spin text-gray-400 mx-auto" /></div>

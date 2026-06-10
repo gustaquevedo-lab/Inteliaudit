@@ -46,7 +46,7 @@ export default function Dashboard() {
     Promise.all([
       api.get<DashboardData>('/dashboard'),
       api.get<Cliente[]>('/clientes'),
-      api.get('/suscripciones/mi-plan').then(setSuscripcion).catch(() => {}),
+      api.get<{ plan_actual: string; en_trial: boolean; trial_expirado: boolean; suscripcion_activa: boolean; dias_restantes: number }>('/suscripciones/mi-plan').then(setSuscripcion).catch(() => {}),
     ])
       .then(([d, c]) => { setData(d); setClientes(c) })
       .catch(e => setError(e instanceof Error ? e.message : 'Error al cargar'))

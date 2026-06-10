@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { FileText, Download, Loader2, FileCheck, Clock, AlertTriangle, Eye, CheckCircle, X, Sparkles, Share2, Copy } from 'lucide-react'
 import { api } from '../../../api/client'
 import { useToast } from '../../../components/Toaster'
-import { Modal } from '../../../components/Modal'
+import Modal from '../../../components/Modal'
 import { pyg, fecha } from '../../../utils/formatters'
 import type { Informe } from '../../../api/types'
 
@@ -53,7 +53,7 @@ export default function TabInformes({ auditoriaId, clienteRuc }: Props) {
   useEffect(() => { loadInformes() }, [auditoriaId])
 
   useEffect(() => {
-    api.get(`/auditorias/${auditoriaId}/hallazgos?estado=aceptado`)
+    api.get<any[]>(`/auditorias/${auditoriaId}/hallazgos?estado=aceptado`)
       .then(setHallazgos)
       .catch(() => {})
   }, [auditoriaId])

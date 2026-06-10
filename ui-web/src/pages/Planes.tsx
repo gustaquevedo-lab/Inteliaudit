@@ -4,7 +4,7 @@ import { CheckCircle, Zap, Building2, Users, BrainCircuit, Share2, Headphones, C
 import { api } from '../api/client'
 import { useToast } from '../components/Toaster'
 import { useAuth } from '../context/AuthContext'
-import { Modal } from '../components/Modal'
+import Modal from '../components/Modal'
 import { pyg } from '../utils/formatters'
 
 interface Plan {

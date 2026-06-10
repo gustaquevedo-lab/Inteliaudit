@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, Save, CheckCircle, XCircle, AlertTriangle, FileText, ExternalLink, History, Sparkles, Lock } from 'lucide-react'
+import { X, Save, CheckCircle, XCircle, AlertTriangle, FileText, ExternalLink, History, Sparkles, Lock, Loader2 } from 'lucide-react'
 import { api } from '../../api/client'
 import { useToast } from '../../components/Toaster'
 import { useAuth } from '../../context/AuthContext'
@@ -169,7 +169,7 @@ export default function HallazgoPanel({ hallazgo: h, auditoriaId, onClose, onUpd
                 </div>
                 <div>
                   <label className="text-[10px] font-bold text-gray-500 uppercase">Riesgo</label>
-                  <select className="input-field text-sm" value={editRiesgo} onChange={e => setEditRiesgo(e.target.value)}>
+                  <select className="input-field text-sm" value={editRiesgo} onChange={e => setEditRiesgo(e.target.value as 'alto' | 'medio' | 'bajo')}>
                     <option value="alto">Alto</option>
                     <option value="medio">Medio</option>
                     <option value="bajo">Bajo</option>
