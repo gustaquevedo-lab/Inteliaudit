@@ -319,5 +319,40 @@
     "briefing": "Agregada ruta /registro en App.tsx (publica, sin auth). Importado Registro desde ./pages/Registro. Botones de landing page actualizados: hero CTA 'Empezar gratis 7 dias' y pricing cards Pro/Starter ahora apuntan a /app/registro en vez de /app/login.",
     "timestamp": "2026-06-10T13:04:00.000Z"
   },
-  "_lastSaved": "2026-06-10T13:04:00.000Z"
+  "2.2__0": {
+    "completed": true,
+    "briefing": "Creado endpoint GET /api/dashboard con KPIs reales desde DB: total_contingencia, auditorias activas/cerradas, hallazgos pendientes/alto_riesgo, clientes_total. Filtrado por firma_id multi-tenant.",
+    "timestamp": "2026-06-10T14:00:00.000Z"
+  },
+  "2.2__1": {
+    "completed": true,
+    "briefing": "Implementada fila de 6 KPI cards con KPICard: Contingencia Total (rojo), Auditorias Activas (azul), Hallazgos Pendientes (ambar), Clientes (verde), Hallazgos Alto Riesgo (rojo), Total Hallazgos (secundario). Cada una con icono, color y subtitulo.",
+    "timestamp": "2026-06-10T14:01:00.000Z"
+  },
+  "2.2__2": {
+    "completed": true,
+    "briefing": "Agregado grafico de dona (Recharts PieChart con innerRadius) de hallazgos por nivel de riesgo con colores: alto #E53E3E, medio #D97706, bajo #22C47E. Leyenda con cantidad, porcentaje y monto PYG.",
+    "timestamp": "2026-06-10T14:02:00.000Z"
+  },
+  "2.2__3": {
+    "completed": true,
+    "briefing": "Agregado grafico de barras (Recharts BarChart) de hallazgos por impuesto con colores variados por categoria. Ejes, grid y tooltips configurados.",
+    "timestamp": "2026-06-10T14:03:00.000Z"
+  },
+  "2.2__4": {
+    "completed": true,
+    "briefing": "Implementada tabla Top 5 clientes con mayor contingencia. Cada fila con numero, razon social, RUC, monto contingencia y barra de progreso relativa con colores segun posicion (rojo/ambar/verde).",
+    "timestamp": "2026-06-10T14:04:00.000Z"
+  },
+  "2.2__5": {
+    "completed": true,
+    "briefing": "Implementado timeline de actividad reciente desde audit_trail (ultimas 10 acciones). Muestra accion, usuario, timestamp formateado y modulo. Datos reales desde GET /api/dashboard.",
+    "timestamp": "2026-06-10T14:05:00.000Z"
+  },
+  "2.2__6": {
+    "completed": true,
+    "briefing": "Manejado estado vacio con EmptyState: texto 'Bienvenido a Inteliaudit', descripcion y CTA 'Crear mi primer cliente' cuando no hay datos. Tendencia mensual con grafico de barras dual (hallazgos + contingencia por mes).",
+    "timestamp": "2026-06-10T14:06:00.000Z"
+  },
+  "_lastSaved": "2026-06-10T14:06:00.000Z"
 }

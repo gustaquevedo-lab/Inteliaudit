@@ -74,6 +74,149 @@ api.include_router(importacion_router)
 
 
 # ============================================================
+#  Dashboard — KPIs y métricas consolidadas
+# ============================================================
+
+@api.get("/dashboard")
+async def get_dashboard(
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from sqlalchemy import select, func
+    from db.models import Auditoria, Cliente, Hallazgo, AuditTrail, Firma
+
+    firma_id = user.firma_id
+
+    # KPIs principales
+    total_contingencia = await db.execute(
+        select(func.coalesce(func.sum(Hallazgo.total_contingencia), 0))
+        .where(Hallazgo.firma_id == firma_id, Hallazgo.estado != "descartado")
+    )
+    total_cont = total_contingencia.scalar() or 0
+
+    aud_count = await db.execute(
+        select(
+            func.count(Auditoria.id).filter(Auditoria.estado.in_(["en_progreso", "analizando"])).label("activas"),
+            func.count(Auditoria.id).filter(Auditoria.estado == "analisis_completado").label("cerradas"),
+        ).where(Auditoria.firma_id == firma_id)
+    )
+    aud_row = aud_count.one()
+
+    hallazgos_count = await db.execute(
+        select(
+            func.count(Hallazgo.id).filter(Hallazgo.estado == "pendiente").label("pendientes"),
+            func.count(Hallazgo.id).filter(Hallazgo.nivel_riesgo == "alto", Hallazgo.estado != "descartado").label("alto_riesgo"),
+        ).where(Hallazgo.firma_id == firma_id)
+    )
+    hal_row = hallazgos_count.one()
+
+    clientes_count = await db.execute(
+        select(func.count(Cliente.id)).where(Cliente.firma_id == firma_id)
+    )
+    total_clientes = clientes_count.scalar() or 0
+
+    # Hallazgos por nivel de riesgo
+    riesgo_rows = await db.execute(
+        select(
+            Hallazgo.nivel_riesgo,
+            func.count(Hallazgo.id).label("cantidad"),
+            func.coalesce(func.sum(Hallazgo.total_contingencia), 0).label("monto"),
+        ).where(Hallazgo.firma_id == firma_id, Hallazgo.estado != "descartado")
+        .group_by(Hallazgo.nivel_riesgo)
+        .order_by(Hallazgo.nivel_riesgo)
+    )
+    hallazgos_por_riesgo = [
+        {"nivel": r.nivel_riesgo, "cantidad": r.cantidad, "monto": r.monto}
+        for r in riesgo_rows
+    ]
+
+    # Hallazgos por impuesto
+    impuesto_rows = await db.execute(
+        select(
+            Hallazgo.impuesto,
+            func.count(Hallazgo.id).label("cantidad"),
+        ).where(Hallazgo.firma_id == firma_id, Hallazgo.estado != "descartado")
+        .group_by(Hallazgo.impuesto)
+        .order_by(func.count(Hallazgo.id).desc())
+    )
+    hallazgos_por_impuesto = [
+        {"impuesto": r.impuesto, "cantidad": r.cantidad}
+        for r in impuesto_rows
+    ]
+
+    # Top 5 clientes por contingencia
+    top_clientes = await db.execute(
+        select(
+            Cliente.razon_social,
+            Cliente.ruc,
+            func.coalesce(func.sum(Hallazgo.total_contingencia), 0).label("contingencia"),
+        )
+        .join(Hallazgo, Hallazgo.auditoria_id == Auditoria.id)
+        .join(Auditoria, Auditoria.cliente_id == Cliente.id)
+        .where(Hallazgo.firma_id == firma_id, Hallazgo.estado != "descartado", Auditoria.firma_id == firma_id)
+        .group_by(Cliente.id, Cliente.razon_social, Cliente.ruc)
+        .order_by(func.sum(Hallazgo.total_contingencia).desc())
+        .limit(5)
+    )
+    top_clientes_list = [
+        {"razon_social": r.razon_social, "ruc": r.ruc, "contingencia": r.contingencia}
+        for r in top_clientes
+    ]
+
+    # Actividad reciente (últimas 10 acciones)
+    trail_rows = await db.execute(
+        select(AuditTrail, Usuario.nombre.label("usuario_nombre"))
+        .outerjoin(Usuario, AuditTrail.usuario_id == Usuario.id)
+        .where(AuditTrail.firma_id == firma_id)
+        .order_by(AuditTrail.timestamp.desc())
+        .limit(10)
+    )
+    actividad_reciente = []
+    for t, nombre in trail_rows:
+        actividad_reciente.append({
+            "accion": t.accion,
+            "usuario": nombre or "Sistema",
+            "timestamp": t.timestamp.isoformat() if t.timestamp else None,
+            "auditoria": t.auditoria_id or "",
+            "modulo": t.modulo or "",
+        })
+
+    tendencia_mensual = []
+    import json
+    periodos_usados = set()
+    meses_data = await db.execute(
+        select(
+            Hallazgo.periodo,
+            func.count(Hallazgo.id).label("hallazgos"),
+            func.coalesce(func.sum(Hallazgo.total_contingencia), 0).label("contingencia"),
+        ).where(Hallazgo.firma_id == firma_id, Hallazgo.estado != "descartado")
+        .group_by(Hallazgo.periodo)
+        .order_by(Hallazgo.periodo)
+        .limit(12)
+    )
+    tendencia_mensual = [
+        {"mes": r.periodo, "hallazgos": r.hallazgos, "contingencia": r.contingencia}
+        for r in meses_data
+    ]
+
+    return {
+        "kpis": {
+            "total_contingencia": total_cont,
+            "auditorias_activas": aud_row.activas or 0,
+            "auditorias_cerradas": aud_row.cerradas or 0,
+            "hallazgos_pendientes": hal_row.pendientes or 0,
+            "hallazgos_alto_riesgo": hal_row.alto_riesgo or 0,
+            "clientes_total": total_clientes,
+        },
+        "hallazgos_por_riesgo": hallazgos_por_riesgo,
+        "hallazgos_por_impuesto": hallazgos_por_impuesto,
+        "top_clientes_contingencia": top_clientes_list,
+        "actividad_reciente": actividad_reciente,
+        "tendencia_mensual": tendencia_mensual,
+    }
+
+
+# ============================================================
 #  Health check
 # ============================================================
 
