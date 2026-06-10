@@ -264,5 +264,35 @@
     "briefing": "Integrados IRE y Retenciones en orquestador de analisis (api/routers/auditorias.py _run_analysis_background). Reemplazados stubs asyncio.sleep(0.5) por llamadas reales a AuditoriaIRE y AuditoriaRetenciones con todos los periodos. Update de progreso por cruce.",
     "timestamp": "2026-06-10T11:06:00.000Z"
   },
-  "_lastSaved": "2026-06-10T11:06:00.000Z"
+  "1.4__0": {
+    "completed": true,
+    "briefing": "Creado endpoint POST /api/auditorias/{id}/validar-sifen con ejecucion batch en background via asyncio.create_task. Toma todos los registros RG90 con CDC, consulta SIFEN con throttling de 3 req/s (asyncio.sleep 0.33s). Retorna job_id para polling.",
+    "timestamp": "2026-06-10T12:00:00.000Z"
+  },
+  "1.4__1": {
+    "completed": true,
+    "briefing": "Implementado throttling de 3 consultas/segundo contra SIFEN. Semaforo en SifenClient.verificar_lote() limitado a 5 concurrentes con sleep 0.2s. Background task usa sleep 0.33s entre consultas individuales.",
+    "timestamp": "2026-06-10T12:01:00.000Z"
+  },
+  "1.4__2": {
+    "completed": true,
+    "briefing": "Creado endpoint GET /api/auditorias/{id}/estado-validacion-sifen?job_id=xxx para polling de estado. Retorna: total_cdcs, validados, validos, invalidos, no_encontrados, hallazgos_generados.",
+    "timestamp": "2026-06-10T12:02:00.000Z"
+  },
+  "1.4__3": {
+    "completed": true,
+    "briefing": "Actualizados campos cdc_valido y en_sifen en tabla rg90 por cada CDC consultado. Si CDC existe en SIFEN, guarda comprobante completo en sifen_comprobantes. cdc_valido=False si no encontrado o error.",
+    "timestamp": "2026-06-10T12:03:00.000Z"
+  },
+  "1.4__4": {
+    "completed": true,
+    "briefing": "Generacion automatica de hallazgos: IVA_CREDITO_SIN_CDC para CDC no encontrado o cancelado, IVA_DIFERENCIA_RG90_DJ para montos que difieren entre RG90 y SIFEN (diferencia > Gs. 1.000). Evidencia incluye CDC y tipo de fuente.",
+    "timestamp": "2026-06-10T12:04:00.000Z"
+  },
+  "1.4__5": {
+    "completed": true,
+    "briefing": "Implementada UI en TabArchivos.tsx: boton 'Validar CDCs en SIFEN', progreso en vivo 'Validando X de Y CDCs...' con barra de progreso, tabla resumen con 4 cards (Validos/Invalidos/No encontrados/Hallazgos), manejo de errores y polling cada 2s.",
+    "timestamp": "2026-06-10T12:05:00.000Z"
+  },
+  "_lastSaved": "2026-06-10T12:05:00.000Z"
 }

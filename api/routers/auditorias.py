@@ -15,6 +15,280 @@ from api.routers.auth import get_current_user
 
 router = APIRouter(prefix="/auditorias", tags=["auditorias"])
 
+# ============================================================
+#  Validación SIFEN en lote
+# ============================================================
+
+_sifen_progress: dict[str, dict] = {}
+
+
+@router.post("/{auditoria_id}/validar-sifen")
+async def validar_sifen_lote(
+    auditoria_id: str,
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Valida CDCs de registros RG90 contra SIFEN en background."""
+    from sqlalchemy import select, update as sa_update
+    from db.models import Auditoria, RG90
+
+    auditoria = await crud.get_auditoria(db, user.firma_id, auditoria_id)
+    if not auditoria:
+        raise HTTPException(404, "Auditoría no encontrada")
+
+    # Obtener registros con CDC no vacío
+    result = await db.execute(
+        select(RG90).where(
+            RG90.auditoria_id == auditoria_id,
+            RG90.firma_id == user.firma_id,
+            RG90.cdc != None,
+            RG90.cdc != "",
+        )
+    )
+    registros = result.scalars().all()
+    if not registros:
+        raise HTTPException(400, "No hay registros RG90 con CDC para validar")
+
+    cdcs = list(set(r.cdc for r in registros if r.cdc))
+    job_id = f"sifen-{auditoria_id}-{int(asyncio.get_event_loop().time())}"
+    _sifen_progress[job_id] = {
+        "job_id": job_id,
+        "estado": "ejecutando",
+        "total_cdcs": len(cdcs),
+        "validados": 0,
+        "validos": 0,
+        "invalidos": 0,
+        "no_encontrados": 0,
+        "errores": 0,
+        "hallazgos_generados": 0,
+    }
+
+    asyncio.create_task(_run_sifen_validation(
+        job_id=job_id,
+        firma_id=user.firma_id,
+        auditoria_id=auditoria_id,
+        cdcs=cdcs,
+        registros=registros,
+    ))
+
+    await crud.log_trail(
+        db, firma_id=user.firma_id, usuario_id=user.id,
+        accion=f"Validación SIFEN iniciada: {len(cdcs)} CDCs",
+        modulo="sifen", auditoria_id=auditoria_id,
+        datos={"job_id": job_id, "total_cdcs": len(cdcs)},
+    )
+    await db.commit()
+
+    return {"ok": True, "job_id": job_id, "total_cdcs": len(cdcs)}
+
+
+@router.get("/{auditoria_id}/estado-validacion-sifen")
+async def estado_validacion_sifen(
+    auditoria_id: str,
+    job_id: str = "",
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Retorna el estado de la validación SIFEN en curso."""
+    if not job_id or job_id not in _sifen_progress:
+        return {"estado": "idle", "total_cdcs": 0, "validados": 0}
+    return _sifen_progress.get(job_id, {"estado": "desconocido"})
+
+
+async def _run_sifen_validation(
+    job_id: str,
+    firma_id: str,
+    auditoria_id: str,
+    cdcs: list[str],
+    registros: list,
+):
+    """Ejecuta validación SIFEN en background con throttling de 3 req/s."""
+    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+    from db.base import engine
+    from db.models import SifenComprobante, RG90
+    from ingesta.sifen import SifenClient, _validar_cdc
+    from analisis.riesgo import calcular_contingencia, clasificar_riesgo
+    import uuid
+
+    Session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    async with Session() as db:
+        try:
+            progress = _sifen_progress[job_id]
+            registros_por_cdc: dict[str, list] = {}
+            for r in registros:
+                if r.cdc:
+                    registros_por_cdc.setdefault(r.cdc, []).append(r)
+
+            async with SifenClient() as sifen:
+                for i, cdc in enumerate(cdcs):
+                    if not _validar_cdc(cdc):
+                        progress["invalidos"] += 1
+                        progress["validados"] += 1
+                        for r in registros_por_cdc.get(cdc, []):
+                            await _update_rg90_result(db, r.id, cdc_valido=False, en_sifen=False)
+                        continue
+
+                    try:
+                        resultado = await sifen.consultar_cdc(cdc)
+                    except Exception:
+                        progress["errores"] += 1
+                        progress["validados"] += 1
+                        for r in registros_por_cdc.get(cdc, []):
+                            await _update_rg90_result(db, r.id, cdc_valido=False, en_sifen=None)
+                        await asyncio.sleep(0.33)
+                        continue
+
+                    if resultado.get("encontrado"):
+                        progress["validos"] += 1
+                        for r in registros_por_cdc.get(cdc, []):
+                            await _update_rg90_result(db, r.id, cdc_valido=True, en_sifen=True)
+
+                        # Guardar comprobante SIFEN
+                        sifen_data = dict(resultado)
+                        sifen_data.pop("encontrado", None)
+                        sifen_data.pop("error", None)
+                        existing = await db.execute(
+                            select(SifenComprobante).where(
+                                SifenComprobante.firma_id == firma_id,
+                                SifenComprobante.cdc == cdc,
+                            )
+                        )
+                        if not existing.scalar_one_or_none():
+                            sifen_comp = SifenComprobante(
+                                id=str(uuid.uuid4()),
+                                firma_id=firma_id,
+                                auditoria_id=auditoria_id,
+                                cdc=cdc,
+                                tipo_de=resultado.get("tipo_de", ""),
+                                ruc_emisor=resultado.get("ruc_emisor", ""),
+                                nombre_emisor=resultado.get("nombre_emisor", ""),
+                                ruc_receptor=resultado.get("ruc_receptor", ""),
+                                nombre_receptor=resultado.get("nombre_receptor", ""),
+                                fecha_emision=resultado.get("fecha_emision", ""),
+                                timbrado=resultado.get("timbrado", ""),
+                                establecimiento=resultado.get("establecimiento", ""),
+                                punto_expedicion=resultado.get("punto_expedicion", ""),
+                                nro_comprobante=resultado.get("nro_comprobante", ""),
+                                base_gravada_10=resultado.get("base_gravada_10", 0),
+                                base_gravada_5=resultado.get("base_gravada_5", 0),
+                                monto_exento=resultado.get("monto_exento", 0),
+                                iva_total=resultado.get("iva_total", 0),
+                                total_comprobante=resultado.get("total_comprobante", 0),
+                                estado_sifen=resultado.get("estado_sifen", "aprobado"),
+                            )
+                            db.add(sifen_comp)
+                    else:
+                        if resultado.get("error"):
+                            progress["no_encontrados"] += 1
+                        else:
+                            progress["invalidos"] += 1
+                        for r in registros_por_cdc.get(cdc, []):
+                            await _update_rg90_result(db, r.id, cdc_valido=False, en_sifen=False)
+
+                    # Generar hallazgos automáticos
+                    for r in registros_por_cdc.get(cdc, []):
+                        encontrado = resultado.get("encontrado", False)
+                        estado_sifen = resultado.get("estado_sifen", "")
+                        if not encontrado and r.iva_total > 0:
+                            await _generar_hallazgo_sifen(db, firma_id, auditoria_id, r, resultado)
+                            progress["hallazgos_generados"] += 1
+                        elif encontrado and estado_sifen in ("cancelado", "inutilizado"):
+                            await _generar_hallazgo_sifen(db, firma_id, auditoria_id, r, resultado)
+                            progress["hallazgos_generados"] += 1
+                        elif encontrado and _tiene_diferencia_montos(r, resultado):
+                            await _generar_hallazgo_diferencia(db, firma_id, auditoria_id, r, resultado)
+                            progress["hallazgos_generados"] += 1
+
+                    progress["validados"] += 1
+                    progress["progreso_pct"] = int((i + 1) / len(cdcs) * 100)
+                    await db.commit()
+                    await asyncio.sleep(0.33)
+
+            progress["estado"] = "completado"
+            progress["progreso_pct"] = 100
+
+            await crud.log_trail(
+                db, firma_id=firma_id, usuario_id=None,
+                accion=f"Validación SIFEN completada: {progress['validos']} válidos, {progress['invalidos']} inválidos",
+                modulo="sifen", auditoria_id=auditoria_id,
+                datos=dict(progress),
+            )
+            await db.commit()
+
+        except Exception as e:
+            _sifen_progress[job_id]["estado"] = "error"
+            _sifen_progress[job_id]["error"] = str(e)[:500]
+            await db.rollback()
+
+
+async def _update_rg90_result(db, rg90_id: str, cdc_valido: bool | None, en_sifen: bool | None):
+    """Actualiza campos de validación en un registro RG90."""
+    from sqlalchemy import update as sa_update
+    from db.models import RG90
+    await db.execute(
+        sa_update(RG90).where(RG90.id == rg90_id).values(
+            cdc_valido=cdc_valido,
+            en_sifen=en_sifen,
+        )
+    )
+
+
+async def _generar_hallazgo_sifen(db, firma_id, auditoria_id, rg90, resultado_sifen):
+    """Genera hallazgo por CDC inválido o cancelado."""
+    from analisis.riesgo import calcular_contingencia, clasificar_riesgo
+    estado = resultado_sifen.get("estado_sifen", "no_encontrado")
+    cont = calcular_contingencia(rg90.iva_total, rg90.fecha_emision)
+    await crud.crear_hallazgo(
+        db,
+        firma_id=firma_id,
+        auditoria_id=auditoria_id,
+        impuesto="IVA",
+        periodo=rg90.periodo,
+        tipo_hallazgo="IVA_CREDITO_SIN_CDC",
+        descripcion=f"CDC {rg90.cdc[:16]}... estado '{estado}' en SIFEN. Crédito fiscal inválido: Gs. {rg90.iva_total:,}",
+        articulo_legal="Art. 95 Ley 6380/2019 + RG 80/2021 — CDC obligatorio",
+        base_ajuste=rg90.base_gravada_10 + rg90.base_gravada_5,
+        impuesto_omitido=rg90.iva_total,
+        multa_estimada=cont["multa_estimada"],
+        intereses_estimados=cont["intereses_estimados"],
+        nivel_riesgo=clasificar_riesgo(cont["total_contingencia"]),
+        evidencias=[{"tipo": "rg90", "id": rg90.id, "cdc": rg90.cdc}],
+    )
+
+
+async def _generar_hallazgo_diferencia(db, firma_id, auditoria_id, rg90, resultado_sifen):
+    """Genera hallazgo por diferencia de montos entre RG90 y SIFEN."""
+    from analisis.riesgo import calcular_contingencia, clasificar_riesgo
+    diff = abs(rg90.iva_total - resultado_sifen.get("iva_total", 0))
+    if diff <= 0:
+        return
+    cont = calcular_contingencia(diff, rg90.fecha_emision)
+    await crud.crear_hallazgo(
+        db,
+        firma_id=firma_id,
+        auditoria_id=auditoria_id,
+        impuesto="IVA",
+        periodo=rg90.periodo,
+        tipo_hallazgo="IVA_DIFERENCIA_RG90_DJ",
+        descripcion=f"CDC {rg90.cdc[:16]}... Monto IVA en RG90 (Gs. {rg90.iva_total:,}) difiere de SIFEN (Gs. {resultado_sifen.get('iva_total', 0):,}). Diferencia: Gs. {diff:,}",
+        articulo_legal="Art. 97 Ley 6380/2019 — Consistencia DJ",
+        base_ajuste=diff,
+        impuesto_omitido=diff,
+        multa_estimada=cont["multa_estimada"],
+        intereses_estimados=cont["intereses_estimados"],
+        nivel_riesgo=clasificar_riesgo(cont["total_contingencia"]),
+        evidencias=[{"tipo": "rg90", "id": rg90.id, "cdc": rg90.cdc, "tipo": "sifen"}],
+    )
+
+
+def _tiene_diferencia_montos(rg90, sifen_result: dict) -> bool:
+    """Verifica si hay diferencia significativa entre montos RG90 y SIFEN."""
+    if not sifen_result.get("encontrado"):
+        return False
+    iva_sifen = sifen_result.get("iva_total", 0)
+    diff = abs(rg90.iva_total - iva_sifen)
+    return diff > 1000  # diferencia mayor a Gs. 1.000
+
 class AuditoriaCreate(BaseModel):
     cliente_id: str
     periodo_desde: str

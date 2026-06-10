@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Upload, File, CheckCircle, AlertCircle, Loader2, Eye, X, Database } from 'lucide-react'
+import { Upload, File, CheckCircle, AlertCircle, Loader2, Eye, X, Database, Shield } from 'lucide-react'
 import { api } from '../../../api/client'
 import { pyg } from '../../../utils/formatters'
 
@@ -74,10 +74,47 @@ export default function TabArchivos({ auditoriaId }: Props) {
   const [djPeriodo, setDjPeriodo] = useState(INIT_PERIODO)
   const [djFormulario, setDjFormulario] = useState('120')
   const [loadingHistory, setLoadingHistory] = useState(false)
+  const [sifenJobId, setSifenJobId] = useState<string | null>(null)
+  const [sifenEstado, setSifenEstado] = useState<{
+    estado: string; total_cdcs: number; validados: number
+    validos: number; invalidos: number; no_encontrados: number
+    hallazgos_generados?: number; error?: string
+  } | null>(null)
+  const [sifenRunning, setSifenRunning] = useState(false)
 
   useEffect(() => {
     loadHistory()
   }, [auditoriaId])
+
+  // SIFEN polling
+  useEffect(() => {
+    if (!sifenJobId || !sifenRunning) return
+    const interval = setInterval(async () => {
+      try {
+        const e = await api.get<typeof sifenEstado>(`/auditorias/${auditoriaId}/estado-validacion-sifen?job_id=${sifenJobId}`)
+        setSifenEstado(e)
+        if (e?.estado === 'completado' || e?.estado === 'error') {
+          setSifenRunning(false)
+          clearInterval(interval)
+          loadHistory()
+        }
+      } catch { /* polling */ }
+    }, 2000)
+    return () => clearInterval(interval)
+  }, [sifenJobId, sifenRunning, auditoriaId])
+
+  const ejecutarValidacionSifen = async () => {
+    setSifenRunning(true)
+    setSifenEstado(null)
+    setSifenJobId(null)
+    try {
+      const res = await api.post<{ ok: boolean; job_id: string }>(`/auditorias/${auditoriaId}/validar-sifen`)
+      setSifenJobId(res.job_id)
+    } catch (e: unknown) {
+      setSifenRunning(false)
+      setSifenEstado({ estado: 'error', total_cdcs: 0, validados: 0, validos: 0, invalidos: 0, no_encontrados: 0, error: e instanceof Error ? e.message : 'Error' })
+    }
+  }
 
   const loadHistory = async () => {
     setLoadingHistory(true)
@@ -369,6 +406,62 @@ export default function TabArchivos({ auditoriaId }: Props) {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* SIFEN Validation */}
+      <div className="card p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Shield size={16} className="text-primary" />
+            <p className="font-bold text-sm uppercase tracking-wide">Validacion SIFEN</p>
+          </div>
+          <button onClick={ejecutarValidacionSifen} disabled={sifenRunning}
+            className="btn-primary py-2 px-4 text-xs flex items-center gap-1.5">
+            {sifenRunning ? <Loader2 size={13} className="animate-spin" /> : <Shield size={13} />}
+            {sifenRunning ? 'Validando...' : 'Validar CDCs en SIFEN'}
+          </button>
+        </div>
+        <p className="text-xs text-gray-500">Verifica la autenticidad de comprobantes electronicos contra el portal SET (e-Kuatia). Maximo 3 consultas/segundo.</p>
+
+        {sifenEstado && sifenEstado.estado === 'ejecutando' && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-xs">
+              <span>Validando {sifenEstado.validados} de {sifenEstado.total_cdcs} CDCs...</span>
+              <span className="font-bold">{sifenEstado.total_cdcs > 0 ? Math.round(sifenEstado.validados / sifenEstado.total_cdcs * 100) : 0}%</span>
+            </div>
+            <div className="w-full h-2.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-full bg-primary rounded-full transition-all duration-500"
+                style={{ width: `${sifenEstado.total_cdcs > 0 ? (sifenEstado.validados / sifenEstado.total_cdcs * 100) : 0}%` }} />
+            </div>
+          </div>
+        )}
+
+        {sifenEstado && (sifenEstado.estado === 'completado' || sifenEstado.estado === 'error') && (
+          <div className="grid grid-cols-4 gap-3">
+            <div className="px-3 py-3 rounded-xl bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800 text-center">
+              <p className="text-[10px] text-green-600 font-bold uppercase">Validos</p>
+              <p className="text-xl font-black text-green-700">{sifenEstado.validos}</p>
+            </div>
+            <div className="px-3 py-3 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 text-center">
+              <p className="text-[10px] text-red-600 font-bold uppercase">Invalidos</p>
+              <p className="text-xl font-black text-red-700">{sifenEstado.invalidos}</p>
+            </div>
+            <div className="px-3 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 text-center">
+              <p className="text-[10px] text-amber-600 font-bold uppercase">No encontrados</p>
+              <p className="text-xl font-black text-amber-700">{sifenEstado.no_encontrados}</p>
+            </div>
+            <div className="px-3 py-3 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 text-center">
+              <p className="text-[10px] text-blue-600 font-bold uppercase">Hallazgos</p>
+              <p className="text-xl font-black text-blue-700">{sifenEstado.hallazgos_generados ?? 0}</p>
+            </div>
+          </div>
+        )}
+
+        {sifenEstado?.error && (
+          <div className="px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-xs">
+            {sifenEstado.error}
+          </div>
+        )}
       </div>
 
       {/* Import history */}
