@@ -154,5 +154,10 @@
     "briefing": "Generadas 6 tareas de plan de trabajo: Carta de Compromiso (legal, completada), Obtencion de Balances (administrativo, completada), Cruce de Inventarios (impositivo, pendiente), Validacion de CDCs (impositivo, pendiente), Revision de Hallazgos (auditoria, pendiente), Informe Final (legal, pendiente).",
     "timestamp": "2026-06-10T08:04:00.000Z"
   },
-  "_lastSaved": "2026-06-10T08:04:00.000Z"
+  "0.4__6": {
+    "completed": true,
+    "briefing": "Verificado seed idempotente: ejecutado dos veces sin error. Primera ejecucion crea todos los datos. Segunda ejecucion detecta firma existente y aborta limpiamente sin duplicados ni errores.",
+    "timestamp": "2026-06-10T08:05:00.000Z"
+  },
+  "_lastSaved": "2026-06-10T08:05:00.000Z"
 }

@@ -85,7 +85,7 @@ async def seed_demo():
             select(Firma).where(Firma.nombre == "Auditores Asociados SRL")
         )
         if existing.scalar_one_or_none():
-            print("⚠️  La firma demo ya existe. Abortando para evitar duplicados.")
+            print("[AVISO] La firma demo ya existe. Abortando para evitar duplicados.")
             return
 
         # ============================================================
