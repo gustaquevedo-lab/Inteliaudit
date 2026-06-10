@@ -78,6 +78,3 @@ asyncio_mode = "auto"
 
 [tool.hatch.build.targets.wheel]
 packages = ["api", "db", "analisis", "ingesta", "informes", "papeles", "config", "landing", "ui", "storage", "notificaciones"]
-
-[tool.hatch.build.targets.wheel.force-include]
-"analytics.py" = "analytics.py"
