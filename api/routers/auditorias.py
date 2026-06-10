@@ -292,31 +292,64 @@ async def _run_analysis_background(
 
             if "ire" in impuestos:
                 await db.commit()
-                for nombre in ["Conciliación contable", "Depreciaciones", "Gastos sin comprobante"]:
-                    if idx < len(cruces):
-                        cruces[idx]["estado"] = "ejecutando"
-                        try:
-                            await asyncio.sleep(0.5)
-                            cruces[idx]["estado"] = "completado"
-                        except Exception as e:
-                            cruces[idx]["estado"] = "error"
-                            cruces[idx]["error"] = str(e)[:200]
-                        _analysis_progress[job_id]["progreso"] = int((idx + 1) / len(cruces) * 100)
-                        idx += 1
+                from analisis.ire import AuditoriaIRE
+
+                auditoria = await crud.get_auditoria(db, firma_id, auditoria_id)
+                if auditoria:
+                    cliente = await crud.get_cliente(db, firma_id, id=auditoria.cliente_id)
+                    if cliente:
+                        ejercicio = auditoria.periodo_desde[:4]
+
+                        for metodo, nombre in [
+                            (AuditoriaIRE.verificar_depreciaciones, "Depreciaciones"),
+                            (AuditoriaIRE.verificar_gastos_sin_comprobante, "Gastos sin comprobante"),
+                            (AuditoriaIRE.conciliar_resultado_contable, "Conciliacion contable"),
+                        ]:
+                            if idx < len(cruces):
+                                cruces[idx]["estado"] = "ejecutando"
+                                try:
+                                    motor_ire = AuditoriaIRE(db, firma_id, auditoria_id, auditoria.materialidad)
+                                    h = await metodo(motor_ire, cliente.id, ejercicio)
+                                    total_hallazgos += h
+                                    cruces[idx]["hallazgos"] = h
+                                    await db.commit()
+                                    cruces[idx]["estado"] = "completado"
+                                except Exception as e:
+                                    cruces[idx]["estado"] = "error"
+                                    cruces[idx]["error"] = str(e)[:200]
+                                _analysis_progress[job_id]["progreso"] = int((idx + 1) / len(cruces) * 100)
+                                _analysis_progress[job_id]["total_hallazgos"] = total_hallazgos
+                                idx += 1
 
             if "retenciones" in impuestos:
                 await db.commit()
-                for nombre in ["HECHAUKA vs Forms. 800/820", "Retenciones omitidas"]:
-                    if idx < len(cruces):
-                        cruces[idx]["estado"] = "ejecutando"
-                        try:
-                            await asyncio.sleep(0.5)
-                            cruces[idx]["estado"] = "completado"
-                        except Exception as e:
-                            cruces[idx]["estado"] = "error"
-                            cruces[idx]["error"] = str(e)[:200]
-                        _analysis_progress[job_id]["progreso"] = int((idx + 1) / len(cruces) * 100)
-                        idx += 1
+                from analisis.retenciones import AuditoriaRetenciones
+
+                auditoria = await crud.get_auditoria(db, firma_id, auditoria_id)
+                if auditoria:
+                    cliente = await crud.get_cliente(db, firma_id, id=auditoria.cliente_id)
+                    if cliente:
+                        for metodo, nombre in [
+                            ("cruce_hechauka_vs_declaraciones", "HECHAUKA vs Forms. 800/820"),
+                            ("verificar_retenciones_omitidas", "Retenciones omitidas"),
+                        ]:
+                            if idx < len(cruces):
+                                cruces[idx]["estado"] = "ejecutando"
+                                try:
+                                    motor_ret = AuditoriaRetenciones(db, firma_id, auditoria_id, auditoria.materialidad)
+                                    h = 0
+                                    for p in periodos:
+                                        h += await getattr(motor_ret, metodo)(cliente.id, p)
+                                    total_hallazgos += h
+                                    cruces[idx]["hallazgos"] = h
+                                    await db.commit()
+                                    cruces[idx]["estado"] = "completado"
+                                except Exception as e:
+                                    cruces[idx]["estado"] = "error"
+                                    cruces[idx]["error"] = str(e)[:200]
+                                _analysis_progress[job_id]["progreso"] = int((idx + 1) / len(cruces) * 100)
+                                _analysis_progress[job_id]["total_hallazgos"] = total_hallazgos
+                                idx += 1
 
             # Finalizar
             from sqlalchemy import update as sa_update

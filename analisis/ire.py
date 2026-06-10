@@ -1,7 +1,8 @@
 """
-Procedimientos de auditoría IRE — Impuesto a la Renta Empresarial.
+Procedimientos de auditoria IRE — Impuesto a la Renta Empresarial.
 Formulario 500. Ley 6380/2019 Art. 15-17, Decreto 3107/2019.
 """
+import json
 from dataclasses import dataclass, field
 
 from rich.console import Console
@@ -12,21 +13,20 @@ from db import db as crud
 
 console = Console()
 
-# Tasas de depreciación máximas — Decreto 3107/2019
 TASAS_DEPRECIACION = {
-    "inmuebles":            0.025,   # 2.5% anual (40 años)
-    "maquinaria":           0.10,    # 10% (10 años)
-    "vehiculos":            0.20,    # 20% (5 años)
-    "equipos_informaticos": 0.333,   # 33.3% (3 años)
-    "muebles_utiles":       0.10,    # 10% (10 años)
-    "instalaciones":        0.10,    # 10% (10 años)
+    "inmuebles":            0.025,
+    "maquinaria":           0.10,
+    "vehiculos":            0.20,
+    "equipos_informaticos": 0.333,
+    "muebles_utiles":       0.10,
+    "instalaciones":        0.10,
 }
 
-ALICUOTA_IRE = 0.10  # 10% Ley 6380/2019 Art. 17
+ALICUOTA_IRE = 0.10
 
 ARTICULOS = {
     "IRE_GASTO_NO_DEDUCIBLE":    "Art. 16 Ley 6380/2019 — Gastos no deducibles",
-    "IRE_DEPRECIACION_EXCEDIDA": "Art. 24 Decreto 3107/2019 — Tasas máximas depreciación",
+    "IRE_DEPRECIACION_EXCEDIDA": "Art. 24 Decreto 3107/2019 — Tasas maximas depreciacion",
     "IRE_INGRESO_NO_DECLARADO":  "Art. 15 Ley 6380/2019 — Hecho generador IRE",
     "IRE_GASTO_SIN_COMPROBANTE": "Art. 16 inc. f) Ley 6380/2019 — Comprobante legal obligatorio",
     "IRE_PARTE_VINCULADA":       "Art. 35 Ley 6380/2019 — Precios de transferencia",
@@ -44,7 +44,6 @@ class ResultadoAuditoriaIRE:
 
 
 class AuditoriaIRE:
-    """Procedimientos de auditoría IRE para un ejercicio fiscal."""
 
     def __init__(self, db: AsyncSession, firma_id: str, auditoria_id: str, materialidad: int = 0):
         self.db = db
@@ -53,81 +52,158 @@ class AuditoriaIRE:
         self.materialidad = materialidad
 
     async def ejecutar_auditoria(self, cliente_id: str, ejercicio: str) -> ResultadoAuditoriaIRE:
-        """
-        Ejecuta todos los procedimientos IRE para un ejercicio (YYYY).
-        """
         resultado = ResultadoAuditoriaIRE(ejercicio=ejercicio)
         console.print(f"[blue]IRE:[/] auditando ejercicio {ejercicio}...")
 
-        r1 = await self.verificar_depreciaciones(cliente_id, ejercicio)
-        r2 = await self.verificar_gastos_sin_comprobante(cliente_id, ejercicio)
-        r3 = await self.conciliar_resultado_contable(cliente_id, ejercicio)
+        h1 = await self.verificar_depreciaciones(cliente_id, ejercicio)
+        h2 = await self.verificar_gastos_sin_comprobante(cliente_id, ejercicio)
+        h3 = await self.conciliar_resultado_contable(cliente_id, ejercicio)
 
-        resultado.hallazgos_generados = r1 + r2 + r3
+        resultado.hallazgos_generados = h1 + h2 + h3
         return resultado
 
-    # --------------------------------------------------------
-    #  Depreciaciones
-    # --------------------------------------------------------
-
-    async def verificar_depreciaciones(self, cliente_id: str, ejercicio: str) -> int:
-        """
-        Verifica que las depreciaciones no superen tasas máximas del Decreto 3107.
-        Retorna cantidad de hallazgos generados.
-        """
-        # TODO: requiere estados contables con detalle de activo fijo
-        # Comparar tasa declarada vs tasa máxima por categoría
-        console.print(f"[dim]IRE: verificación de depreciaciones {ejercicio} — pendiente datos contables[/]")
-        return 0
-
-    # --------------------------------------------------------
-    #  Gastos sin comprobante
-    # --------------------------------------------------------
-
-    async def verificar_gastos_sin_comprobante(self, cliente_id: str, ejercicio: str) -> int:
-        """
-        Identifica gastos en estados contables sin respaldo en comprobantes SET.
-        Retorna cantidad de hallazgos generados.
-        """
-        # TODO: cruce estados contables vs declaraciones/RG90
-        # Categorías de alto riesgo: honorarios, servicios, gastos de representación
-        console.print(f"[dim]IRE: verificación gastos sin comprobante {ejercicio} — pendiente datos contables[/]")
-        return 0
-
-    # --------------------------------------------------------
-    #  Conciliación resultado contable vs base imponible
-    # --------------------------------------------------------
+    async def _get_form_500(self, cliente_id: str, ejercicio: str):
+        """Obtiene el Form.500 mas reciente para el ejercicio."""
+        decls = await crud.get_declaraciones(self.db, self.firma_id, cliente_id, "500", ejercicio)
+        if not decls:
+            return None, {}
+        decl = sorted(decls, key=lambda d: d.nro_rectificativa, reverse=True)[0]
+        return decl, json.loads(decl.datos_json)
 
     async def conciliar_resultado_contable(self, cliente_id: str, ejercicio: str) -> int:
-        """
-        Compara el resultado contable con la renta neta declarada en Form.500.
-        Las diferencias no justificadas son potenciales ajustes.
-        """
-        declaraciones = await crud.get_declaraciones(self.db, self.firma_id, cliente_id, "500", ejercicio)
-        if not declaraciones:
-            console.print(f"[yellow]⚠[/] IRE {ejercicio}: no se encontró Form.500")
+        """Cruza ingresos declarados en Form.500 vs ventas en RG90 del mismo ejercicio."""
+        decl, datos = await self._get_form_500(cliente_id, ejercicio)
+        if not decl:
+            console.print(f"[yellow]IRE {ejercicio}: no se encontro Form.500[/]")
             return 0
 
-        import json
-        decl = sorted(declaraciones, key=lambda d: d.nro_rectificativa, reverse=True)[0]
-        datos = json.loads(decl.datos_json)
+        total_ingresos = int(datos.get("total_ingresos", datos.get("ingresos_brutos", 0)))
+        renta_neta = int(datos.get("renta_neta", datos.get("renta_neta_imponible", 0)))
+        gastos = int(datos.get("total_gastos", datos.get("gastos_deducidos", 0)))
 
-        # TODO: parsear campos específicos del Form.500
-        # renta_neta_declarada = datos.get("renta_neta_imponible", 0)
-        # Comparar vs resultado contable de estados_contables
+        if not total_ingresos:
+            return 0
 
+        # Sumar ventas de RG90 para todo el ejercicio
+        total_ventas_rg90 = 0
+        for mes in range(1, 13):
+            p = f"{ejercicio}-{mes:02d}"
+            ventas = await crud.get_rg90(self.db, self.firma_id, cliente_id, p, "venta")
+            total_ventas_rg90 += sum(v.iva_total for v in ventas)
+
+        diferencia = abs(total_ingresos - total_ventas_rg90)
+
+        if diferencia > self.materialidad and total_ventas_rg90 > 0:
+            impuesto_omitido = int(diferencia * ALICUOTA_IRE)
+            cont = calcular_contingencia(impuesto_omitido, f"{ejercicio}-12-31")
+            await crud.crear_hallazgo(
+                self.db,
+                firma_id=self.firma_id,
+                auditoria_id=self.auditoria_id,
+                impuesto="IRE",
+                periodo=ejercicio,
+                tipo_hallazgo="IRE_INGRESO_NO_DECLARADO",
+                descripcion=f"Ingresos declarados en Form.500 (Gs. {total_ingresos:,}) difieren de ventas RG90 (Gs. {total_ventas_rg90:,}). Diferencia: Gs. {diferencia:,}",
+                articulo_legal=ARTICULOS["IRE_INGRESO_NO_DECLARADO"],
+                base_ajuste=diferencia,
+                impuesto_omitido=impuesto_omitido,
+                multa_estimada=cont["multa_estimada"],
+                intereses_estimados=cont["intereses_estimados"],
+                nivel_riesgo=clasificar_riesgo(cont["total_contingencia"], self.materialidad),
+            )
+            return 1
         return 0
 
-    # --------------------------------------------------------
-    #  Límites deducibilidad
-    # --------------------------------------------------------
+    async def verificar_depreciaciones(self, cliente_id: str, ejercicio: str) -> int:
+        """Verifica depreciacion contra tasas maximas del Decreto 3107."""
+        decl, datos = await self._get_form_500(cliente_id, ejercicio)
+        if not decl:
+            return 0
+
+        depreciaciones = datos.get("depreciaciones", datos.get("depreciacion", {}))
+        if not depreciaciones or not isinstance(depreciaciones, dict):
+            return 0
+
+        hallazgos = 0
+        for categoria, valor_anual in depreciaciones.items():
+            cat = categoria.lower().replace(" ", "_").replace("-", "_")
+            tasa_max = TASAS_DEPRECIACION.get(cat)
+            if not tasa_max:
+                continue
+
+            valor_activo = int(datos.get(f"valor_{categoria}", 0)) or int(valor_anual / tasa_max) if tasa_max else 0
+            if valor_activo <= 0:
+                continue
+
+            tasa_real = valor_anual / valor_activo if valor_activo > 0 else 0
+            if tasa_real > tasa_max:
+                exceso = int(valor_anual - (valor_activo * tasa_max))
+                impuesto_omitido = int(exceso * ALICUOTA_IRE)
+                cont = calcular_contingencia(impuesto_omitido, f"{ejercicio}-12-31")
+
+                await crud.crear_hallazgo(
+                    self.db,
+                    firma_id=self.firma_id,
+                    auditoria_id=self.auditoria_id,
+                    impuesto="IRE",
+                    periodo=ejercicio,
+                    tipo_hallazgo="IRE_DEPRECIACION_EXCEDIDA",
+                    descripcion=f"Depreciacion de {categoria}: tasa aplicada {tasa_real:.1%} supera tasa maxima {tasa_max:.1%}. Exceso: Gs. {exceso:,}",
+                    articulo_legal=ARTICULOS["IRE_DEPRECIACION_EXCEDIDA"],
+                    base_ajuste=exceso,
+                    impuesto_omitido=impuesto_omitido,
+                    multa_estimada=cont["multa_estimada"],
+                    intereses_estimados=cont["intereses_estimados"],
+                    nivel_riesgo=clasificar_riesgo(cont["total_contingencia"], self.materialidad),
+                )
+                hallazgos += 1
+
+        return hallazgos
+
+    async def verificar_gastos_sin_comprobante(self, cliente_id: str, ejercicio: str) -> int:
+        """Compara gastos declarados en Form.500 vs comprobantes de compra en RG90."""
+        decl, datos = await self._get_form_500(cliente_id, ejercicio)
+        if not decl:
+            return 0
+
+        gastos_declarados = int(datos.get("total_gastos", datos.get("gastos_deducidos", 0)))
+        if not gastos_declarados:
+            return 0
+
+        # Sumar compras RG90 de todo el ejercicio
+        total_compras_rg90 = 0
+        for mes in range(1, 13):
+            p = f"{ejercicio}-{mes:02d}"
+            compras = await crud.get_rg90(self.db, self.firma_id, cliente_id, p, "compra")
+            total_compras_rg90 += sum(c.total_comprobante for c in compras)
+
+        max_admitido = int(total_compras_rg90 * 1.1)
+        diferencia = gastos_declarados - max_admitido
+
+        if diferencia > self.materialidad and total_compras_rg90 > 0:
+            impuesto_omitido = int(diferencia * ALICUOTA_IRE)
+            cont = calcular_contingencia(impuesto_omitido, f"{ejercicio}-12-31")
+
+            await crud.crear_hallazgo(
+                self.db,
+                firma_id=self.firma_id,
+                auditoria_id=self.auditoria_id,
+                impuesto="IRE",
+                periodo=ejercicio,
+                tipo_hallazgo="IRE_GASTO_SIN_COMPROBANTE",
+                descripcion=f"Gastos declarados en Form.500 (Gs. {gastos_declarados:,}) superan comprobantes RG90 (Gs. {total_compras_rg90:,}). Diferencia sin respaldo: Gs. {diferencia:,}",
+                articulo_legal=ARTICULOS["IRE_GASTO_SIN_COMPROBANTE"],
+                base_ajuste=diferencia,
+                impuesto_omitido=impuesto_omitido,
+                multa_estimada=cont["multa_estimada"],
+                intereses_estimados=cont["intereses_estimados"],
+                nivel_riesgo=clasificar_riesgo(cont["total_contingencia"], self.materialidad),
+            )
+            return 1
+        return 0
 
     @staticmethod
     def verificar_limite_representacion(ingresos_brutos: int, gastos_representacion: int) -> dict:
-        """
-        Verifica límite del 1% sobre ingresos brutos para gastos de representación.
-        Art. 16 inc. j) Ley 6380/2019.
-        """
         limite = int(ingresos_brutos * 0.01)
         exceso = max(0, gastos_representacion - limite)
         ajuste_ire = int(exceso * ALICUOTA_IRE)
@@ -140,10 +216,6 @@ class AuditoriaIRE:
 
     @staticmethod
     def verificar_limite_donaciones(renta_bruta: int, donaciones: int) -> dict:
-        """
-        Verifica límite del 1% sobre renta bruta para donaciones.
-        Art. 16 inc. k) Ley 6380/2019.
-        """
         limite = int(renta_bruta * 0.01)
         exceso = max(0, donaciones - limite)
         ajuste_ire = int(exceso * ALICUOTA_IRE)
@@ -156,17 +228,6 @@ class AuditoriaIRE:
 
     @staticmethod
     def calcular_depreciacion_maxima(valor_activo: int, categoria: str, años_usados: int = 0) -> dict:
-        """
-        Calcula la depreciación máxima admisible para un activo.
-
-        Args:
-            valor_activo: Valor de costo del activo en PYG
-            categoria: Clave de TASAS_DEPRECIACION
-            años_usados: Años ya depreciados anteriormente
-
-        Returns:
-            Dict con cuota_anual_max, vida_util, años_restantes
-        """
         tasa = TASAS_DEPRECIACION.get(categoria.lower(), 0.10)
         vida_util = int(1 / tasa)
         cuota_anual = int(valor_activo * tasa)

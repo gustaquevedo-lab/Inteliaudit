@@ -229,5 +229,40 @@
     "briefing": "Registro en audit_trail: inicio de analisis con job_id, impuestos y periodos. Finalizacion con total de hallazgos. Estado de auditoria actualizado: en_progreso → analizando → analisis_completado via sa_update.",
     "timestamp": "2026-06-10T10:06:00.000Z"
   },
-  "_lastSaved": "2026-06-10T10:06:00.000Z"
+  "1.3__0": {
+    "completed": true,
+    "briefing": "Implementado conciliar_resultado_contable(): obtiene Form.500, extrae total_ingresos, cruza con suma de ventas RG90 del ejercicio. Si diferencia > materialidad, genera hallazgo IRE_INGRESO_NO_DECLARADO con contingencia = diferencia x 10% alicuota IRE + multa 50% + intereses 1% mensual.",
+    "timestamp": "2026-06-10T11:00:00.000Z"
+  },
+  "1.3__1": {
+    "completed": true,
+    "briefing": "Implementado verificar_depreciaciones(): compara depreciacion declarada en Form.500 contra tasas maximas del Decreto 3107/2019. Detecta excesos por categoria (inmuebles 2.5%, maquinaria 10%, vehiculos 20%, equipos informaticos 33.3%). Genera hallazgo IRE_DEPRECIACION_EXCEDIDA.",
+    "timestamp": "2026-06-10T11:01:00.000Z"
+  },
+  "1.3__2": {
+    "completed": true,
+    "briefing": "Implementado verificar_gastos_sin_comprobante(): compara total gastos declarados en Form.500 vs suma de comprobantes de compra RG90 con margen 10%. Si gastos > compras x 1.1, genera hallazgo IRE_GASTO_SIN_COMPROBANTE por diferencia sin respaldo documental.",
+    "timestamp": "2026-06-10T11:02:00.000Z"
+  },
+  "1.3__3": {
+    "completed": true,
+    "briefing": "Implementado cruce_hechauka_vs_declaraciones(): obtiene retenciones de HECHAUKA (IVA e IRE), las cruza con declarado en Forms. 800/810/820/830. Genera RET_DIFERENCIA_HECHAUKA si hay diferencia > materialidad. Detecta retenciones en HECHAUKA sin formularios presentados -> RET_NO_DEPOSITADA.",
+    "timestamp": "2026-06-10T11:03:00.000Z"
+  },
+  "1.3__4": {
+    "completed": true,
+    "briefing": "Implementado verificar_retenciones_omitidas(): busca pagos a proveedores (compras RG90) con RUC corto (presunta persona fisica) y monto > 1.000.000 PYG. Verifica si hubo retencion segun HECHAUKA. Si no, genera RET_NO_PRACTICADA con retencion calculada al 3% (tasa servicios personales).",
+    "timestamp": "2026-06-10T11:04:00.000Z"
+  },
+  "1.3__5": {
+    "completed": true,
+    "briefing": "Todos los hallazgos generados con todos los campos: impuesto, periodo, tipo_hallazgo, descripcion, articulo_legal, base_ajuste, impuesto_omitido, multa_estimada (50%), intereses_estimados (1%/mes), total_contingencia, nivel_riesgo (alto/medio/bajo). Usa calcular_contingencia() y clasificar_riesgo() de analisis/riesgo.py.",
+    "timestamp": "2026-06-10T11:05:00.000Z"
+  },
+  "1.3__6": {
+    "completed": true,
+    "briefing": "Integrados IRE y Retenciones en orquestador de analisis (api/routers/auditorias.py _run_analysis_background). Reemplazados stubs asyncio.sleep(0.5) por llamadas reales a AuditoriaIRE y AuditoriaRetenciones con todos los periodos. Update de progreso por cruce.",
+    "timestamp": "2026-06-10T11:06:00.000Z"
+  },
+  "_lastSaved": "2026-06-10T11:06:00.000Z"
 }
