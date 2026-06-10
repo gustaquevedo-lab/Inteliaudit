@@ -30,34 +30,34 @@
     "timestamp": "2026-06-10T06:00:00.000Z"
   },
   "0.5__1": {
-    "completed": false,
-    "briefing": null,
-    "timestamp": null
+    "completed": true,
+    "briefing": "FASE B: Proyecto Railway creado desde Dashboard. Repo GitHub conectado: gustaquevedo-lab/Inteliaudit. PostgreSQL agregado como servicio. Nixpacks.toml creado con python312 + nodejs_18 + gcc para resolver error de npm.",
+    "timestamp": "2026-06-10T09:30:00.000Z"
   },
   "0.5__2": {
-    "completed": false,
-    "briefing": null,
-    "timestamp": null
+    "completed": true,
+    "briefing": "FASE C: Variables configuradas en Railway Dashboard. DATABASE_URL conectada via referencia ${{Postgres.DATABASE_URL}}. Redeploy ejecutado.",
+    "timestamp": "2026-06-10T10:00:00.000Z"
   },
   "0.5__3": {
-    "completed": false,
-    "briefing": null,
-    "timestamp": null
+    "completed": true,
+    "briefing": "FASE D: Deploy exitoso. Build completo con npm ci + npm run build. Frontend compilado (1507 modulos). Alembic migrations ejecutadas en start phase. Uvicorn corriendo.",
+    "timestamp": "2026-06-10T10:10:00.000Z"
   },
   "0.5__4": {
-    "completed": false,
-    "briefing": null,
-    "timestamp": null
+    "completed": true,
+    "briefing": "FASE E: Verificacion completa. Health check: OK (v0.1.0). Frontend /app/: 200 OK. Landing /: 200 OK. API Docs /api/docs: 200 OK. URL: https://inteliaudit-production.up.railway.app",
+    "timestamp": "2026-06-10T10:15:00.000Z"
   },
   "0.5__5": {
-    "completed": false,
-    "briefing": null,
-    "timestamp": null
+    "completed": true,
+    "briefing": "FASE F: Render desactivado. Neon no existia (ruta simplificada). App corriendo 100% en Railway PRO con PostgreSQL integrado.",
+    "timestamp": "2026-06-10T10:15:00.000Z"
   },
   "0.5__6": {
-    "completed": false,
-    "briefing": null,
-    "timestamp": null
+    "completed": true,
+    "briefing": "FASE G: Scripts actualizados. deploy-railway.ps1 corregido (path con espacio). railway.json con healthcheckTimeout=60. nixpacks.toml creado para Node.js. render.yaml actualizado. Procfile simplificado (release removido, start con alembic).",
+    "timestamp": "2026-06-10T10:15:00.000Z"
   },
-  "_lastSaved": "2026-06-10T06:05:00.000Z"
+  "_lastSaved": "2026-06-10T10:15:00.000Z"
 }
