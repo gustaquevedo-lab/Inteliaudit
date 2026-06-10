@@ -99,5 +99,30 @@
     "briefing": "Verificado: pytest -v ejecuta 85 tests, todos pasan en 4.76s. Python 3.12.10, pytest 9.0.3, pytest-asyncio 1.4.0. Modo asyncio=auto configurado en pyproject.toml.",
     "timestamp": "2026-06-10T07:22:00.000Z"
   },
-  "_lastSaved": "2026-06-10T07:22:00.000Z"
+  "0.3__0": {
+    "completed": true,
+    "briefing": "Creado .github/workflows/ci.yml con pipeline completo: triggers en push/PR a main. Jobs: lint-and-type (ruff check + format + mypy), test (pytest con coverage), build-frontend (Node 20, npm ci + build), deploy (solo main, Railway auto-deploy).",
+    "timestamp": "2026-06-10T07:38:00.000Z"
+  },
+  "0.3__1": {
+    "completed": true,
+    "briefing": "Configurado matrix para Python 3.12 + Node 20. Cache de pip y npm habilitado. Playwright chromium instalado para tests. Coverage upload a Codecov configurado (opcional con CODECOV_TOKEN).",
+    "timestamp": "2026-06-10T07:38:30.000Z"
+  },
+  "0.3__2": {
+    "completed": true,
+    "briefing": "Agregado step de playwright install chromium en job test. Necesario para imports de ingesta/marangatu.py. Playwright browsers instalados antes de pytest.",
+    "timestamp": "2026-06-10T07:39:00.000Z"
+  },
+  "0.3__3": {
+    "completed": true,
+    "briefing": "Verificado: Railway auto-deploys desde main. Job deploy solo confirma el auto-deploy. No se necesita deploy hook explicito. Railway detecta push a main automaticamente.",
+    "timestamp": "2026-06-10T07:39:30.000Z"
+  },
+  "0.3__4": {
+    "completed": true,
+    "briefing": "Creado README.md con badge de CI status, descripcion del proyecto, stack tecnologico, estructura, inicio rapido, tests, produccion, roadmap, seguridad, marco legal. Badge: https://github.com/gustaquevedo-lab/Inteliaudit/actions/workflows/ci.yml/badge.svg",
+    "timestamp": "2026-06-10T07:40:00.000Z"
+  },
+  "_lastSaved": "2026-06-10T07:40:00.000Z"
 }

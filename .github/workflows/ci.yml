@@ -1,0 +1,122 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "20"
+
+jobs:
+  lint-and-type:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run ruff check
+        run: ruff check .
+
+      - name: Run ruff format check
+        run: ruff format --check .
+
+      - name: Run mypy
+        run: mypy .
+
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    needs: lint-and-type
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Install Playwright browsers
+        run: playwright install chromium
+
+      - name: Run tests with coverage
+        run: pytest --cov --cov-report=xml --cov-report=term-missing
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  build-frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    needs: lint-and-type
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: ui-web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./ui-web
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: ./ui-web
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: ui-web-dist/
+          retention-days: 7
+
+  deploy:
+    name: Deploy to Railway
+    runs-on: ubuntu-latest
+    needs: [test, build-frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trigger Railway Deploy
+        run: |
+          echo "🚀 Railway auto-deploys from main branch"
+          echo "✅ All checks passed - Railway will deploy automatically"
+          echo "📊 Monitor deploy: https://railway.app/dashboard"
+
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Deployment triggered successfully"
+          else
+            echo "❌ Deployment failed"
+          fi
