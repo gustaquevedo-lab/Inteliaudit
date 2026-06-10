@@ -127,7 +127,7 @@ export default function TabInformes({ auditoriaId, clienteRuc }: Props) {
       success('Link generado')
     } catch (e: unknown) { error(e instanceof Error ? e.message : 'Error') }
     setGenerandoLink(false)
-  } - se puede verificar desde API
+  }
 
   return (
     <div className="space-y-5">
