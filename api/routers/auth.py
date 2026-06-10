@@ -365,17 +365,28 @@ async def get_credencial(
 async def crear_firma(body: FirmaCreate, db: AsyncSession = Depends(get_db)):
     """
     Endpoint de onboarding: crea firma + primer usuario admin.
-    Todas las firmas nuevas inician con 7 días de trial del plan Pro.
+    Retorna access_token para auto-login inmediato.
     """
     from datetime import timedelta
     from config.plans import get_plan
 
+    if not body.nombre or not body.nombre.strip():
+        raise HTTPException(400, "El nombre de la firma es obligatorio")
+    if not body.admin_email or not body.admin_password:
+        raise HTTPException(400, "Email y password del administrador son obligatorios")
+    if len(body.admin_password) < 8:
+        raise HTTPException(400, "La password debe tener al menos 8 caracteres")
+
+    existing = await db.execute(select(Usuario).where(Usuario.email == body.admin_email, Usuario.activo == True))
+    if existing.scalar_one_or_none():
+        raise HTTPException(400, "El email ya está registrado")
+
     trial_plan = get_plan("pro")
     firma = Firma(
-        nombre=body.nombre,
+        nombre=body.nombre.strip(),
         ruc=body.ruc,
         email=body.email,
-        eslogan=body.eslogan,
+        eslogan=body.eslogan or "",
         plan="trial",
         trial_hasta=datetime.now(timezone.utc) + timedelta(days=7),
     )
@@ -392,7 +403,11 @@ async def crear_firma(body: FirmaCreate, db: AsyncSession = Depends(get_db)):
     db.add(admin)
     await db.flush()
 
+    token = _crear_token({"sub": admin.id, "firma_id": firma.id, "rol": "admin"})
+
     return {
+        "access_token": token,
+        "token_type": "bearer",
         "firma_id": firma.id,
         "admin_id": admin.id,
         "trial_hasta": firma.trial_hasta.isoformat(),

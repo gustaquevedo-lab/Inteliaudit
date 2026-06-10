@@ -294,5 +294,30 @@
     "briefing": "Implementada UI en TabArchivos.tsx: boton 'Validar CDCs en SIFEN', progreso en vivo 'Validando X de Y CDCs...' con barra de progreso, tabla resumen con 4 cards (Validos/Invalidos/No encontrados/Hallazgos), manejo de errores y polling cada 2s.",
     "timestamp": "2026-06-10T12:05:00.000Z"
   },
-  "_lastSaved": "2026-06-10T12:05:00.000Z"
+  "2.1__0": {
+    "completed": true,
+    "briefing": "Creada pagina /registro (Registro.tsx) con formulario wizard de 2 pasos usando framer-motion. Paso 1: nombre firma, RUC (validacion digito verificador modulo 11), email contacto. Paso 2: nombre admin, email, password (show/hide), confirmar password. Diseno fullscreen sobre fondo navy #091624 con logo Inteliaudit.",
+    "timestamp": "2026-06-10T13:00:00.000Z"
+  },
+  "2.1__1": {
+    "completed": true,
+    "briefing": "Implementado auto-login post-registro: POST /api/auth/firmas ahora retorna access_token + firma_id + admin_id. Frontend guarda token en localStorage y redirige a /dashboard tras 2s de modal de bienvenida con 3 pasos: Crear cliente, Subir archivos RG90, Ejecutar analisis.",
+    "timestamp": "2026-06-10T13:01:00.000Z"
+  },
+  "2.1__2": {
+    "completed": true,
+    "briefing": "Creado modal de bienvenida post-registro con animacion. Muestra 3 pasos con iconos animados en secuencia (delay progresivo). Auto-redireccion a /dashboard despues de 2 segundos.",
+    "timestamp": "2026-06-10T13:02:00.000Z"
+  },
+  "2.1__3": {
+    "completed": true,
+    "briefing": "Implementado banner de trial en Dashboard.tsx: si firma.plan === 'trial', muestra banner azul/verde con 'Trial Pro — Te quedan X dias' y contador dinamico desde trial_hasta. Al vencer: banner rojo 'Trial expirado — Elegi un plan para continuar'. Boton 'Ver planes' en ambos casos.",
+    "timestamp": "2026-06-10T13:03:00.000Z"
+  },
+  "2.1__4": {
+    "completed": true,
+    "briefing": "Agregada ruta /registro en App.tsx (publica, sin auth). Importado Registro desde ./pages/Registro. Botones de landing page actualizados: hero CTA 'Empezar gratis 7 dias' y pricing cards Pro/Starter ahora apuntan a /app/registro en vez de /app/login.",
+    "timestamp": "2026-06-10T13:04:00.000Z"
+  },
+  "_lastSaved": "2026-06-10T13:04:00.000Z"
 }

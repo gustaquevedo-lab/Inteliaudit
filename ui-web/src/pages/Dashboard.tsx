@@ -57,6 +57,10 @@ export default function Dashboard() {
     </div>
   )
 
+  const isTrial = user?.en_trial
+  const diasRestantes = user?.dias_trial_restantes ?? 0
+  const trialExpirado = isTrial && diasRestantes <= 0
+
   const recientes = [...(data?.auditorias ?? [])].sort((a, b) =>
     (b.fecha_inicio ?? '').localeCompare(a.fecha_inicio ?? '')
   ).slice(0, 8)
@@ -88,6 +92,47 @@ export default function Dashboard() {
           </button>
         </div>
       </div>
+
+      {/* Trial Banner */}
+      {isTrial && (
+        <div className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${
+          trialExpirado
+            ? 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800'
+            : 'bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/10 dark:to-green-900/10 border-blue-200 dark:border-blue-800/40'
+        }`}>
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-xl ${trialExpirado ? 'bg-red-100 dark:bg-red-900/20' : 'bg-primary/10'}`}>
+              {trialExpirado
+                ? <AlertTriangle size={18} className="text-red-500" />
+                : <Clock size={18} className="text-primary" />
+              }
+            </div>
+            <div>
+              <p className={`text-sm font-bold ${trialExpirado ? 'text-red-700 dark:text-red-300' : 'text-gray-900 dark:text-white'}`}>
+                {trialExpirado ? 'Trial expirado' : `Trial Pro — Te quedan ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}`}
+              </p>
+              <p className={`text-xs ${trialExpirado ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                {trialExpirado
+                  ? 'Elegi un plan para continuar usando Inteliaudit'
+                  : 'Disfruta de todas las funcionalidades del plan Pro durante tu periodo de prueba'
+                }
+              </p>
+            </div>
+          </div>
+          <a
+            href="https://inteliaudit.com/#precios"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`py-2 px-4 rounded-xl text-xs font-bold whitespace-nowrap ${
+              trialExpirado
+                ? 'bg-red-500 text-white hover:bg-red-600'
+                : 'btn-primary'
+            }`}
+          >
+            Ver planes
+          </a>
+        </div>
+      )}
 
       {/* Advanced KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

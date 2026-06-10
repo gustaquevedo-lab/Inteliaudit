@@ -15,6 +15,7 @@ import InformesList from './pages/informes/InformesList'
 import Configuracion from './pages/admin/Configuracion'
 import AuditTrail from './pages/admin/AuditTrail'
 import PortalCliente from './pages/PortalCliente'
+import Registro from './pages/Registro'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -33,6 +34,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/registro" element={<Registro />} />
       <Route
         path="/"
         element={
