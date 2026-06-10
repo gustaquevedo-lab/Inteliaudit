@@ -26,6 +26,7 @@ export function BadgeEstadoHallazgo({ estado }: { estado: EstadoHallazgo }) {
     aceptado: 'Aceptado',
     descartado: 'Descartado',
     regularizado: 'Regularizado',
+    confirmado: 'Confirmado',
   }
   return (
     <span className={clsx(
