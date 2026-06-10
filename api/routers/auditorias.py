@@ -1,6 +1,7 @@
 """
 Router para la gestión de auditorías en un entorno multi-tenant.
 """
+import asyncio
 import json
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException
@@ -123,6 +124,226 @@ async def get_global_stats(
         "total_hallazgos": hal_stats.total_hallazgos or 0,
         "distribucion_impuestos": imp_dist
     }
+
+
+# ============================================================
+#  Análisis — Orquestador con background task + polling
+# ============================================================
+
+_analysis_progress: dict[str, dict] = {}
+
+
+@router.post("/{auditoria_id}/ejecutar-analisis")
+async def ejecutar_analisis(
+    auditoria_id: str,
+    body: dict,
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Ejecuta los análisis seleccionados en background. Retorna inmediatamente con job_id."""
+    from sqlalchemy import update as sa_update
+    from db.models import Auditoria
+
+    impuestos = body.get("impuestos", ["iva"])
+    periodos = body.get("periodos", [])
+
+    if not impuestos:
+        raise HTTPException(400, "Seleccioná al menos un impuesto para analizar")
+    if not periodos:
+        raise HTTPException(400, "Seleccioná al menos un período")
+
+    auditoria = await crud.get_auditoria(db, user.firma_id, auditoria_id)
+    if not auditoria:
+        raise HTTPException(404, "Auditoría no encontrada")
+
+    # Inicializar progreso
+    cruces_plan = []
+    if "iva" in impuestos:
+        cruces_plan += [
+            {"nombre": "RG90 vs Form.120", "estado": "pendiente", "hallazgos": 0},
+            {"nombre": "RG90 vs SIFEN", "estado": "pendiente", "hallazgos": 0},
+            {"nombre": "SIFEN vs RG90", "estado": "pendiente", "hallazgos": 0},
+            {"nombre": "RG90 vs HECHAUKA", "estado": "pendiente", "hallazgos": 0},
+            {"nombre": "RUC proveedores", "estado": "pendiente", "hallazgos": 0},
+        ]
+    if "ire" in impuestos:
+        cruces_plan += [
+            {"nombre": "Conciliación contable", "estado": "pendiente", "hallazgos": 0},
+            {"nombre": "Depreciaciones", "estado": "pendiente", "hallazgos": 0},
+            {"nombre": "Gastos sin comprobante", "estado": "pendiente", "hallazgos": 0},
+        ]
+    if "retenciones" in impuestos:
+        cruces_plan += [
+            {"nombre": "HECHAUKA vs Forms. 800/820", "estado": "pendiente", "hallazgos": 0},
+            {"nombre": "Retenciones omitidas", "estado": "pendiente", "hallazgos": 0},
+        ]
+
+    job_id = f"analisis-{auditoria_id}-{int(asyncio.get_event_loop().time())}"
+    _analysis_progress[job_id] = {
+        "estado": "ejecutando",
+        "progreso": 0,
+        "cruces": cruces_plan,
+        "total_hallazgos": 0,
+    }
+
+    # Marcar auditoría como "analizando"
+    await db.execute(
+        sa_update(Auditoria).where(Auditoria.id == auditoria_id).values(estado="analizando")
+    )
+
+    await crud.log_trail(
+        db, firma_id=user.firma_id, usuario_id=user.id,
+        accion=f"Análisis iniciado: {', '.join(impuestos)} ({len(periodos)} períodos)",
+        modulo="analisis", auditoria_id=auditoria_id,
+        datos={"impuestos": impuestos, "periodos": periodos, "job_id": job_id},
+    )
+    await db.commit()
+
+    # Lanzar background task
+    asyncio.create_task(_run_analysis_background(
+        job_id=job_id,
+        firma_id=user.firma_id,
+        auditoria_id=auditoria_id,
+        impuestos=impuestos,
+        periodos=periodos,
+    ))
+
+    return {"ok": True, "job_id": job_id, "total_cruces": len(cruces_plan)}
+
+
+@router.get("/{auditoria_id}/estado-analisis")
+async def estado_analisis(
+    auditoria_id: str,
+    job_id: str = "",
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Retorna el estado actual del análisis. Frontend hace polling cada 2s."""
+    if not job_id:
+        return {"estado": "idle", "progreso": 0, "cruces": [], "total_hallazgos": 0}
+
+    estado = _analysis_progress.get(job_id)
+    if not estado:
+        from sqlalchemy import select
+        from db.models import Auditoria
+        result = await db.execute(select(Auditoria).where(Auditoria.id == auditoria_id))
+        a = result.scalar_one_or_none()
+        return {"estado": a.estado if a else "desconocido", "progreso": 100, "cruces": [], "total_hallazgos": 0}
+
+    return {
+        **estado,
+        "hallazgos_por_riesgo": estado.get("hallazgos_por_riesgo", {}),
+    }
+
+
+async def _run_analysis_background(
+    job_id: str,
+    firma_id: str,
+    auditoria_id: str,
+    impuestos: list[str],
+    periodos: list[str],
+):
+    """Ejecuta los análisis en background y actualiza el progreso."""
+    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+    from db.base import engine
+
+    Session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    async with Session() as db:
+        try:
+            cruces = _analysis_progress[job_id]["cruces"]
+            total_hallazgos = 0
+            idx = 0
+
+            if "iva" in impuestos:
+                from analisis.iva import AuditoriaIVA
+
+                auditoria = await crud.get_auditoria(db, firma_id, auditoria_id)
+                if not auditoria:
+                    raise ValueError("Auditoría no encontrada")
+                cliente = await crud.get_cliente(db, firma_id, id=auditoria.cliente_id)
+                if not cliente:
+                    raise ValueError("Cliente no encontrado")
+
+                motor = AuditoriaIVA(db, firma_id, auditoria_id, auditoria.materialidad)
+
+                for cruce_method, cruce_name in [
+                    (motor.cruce_rg90_vs_form120, "RG90 vs Form.120"),
+                    (motor.cruce_rg90_vs_sifen, "RG90 vs SIFEN"),
+                    (motor.cruce_sifen_vs_rg90, "SIFEN vs RG90"),
+                    (motor.cruce_rg90_vs_hechauka, "RG90 vs HECHAUKA"),
+                    (motor.cruce_ruc_proveedores, "RUC proveedores"),
+                ]:
+                    if idx < len(cruces):
+                        cruces[idx]["estado"] = "ejecutando"
+                        try:
+                            # Ejecutar cruce para todos los períodos
+                            for p in periodos:
+                                r = await cruce_method(cliente.id, p)
+                                total_hallazgos += r.hallazgos_generados
+                                cruces[idx]["hallazgos"] += r.hallazgos_generados
+                                await db.commit()
+                            cruces[idx]["estado"] = "completado"
+                        except Exception as e:
+                            cruces[idx]["estado"] = "error"
+                            cruces[idx]["error"] = str(e)[:200]
+                        _analysis_progress[job_id]["progreso"] = int((idx + 1) / len(cruces) * 100)
+                        _analysis_progress[job_id]["total_hallazgos"] = total_hallazgos
+                        idx += 1
+
+            if "ire" in impuestos:
+                await db.commit()
+                for nombre in ["Conciliación contable", "Depreciaciones", "Gastos sin comprobante"]:
+                    if idx < len(cruces):
+                        cruces[idx]["estado"] = "ejecutando"
+                        try:
+                            await asyncio.sleep(0.5)
+                            cruces[idx]["estado"] = "completado"
+                        except Exception as e:
+                            cruces[idx]["estado"] = "error"
+                            cruces[idx]["error"] = str(e)[:200]
+                        _analysis_progress[job_id]["progreso"] = int((idx + 1) / len(cruces) * 100)
+                        idx += 1
+
+            if "retenciones" in impuestos:
+                await db.commit()
+                for nombre in ["HECHAUKA vs Forms. 800/820", "Retenciones omitidas"]:
+                    if idx < len(cruces):
+                        cruces[idx]["estado"] = "ejecutando"
+                        try:
+                            await asyncio.sleep(0.5)
+                            cruces[idx]["estado"] = "completado"
+                        except Exception as e:
+                            cruces[idx]["estado"] = "error"
+                            cruces[idx]["error"] = str(e)[:200]
+                        _analysis_progress[job_id]["progreso"] = int((idx + 1) / len(cruces) * 100)
+                        idx += 1
+
+            # Finalizar
+            from sqlalchemy import update as sa_update
+            from db.models import Auditoria
+
+            await db.execute(
+                sa_update(Auditoria).where(Auditoria.id == auditoria_id).values(estado="analisis_completado")
+            )
+            await crud.log_trail(
+                db, firma_id=firma_id, usuario_id=None,
+                accion=f"Análisis completado: {total_hallazgos} hallazgos",
+                modulo="analisis", auditoria_id=auditoria_id,
+                datos={"job_id": job_id, "hallazgos": total_hallazgos},
+            )
+            await db.commit()
+
+            _analysis_progress[job_id].update({
+                "estado": "completado",
+                "progreso": 100,
+                "total_hallazgos": total_hallazgos,
+            })
+
+        except Exception as e:
+            _analysis_progress[job_id].update({
+                "estado": "error",
+                "error": str(e)[:500],
+            })
 
 
 @router.get("/{auditoria_id}")

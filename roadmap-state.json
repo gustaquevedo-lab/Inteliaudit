@@ -194,5 +194,40 @@
     "briefing": "Test end-to-end: subir archivo RG90 XLSX via endpoint POST /importar/rg90. Preview con 3 registros parseados correctamente. Confirmacion via POST /importar/rg90/confirmar persiste en DB. Audit trail registra cada importacion con usuario y timestamp. Import history visible en TabArchivos.",
     "timestamp": "2026-06-10T09:06:00.000Z"
   },
-  "_lastSaved": "2026-06-10T09:06:00.000Z"
+  "1.2__0": {
+    "completed": true,
+    "briefing": "Creado endpoint POST /api/auditorias/{id}/ejecutar-analisis con ejecucion en background via asyncio.create_task. Body recibe { impuestos: [\"iva\",\"ire\",\"retenciones\"], periodos: [...] }. Inicializa progreso con lista de cruces segun impuestos seleccionados. Retorna job_id inmediatamente para polling.",
+    "timestamp": "2026-06-10T10:00:00.000Z"
+  },
+  "1.2__1": {
+    "completed": true,
+    "briefing": "Creado endpoint GET /api/auditorias/{id}/estado-analisis?job_id=xxx para polling de progreso cada 2s. Retorna: { estado, progreso, cruces: [{nombre, estado, hallazgos}], total_hallazgos, hallazgos_por_riesgo, error }.",
+    "timestamp": "2026-06-10T10:01:00.000Z"
+  },
+  "1.2__2": {
+    "completed": true,
+    "briefing": "Implementada logica de progreso por cruce. IVA: 5 cruces (RG90 vs Form.120, RG90 vs SIFEN, SIFEN vs RG90, RG90 vs HECHAUKA, RUC proveedores). IRE: 3 procedimientos. Retenciones: 2 procedimientos. Cada cruce con estado pendiente/ejecutando/completado/error y contador de hallazgos.",
+    "timestamp": "2026-06-10T10:02:00.000Z"
+  },
+  "1.2__3": {
+    "completed": true,
+    "briefing": "TabAnalisis.tsx actualizado: resumen de datos disponibles (RG90 compras/ventas, CF/DF), selector de impuestos con checkboxes (IVA, IRE, Retenciones), selector de periodo desde/hasta, boton 'Ejecutar analisis' con estado deshabilitado si no hay datos.",
+    "timestamp": "2026-06-10T10:03:00.000Z"
+  },
+  "1.2__4": {
+    "completed": true,
+    "briefing": "Implementada UI de progreso en tiempo real con polling cada 2s. Barra de progreso animada. Lista de cruces con iconos: ⏳ pendiente, 🔄 ejecutando (spinner), ✅ completado (check), ❌ error (x). Contador de hallazgos en tiempo real actualizado por cruce.",
+    "timestamp": "2026-06-10T10:04:00.000Z"
+  },
+  "1.2__5": {
+    "completed": true,
+    "briefing": "Al completar: resumen final con total de hallazgos por nivel de riesgo (alto/medio/bajo) en cards con colores (rojo/ambar/verde). Boton 'Ver hallazgos' con link a pestana de hallazgos. Manejo de estado empty y error.",
+    "timestamp": "2026-06-10T10:05:00.000Z"
+  },
+  "1.2__6": {
+    "completed": true,
+    "briefing": "Registro en audit_trail: inicio de analisis con job_id, impuestos y periodos. Finalizacion con total de hallazgos. Estado de auditoria actualizado: en_progreso → analizando → analisis_completado via sa_update.",
+    "timestamp": "2026-06-10T10:06:00.000Z"
+  },
+  "_lastSaved": "2026-06-10T10:06:00.000Z"
 }

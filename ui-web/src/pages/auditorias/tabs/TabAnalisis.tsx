@@ -1,368 +1,316 @@
-import { useState } from 'react'
-import { Zap, CheckCircle2, AlertTriangle, Loader2, BarChart3, Database, FileSearch, TrendingUp, ChevronRight, Sparkles, BrainCircuit, Lock } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Zap, CheckCircle, AlertTriangle, Loader2, BarChart3, FileSearch, TrendingUp, XCircle, Clock, ArrowRight, ChevronRight } from 'lucide-react'
 import { api } from '../../../api/client'
 import { useToast } from '../../../components/Toaster'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../../../context/AuthContext'
 import { pyg } from '../../../utils/formatters'
 
-interface Props {
-  auditoriaId: string
-}
-
-interface AnalisisResult {
-  ok: boolean
-  periodos_analizados?: number
-  cruces_ejecutados?: number
-  hallazgos_generados: number
-  monto_ajuste_total?: number
-  ejercicio_analizado?: string
-  advertencias?: string[]
-  errores?: string[]
-}
+interface Props { auditoriaId: string }
 
 interface RG90Resumen {
   resumen: {
-    total_compras: number
-    total_ventas: number
-    credito_fiscal_total: number
-    debito_fiscal_total: number
+    total_compras: number; total_ventas: number
+    credito_fiscal_total: number; debito_fiscal_total: number
     comprobantes_sin_cdc: number
   }
 }
 
-const ANALISIS = [
-  {
-    id: 'iva',
-    endpoint: 'ejecutar-analisis-iva',
-    label: 'Análisis IVA Completo',
-    desc: '5 cruces: RG90 vs Form.120, RG90 vs SIFEN, RG90 vs HECHAUKA, validación RUC proveedores',
-    icon: BarChart3,
-    color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
-    accent: 'border-blue-200 dark:border-blue-800',
-  },
-  {
-    id: 'ire',
-    endpoint: 'ejecutar-analisis-ire',
-    label: 'Análisis IRE',
-    desc: 'Depreciaciones, gastos sin comprobante, conciliación resultado contable vs Form.500',
-    icon: TrendingUp,
-    color: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
-    accent: 'border-purple-200 dark:border-purple-800',
-  },
-  {
-    id: 'ret',
-    endpoint: 'ejecutar-analisis-retenciones',
-    label: 'Análisis Retenciones',
-    desc: 'Cruce HECHAUKA vs declaraciones Forms. 800/820/830 — retenciones practicadas y depositadas',
-    icon: FileSearch,
-    color: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400',
-    accent: 'border-amber-200 dark:border-amber-800',
-  },
+interface CruceEstado {
+  nombre: string; estado: string; hallazgos: number; error?: string
+}
+
+interface AnalisisEstado {
+  estado: string; progreso: number; cruces: CruceEstado[]
+  total_hallazgos: number; error?: string
+  hallazgos_por_riesgo?: Record<string, number>
+}
+
+const IMPUESTOS = [
+  { id: 'iva',     label: 'IVA',          desc: '5 cruces: RG90 vs Form.120, SIFEN, HECHAUKA, RUC',           icon: BarChart3 },
+  { id: 'ire',     label: 'IRE',          desc: 'Conciliacion contable, depreciaciones, gastos sin comprobante', icon: TrendingUp },
+  { id: 'retenciones', label: 'Retenciones', desc: 'Cruce HECHAUKA vs Forms. 800/820, retenciones omitidas',     icon: FileSearch },
 ]
 
-interface ClaudeResult {
-  ok: boolean
-  mensaje?: string
-  hallazgos_analizados?: number
-  total_contingencia?: number
-  narrativa?: string
-  conclusion?: string
-  procedimientos?: string[]
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Setiembre','Octubre','Noviembre','Diciembre']
+
+function getPeriodosRango(desde: string, hasta: string): string[] {
+  const [a1, m1] = desde.split('-').map(Number)
+  const [a2, m2] = hasta.split('-').map(Number)
+  const ps: string[] = []
+  let a = a1, m = m1
+  while (a < a2 || (a === a2 && m <= m2)) {
+    ps.push(`${a}-${String(m).padStart(2, '0')}`)
+    m++; if (m > 12) { m = 1; a++ }
+  }
+  return ps
 }
 
 export default function TabAnalisis({ auditoriaId }: Props) {
-  const { success, error } = useToast()
+  const { success, error: showError } = useToast()
   const navigate = useNavigate()
-  const { planInfo } = useAuth()
-  const tieneIA = planInfo?.tieneIA ?? false
-  const [running, setRunning] = useState<string | null>(null)
-  const [results, setResults] = useState<Record<string, AnalisisResult>>({})
   const [rg90, setRg90] = useState<RG90Resumen | null>(null)
   const [loadingRg90, setLoadingRg90] = useState(false)
-  const [claudeResult, setClaudeResult] = useState<ClaudeResult | null>(null)
-  const [runningClaude, setRunningClaude] = useState(false)
+  const [selected, setSelected] = useState<string[]>(['iva'])
+  const [periodoDesde, setPeriodoDesde] = useState('2024-01')
+  const [periodoHasta, setPeriodoHasta] = useState('2024-12')
+  const [jobId, setJobId] = useState<string | null>(null)
+  const [estado, setEstado] = useState<AnalisisEstado | null>(null)
+  const [running, setRunning] = useState(false)
 
-  const ejecutar = async (a: typeof ANALISIS[0]) => {
-    setRunning(a.id)
-    try {
-      const res = await api.post<AnalisisResult>(`/auditorias/${auditoriaId}/${a.endpoint}`)
-      setResults(r => ({ ...r, [a.id]: res }))
-      if (res.hallazgos_generados > 0) {
-        success(`${a.label}: ${res.hallazgos_generados} hallazgos generados`)
-      } else {
-        success(`${a.label} completado. Sin hallazgos nuevos.`)
-      }
-    } catch (e: unknown) {
-      error(e instanceof Error ? e.message : `Error en ${a.label}`)
-    } finally {
-      setRunning(null)
-    }
-  }
-
-  const ejecutarClaudeIA = async () => {
-    setRunningClaude(true)
-    try {
-      const res = await api.post<ClaudeResult>(`/auditorias/${auditoriaId}/analisis-claude`)
-      setClaudeResult(res)
-      if (res.ok) {
-        success(`Análisis IA completado — ${res.hallazgos_analizados} hallazgos interpretados`)
-      }
-    } catch (e: unknown) {
-      error(e instanceof Error ? e.message : 'Error en el análisis IA')
-    } finally {
-      setRunningClaude(false)
-    }
-  }
-
-  const cargarRg90 = async () => {
+  const loadRg90 = useCallback(async () => {
     setLoadingRg90(true)
+    try { setRg90(await api.get<RG90Resumen>(`/auditorias/${auditoriaId}/rg90`)) }
+    catch { /* no data yet */ }
+    setLoadingRg90(false)
+  }, [auditoriaId])
+
+  useEffect(() => { loadRg90() }, [loadRg90])
+
+  // Polling de estado
+  useEffect(() => {
+    if (!jobId || !running) return
+    const interval = setInterval(async () => {
+      try {
+        const e = await api.get<AnalisisEstado>(`/auditorias/${auditoriaId}/estado-analisis?job_id=${jobId}`)
+        setEstado(e)
+        if (e.estado === 'completado' || e.estado === 'error') {
+          setRunning(false)
+          clearInterval(interval)
+          if (e.estado === 'completado') success('Analisis completado')
+        }
+      } catch { /* polling failed */ }
+    }, 2000)
+    return () => clearInterval(interval)
+  }, [jobId, running, auditoriaId, success])
+
+  const ejecutar = async () => {
+    if (selected.length === 0) { showError('Selecciona al menos un impuesto'); return }
+    setRunning(true)
+    setJobId(null)
+    setEstado(null)
     try {
-      const data = await api.get<RG90Resumen>(`/auditorias/${auditoriaId}/rg90`)
-      setRg90(data)
-    } catch {
-      error('No se pudo cargar RG90')
-    } finally {
-      setLoadingRg90(false)
+      const periodos = getPeriodosRango(periodoDesde, periodoHasta)
+      const res = await api.post<{ ok: boolean; job_id: string }>(
+        `/auditorias/${auditoriaId}/ejecutar-analisis`,
+        { impuestos: selected, periodos }
+      )
+      setJobId(res.job_id)
+    } catch (e: unknown) {
+      setRunning(false)
+      showError(e instanceof Error ? e.message : 'Error al iniciar analisis')
+    }
+  }
+
+  const toggleImpuesto = (id: string) => {
+    setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  }
+
+  const hasData = rg90 && (rg90.resumen.total_compras > 0 || rg90.resumen.total_ventas > 0)
+
+  const statusIcon = (s: string) => {
+    switch (s) {
+      case 'completado': return <CheckCircle size={14} className="text-green-500 shrink-0" />
+      case 'ejecutando': return <Loader2 size={14} className="animate-spin text-primary shrink-0" />
+      case 'error': return <XCircle size={14} className="text-red-500 shrink-0" />
+      default: return <Clock size={14} className="text-gray-300 shrink-0" />
     }
   }
 
   return (
-    <div className="space-y-6">
-      {/* RG90 Summary */}
+    <div className="space-y-5">
+      {/* Resumen de datos disponibles */}
       <div className="card p-5">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Database size={16} className="text-primary" />
-            <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">Estado RG90 Importado</h3>
-          </div>
-          <button
-            onClick={cargarRg90}
-            disabled={loadingRg90}
-            className="btn-ghost text-xs flex items-center gap-1.5"
-          >
-            {loadingRg90 ? <Loader2 size={12} className="animate-spin" /> : <Database size={12} />}
+          <p className="section-label mb-0 flex items-center gap-2">
+            <BarChart3 size={16} className="text-primary" /> Datos disponibles
+          </p>
+          <button onClick={loadRg90} disabled={loadingRg90} className="btn-ghost text-xs">
+            {loadingRg90 ? <Loader2 size={12} className="animate-spin" /> : null}
             Actualizar
           </button>
         </div>
-
         {rg90 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            {[
-              { label: 'Compras', val: rg90.resumen.total_compras.toLocaleString('es-PY'), color: 'text-blue-600' },
-              { label: 'Ventas', val: rg90.resumen.total_ventas.toLocaleString('es-PY'), color: 'text-green-600' },
-              { label: 'CF Total', val: pyg(rg90.resumen.credito_fiscal_total), color: 'text-primary' },
-              { label: 'DF Total', val: pyg(rg90.resumen.debito_fiscal_total), color: 'text-secondary' },
-              { label: 'Sin CDC', val: rg90.resumen.comprobantes_sin_cdc.toString(), color: rg90.resumen.comprobantes_sin_cdc > 0 ? 'text-red-500' : 'text-gray-400' },
-            ].map(stat => (
-              <div key={stat.label} className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 text-center">
-                <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">{stat.label}</p>
-                <p className={`text-sm font-black ${stat.color}`}>{stat.val}</p>
-              </div>
-            ))}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 text-center">
+              <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">RG90 Compras</p>
+              <p className="text-sm font-black text-blue-600">{rg90.resumen.total_compras.toLocaleString('es-PY')}</p>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 text-center">
+              <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">RG90 Ventas</p>
+              <p className="text-sm font-black text-green-600">{rg90.resumen.total_ventas.toLocaleString('es-PY')}</p>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 text-center">
+              <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Credito Fiscal</p>
+              <p className="text-xs font-black text-primary">{pyg(rg90.resumen.credito_fiscal_total)}</p>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 text-center">
+              <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Debito Fiscal</p>
+              <p className="text-xs font-black text-secondary">{pyg(rg90.resumen.debito_fiscal_total)}</p>
+            </div>
           </div>
         ) : (
           <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6 text-center text-gray-400">
-            <Database size={28} className="opacity-30 mx-auto mb-2" />
             <p className="text-xs font-bold uppercase tracking-wide">
-              Importá archivos RG90 en la pestaña <strong className="text-gray-600 dark:text-gray-300">Archivos</strong> para ver el resumen
+              Importa archivos RG90 en la pestana <strong className="text-gray-600 dark:text-gray-300">Archivos</strong> primero
             </p>
-            <button onClick={cargarRg90} className="mt-3 btn-ghost text-xs">
+            <button onClick={loadRg90} className="mt-3 btn-ghost text-xs">
               {loadingRg90 ? 'Cargando...' : 'Verificar datos'}
             </button>
           </div>
         )}
       </div>
 
-      {/* Módulos de Análisis */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between px-1">
-          <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight flex items-center gap-2">
-            <Zap size={16} className="text-primary" /> Motores de Análisis Automático
-          </h3>
+      {/* Selector de impuestos + periodos */}
+      <div className="card p-5 space-y-4">
+        <p className="section-label mb-0 flex items-center gap-2">
+          <Zap size={16} className="text-primary" /> Configurar analisis
+        </p>
+
+        <div>
+          <p className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-3 uppercase tracking-wide">Impuestos a analizar</p>
+          <div className="flex flex-wrap gap-3">
+            {IMPUESTOS.map(imp => {
+              const isSelected = selected.includes(imp.id)
+              return (
+                <button
+                  key={imp.id}
+                  onClick={() => toggleImpuesto(imp.id)}
+                  disabled={running}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left ${
+                    isSelected
+                      ? 'border-primary bg-primary/5 text-gray-900 dark:text-white'
+                      : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-300'
+                  } ${running ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <div className={`p-2 rounded-lg ${isSelected ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-400'}`}>
+                    <imp.icon size={16} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold">{imp.label}</p>
+                    <p className="text-[10px] text-gray-400">{imp.desc}</p>
+                  </div>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ml-auto transition-colors ${
+                    isSelected ? 'border-primary bg-primary' : 'border-gray-300 dark:border-gray-600'
+                  }`}>
+                    {isSelected && <CheckCircle size={12} className="text-white" />}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
         </div>
 
-        {ANALISIS.map(a => {
-          const res = results[a.id]
-          const isRunning = running === a.id
-          return (
-            <div key={a.id} className={`card p-5 border ${a.accent} transition-all`}>
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3 flex-1">
-                  <div className={`p-2.5 rounded-xl ${a.color} shrink-0 mt-0.5`}>
-                    <a.icon size={18} />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-black text-gray-900 dark:text-white text-sm">{a.label}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{a.desc}</p>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="input-label">Periodo desde</label>
+            <input type="month" className="input-field" value={periodoDesde} onChange={e => setPeriodoDesde(e.target.value)} disabled={running} />
+          </div>
+          <div>
+            <label className="input-label">Periodo hasta</label>
+            <input type="month" className="input-field" value={periodoHasta} onChange={e => setPeriodoHasta(e.target.value)} disabled={running} />
+          </div>
+        </div>
 
-                    {/* Result */}
-                    {res && (
-                      <div className={`mt-3 flex flex-wrap gap-3 items-center p-3 rounded-xl ${
-                        res.hallazgos_generados > 0
-                          ? 'bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20'
-                          : 'bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/20'
-                      }`}>
-                        {res.hallazgos_generados > 0 ? (
-                          <AlertTriangle size={14} className="text-red-500 shrink-0" />
-                        ) : (
-                          <CheckCircle2 size={14} className="text-green-500 shrink-0" />
-                        )}
-                        <span className={`text-xs font-bold ${res.hallazgos_generados > 0 ? 'text-red-700 dark:text-red-300' : 'text-green-700 dark:text-green-300'}`}>
-                          {res.hallazgos_generados > 0
-                            ? `${res.hallazgos_generados} hallazgos generados${res.monto_ajuste_total ? ` · ${pyg(res.monto_ajuste_total)} contingencia` : ''}`
-                            : 'Sin hallazgos detectados'
-                          }
-                        </span>
-                        {res.periodos_analizados && (
-                          <span className="text-[10px] text-gray-400">{res.periodos_analizados} períodos</span>
-                        )}
-                        {(res.advertencias?.length ?? 0) > 0 && (
-                          <div className="w-full mt-1">
-                            {res.advertencias!.slice(0, 3).map((adv, i) => (
-                              <p key={i} className="text-[10px] text-amber-600 dark:text-amber-400">{adv}</p>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => ejecutar(a)}
-                  disabled={isRunning || running !== null}
-                  className={`btn-primary py-2 px-4 text-xs flex items-center gap-1.5 shrink-0 ${running !== null && !isRunning ? 'opacity-50' : ''}`}
-                >
-                  {isRunning ? (
-                    <><Loader2 size={13} className="animate-spin" /> Ejecutando...</>
-                  ) : (
-                    <><Zap size={13} /> Ejecutar</>
-                  )}
-                </button>
-              </div>
-            </div>
-          )
-        })}
+        <button onClick={ejecutar} disabled={running || selected.length === 0 || !hasData}
+          className="btn-primary w-full py-3 text-sm flex items-center justify-center gap-2">
+          {running ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />}
+          {running ? 'Ejecutando analisis...' : 'Ejecutar analisis'}
+        </button>
+        {!hasData && !loadingRg90 && (
+          <p className="text-xs text-amber-600 text-center">Importa archivos RG90 y HECHAUKA primero</p>
+        )}
       </div>
 
-      {/* Análisis IA con Claude */}
-      <div className={`card p-5 border ${tieneIA ? 'border-purple-200 dark:border-purple-800/40' : 'border-gray-200 dark:border-gray-700'}`}>
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3 flex-1">
-            <div className={`p-2.5 rounded-xl shrink-0 mt-0.5 ${tieneIA ? 'bg-gradient-to-br from-purple-500 to-blue-600' : 'bg-gray-200 dark:bg-gray-700'}`}>
-              <BrainCircuit size={18} className={tieneIA ? 'text-white' : 'text-gray-400 dark:text-gray-500'} />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-0.5">
-                <p className="font-black text-gray-900 dark:text-white text-sm">Análisis con Inteligencia Artificial</p>
-                <span className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-[9px] font-black uppercase rounded-full">Claude</span>
-                {!tieneIA && (
-                  <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-[9px] font-black uppercase rounded-full flex items-center gap-1">
-                    <Lock size={8} /> Pro
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                Claude interpreta los hallazgos existentes y redacta narrativa profesional, conclusión ejecutiva y procedimientos adicionales recomendados.
+      {/* Progreso en vivo */}
+      {estado && estado.estado !== 'idle' && (
+        <div className="card p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {estado.estado === 'ejecutando' && <Loader2 size={16} className="animate-spin text-primary" />}
+              {estado.estado === 'completado' && <CheckCircle size={16} className="text-green-500" />}
+              {estado.estado === 'error' && <AlertTriangle size={16} className="text-red-500" />}
+              <p className="font-bold text-sm uppercase">
+                {estado.estado === 'ejecutando' ? 'Ejecutando...' :
+                 estado.estado === 'completado' ? 'Analisis completado' : 'Error en analisis'}
               </p>
-
-              {!tieneIA && (
-                <div className="mt-3 p-3 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/10 dark:to-blue-900/10 border border-purple-100 dark:border-purple-800/30 rounded-xl">
-                  <p className="text-xs font-bold text-purple-800 dark:text-purple-300 mb-1">Función exclusiva del plan Pro</p>
-                  <p className="text-xs text-purple-700 dark:text-purple-400 leading-relaxed">
-                    Actualizá tu plan para acceder al análisis automático con IA, narrativa legal y procedimientos sugeridos por Claude.
-                  </p>
-                  <a
-                    href="https://inteliaudit.com/#precios"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 mt-2 text-xs font-black text-purple-700 dark:text-purple-300 hover:text-purple-900 dark:hover:text-purple-100 transition-colors"
-                  >
-                    Ver planes <ChevronRight size={11} />
-                  </a>
-                </div>
-              )}
-
-              {tieneIA && claudeResult && (
-                <div className="mt-4 space-y-4">
-                  {!claudeResult.ok && claudeResult.mensaje && (
-                    <div className="p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30 rounded-xl text-xs text-amber-700 dark:text-amber-400">
-                      {claudeResult.mensaje}
-                    </div>
-                  )}
-
-                  {claudeResult.narrativa && (
-                    <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-1.5">
-                        <Sparkles size={10} /> Observaciones de Auditoría
-                      </p>
-                      <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{claudeResult.narrativa}</p>
-                    </div>
-                  )}
-
-                  {claudeResult.conclusion && (
-                    <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-800/30">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-blue-400 mb-2 flex items-center gap-1.5">
-                        <CheckCircle2 size={10} /> Conclusión Ejecutiva
-                      </p>
-                      <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed italic">{claudeResult.conclusion}</p>
-                    </div>
-                  )}
-
-                  {claudeResult.procedimientos && claudeResult.procedimientos.length > 0 && (
-                    <div className="p-4 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-800/30">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-2 flex items-center gap-1.5">
-                        <AlertTriangle size={10} /> Procedimientos Adicionales Recomendados
-                      </p>
-                      <ul className="space-y-1">
-                        {claudeResult.procedimientos.map((p, i) => (
-                          <li key={i} className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">{p}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
+            <span className="text-xs font-bold text-gray-500">{estado.progreso}%</span>
           </div>
 
-          {tieneIA ? (
-            <button
-              onClick={ejecutarClaudeIA}
-              disabled={runningClaude || running !== null}
-              className="btn-primary py-2 px-4 text-xs flex items-center gap-1.5 shrink-0 bg-gradient-to-r from-purple-600 to-blue-600 border-0"
-            >
-              {runningClaude ? (
-                <><Loader2 size={13} className="animate-spin" /> Analizando...</>
-              ) : (
-                <><Sparkles size={13} /> Analizar con IA</>
-              )}
-            </button>
-          ) : (
-            <div className="shrink-0 px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-400 text-xs font-black flex items-center gap-1.5 cursor-not-allowed">
-              <Lock size={12} /> Bloqueado
+          <div className="w-full h-2.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div className={`h-full rounded-full transition-all duration-500 ${
+              estado.estado === 'error' ? 'bg-red-500' : 'bg-primary'
+            }`} style={{ width: `${estado.progreso}%` }} />
+          </div>
+
+          {estado.total_hallazgos > 0 && (
+            <div className="px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 flex items-center gap-3">
+              <AlertTriangle size={16} className="text-red-500 shrink-0" />
+              <div>
+                <p className="text-xs font-bold text-red-700 dark:text-red-300">
+                  {estado.total_hallazgos} hallazgo{estado.total_hallazgos !== 1 ? 's' : ''} encontrado{estado.total_hallazgos !== 1 ? 's' : ''}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Lista de cruces */}
+          <div className="space-y-2">
+            {estado.cruces.map((cruce, i) => (
+              <div key={i} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-medium ${
+                cruce.estado === 'completado' ? 'bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-300' :
+                cruce.estado === 'ejecutando' ? 'bg-blue-50 dark:bg-blue-900/10 text-blue-700 dark:text-blue-300' :
+                cruce.estado === 'error' ? 'bg-red-50 dark:bg-red-900/10 text-red-700 dark:text-red-300' :
+                'bg-gray-50 dark:bg-gray-800/50 text-gray-400'
+              }`}>
+                {statusIcon(cruce.estado)}
+                <span className="flex-1">{cruce.nombre}</span>
+                {cruce.hallazgos > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-[10px] font-bold">
+                    {cruce.hallazgos} hallazgo{cruce.hallazgos !== 1 ? 's' : ''}
+                  </span>
+                )}
+                {cruce.estado === 'completado' && cruce.hallazgos === 0 && (
+                  <CheckCircle size={12} className="text-green-400" />
+                )}
+                {cruce.error && (
+                  <span className="text-[10px] text-red-400 ml-2 truncate max-w-[200px]">{cruce.error}</span>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {estado.error && (
+            <div className="px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-xs">
+              {estado.error}
             </div>
           )}
         </div>
-      </div>
+      )}
 
-      {/* Link a Evidence Explorer */}
-      <div
-        onClick={() => navigate(`/auditorias/${auditoriaId}/evidencia`)}
-        className="card p-5 flex items-center justify-between cursor-pointer hover:border-primary/50 transition-colors group"
-      >
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-primary/10 rounded-xl">
-            <FileSearch className="text-primary" size={18} />
+      {/* Resultado final */}
+      {estado && estado.estado === 'completado' && estado.total_hallazgos > 0 && (
+        <div className="card p-5 space-y-4">
+          <p className="section-label mb-0">Resumen de hallazgos</p>
+          <div className="grid grid-cols-3 gap-3">
+            {['alto', 'medio', 'bajo'].map(riesgo => {
+              const count = estado.hallazgos_por_riesgo?.[riesgo] ?? 0
+              const colors = { alto: 'bg-red-50 border-red-200 text-red-700', medio: 'bg-amber-50 border-amber-200 text-amber-700', bajo: 'bg-green-50 border-green-200 text-green-700' }
+              const labels = { alto: 'Alto', medio: 'Medio', bajo: 'Bajo' }
+              return (
+                <div key={riesgo} className={`px-4 py-3 rounded-xl border ${colors[riesgo as keyof typeof colors]} text-center`}>
+                  <p className="text-xs font-bold mb-1">{labels[riesgo as keyof typeof labels]}</p>
+                  <p className="text-2xl font-black">{count}</p>
+                </div>
+              )
+            })}
           </div>
-          <div>
-            <p className="font-black text-gray-900 dark:text-white text-sm">Evidence Explorer</p>
-            <p className="text-xs text-gray-500 mt-0.5">Explorar hallazgos con evidencias detalladas, papeles de trabajo y documentación DNIT</p>
-          </div>
+          <button onClick={() => navigate(`/auditorias/${auditoriaId}`)}
+            className="btn-primary w-full py-3 text-sm flex items-center justify-center gap-2">
+            Ver hallazgos <ChevronRight size={14} />
+          </button>
         </div>
-        <ChevronRight size={18} className="text-gray-300 group-hover:text-primary transition-colors" />
-      </div>
+      )}
     </div>
   )
 }
