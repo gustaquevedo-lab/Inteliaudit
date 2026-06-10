@@ -124,5 +124,35 @@
     "briefing": "Creado README.md con badge de CI status, descripcion del proyecto, stack tecnologico, estructura, inicio rapido, tests, produccion, roadmap, seguridad, marco legal. Badge: https://github.com/gustaquevedo-lab/Inteliaudit/actions/workflows/ci.yml/badge.svg",
     "timestamp": "2026-06-10T07:40:00.000Z"
   },
-  "_lastSaved": "2026-06-10T07:40:00.000Z"
+  "0.4__0": {
+    "completed": true,
+    "briefing": "Creado seed_demo.py con datos de demostracion completos y realistas. Firma demo: Auditores Asociados SRL (plan trial, 7 dias). Script idempotente que verifica si ya existen datos antes de insertar.",
+    "timestamp": "2026-06-10T08:00:00.000Z"
+  },
+  "0.4__1": {
+    "completed": true,
+    "briefing": "Generados 3 usuarios: admin@demo.com (admin), senior@demo.com (auditor_senior), auditor@demo.com (auditor). Password: demo123 para todos. bcrypt hashing con salt unico.",
+    "timestamp": "2026-06-10T08:00:30.000Z"
+  },
+  "0.4__2": {
+    "completed": true,
+    "briefing": "Generados 3 clientes con RUCs paraguayos validos: Comercial Guarani SA (80012345-6, comercio), Servicios Delta SRL (80098765-4, servicios), Importadora Sur SA (80054321-0, importacion). Regimen general, estado DNIT activo.",
+    "timestamp": "2026-06-10T08:01:00.000Z"
+  },
+  "0.4__3": {
+    "completed": true,
+    "briefing": "Generada auditoria completa para primer cliente (2024-01 a 2024-12): 360 registros RG90 compras (30/mes x 12 meses), 240 registros RG90 ventas (20/mes x 12 meses), 256 comprobantes SIFEN asociados, 240 registros HECHAUKA, 12 declaraciones Form. 120 con diferencias intencionales para generar hallazgos.",
+    "timestamp": "2026-06-10T08:02:00.000Z"
+  },
+  "0.4__4": {
+    "completed": true,
+    "briefing": "Generados 8 hallazgos pre-generados de diferentes tipos: IVA_CREDITO_RUC_INACTIVO (1), IVA_DIFERENCIA_RG90_DJ (2), IVA_CREDITO_SIN_CDC (2), IVA_DEBITO_OMITIDO_HECHAUKA (1), IRE_GASTO_SIN_COMPROBANTE (1), RET_NO_PRACTICADA (1). Cada uno con articulo legal, base_ajuste, impuesto_omitido, multa_estimada (50%), intereses_estimados (1% mensual), total_contingencia, nivel_riesgo (alto/medio/bajo).",
+    "timestamp": "2026-06-10T08:03:00.000Z"
+  },
+  "0.4__5": {
+    "completed": true,
+    "briefing": "Generadas 6 tareas de plan de trabajo: Carta de Compromiso (legal, completada), Obtencion de Balances (administrativo, completada), Cruce de Inventarios (impositivo, pendiente), Validacion de CDCs (impositivo, pendiente), Revision de Hallazgos (auditoria, pendiente), Informe Final (legal, pendiente).",
+    "timestamp": "2026-06-10T08:04:00.000Z"
+  },
+  "_lastSaved": "2026-06-10T08:04:00.000Z"
 }
