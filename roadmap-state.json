@@ -59,5 +59,45 @@
     "briefing": "FASE G: Scripts actualizados. deploy-railway.ps1 corregido (path con espacio). railway.json con healthcheckTimeout=60. nixpacks.toml creado para Node.js. render.yaml actualizado. Procfile simplificado (release removido, start con alembic).",
     "timestamp": "2026-06-10T10:15:00.000Z"
   },
-  "_lastSaved": "2026-06-10T10:15:00.000Z"
+  "0.2__0": {
+    "completed": true,
+    "briefing": "Creado tests/conftest.py con async engine SQLite in-memory, fixtures para Firma, Usuario (admin/auditor), Cliente (RUC 80012345-6), Auditoria, RG90 (compras/ventas), SIFEN, HECHAUKA, Declaracion Form.120. Datos sinteticos paraguayos realistas.",
+    "timestamp": "2026-06-10T07:15:00.000Z"
+  },
+  "0.2__1": {
+    "completed": true,
+    "briefing": "Generados archivos fixture: rg90_compras.xlsx (3 registros), rg90_ventas.xlsx (2 registros), hechauka.xlsx (3 registros), sifen_de.xml (comprobante e-Kuatia completo con namespace SIFEN).",
+    "timestamp": "2026-06-10T07:16:00.000Z"
+  },
+  "0.2__2": {
+    "completed": true,
+    "briefing": "Creado tests/test_iva.py con 11 tests: cruce RG90 vs Form.120 (sin declaracion, con/sin diferencia), RG90 vs SIFEN (CDC cancelado, sin CDC post-obligatoriedad), SIFEN vs RG90 (requiere Marangatu), RG90 vs HECHAUKA (venta omitida, sin datos), RUC proveedores (inactivo/activo), auditoria completa (5 cruces, multiples periodos).",
+    "timestamp": "2026-06-10T07:17:00.000Z"
+  },
+  "0.2__3": {
+    "completed": true,
+    "briefing": "Creado tests/test_riesgo.py con 20 tests: calcular_contingencia (basica, 12 meses, reincidente, formato YYYY-MM, meses cero, lote), clasificar_riesgo (alto/medio/bajo, con materialidad, lote), calcular_iva_sobre_monto (10%, 5%, redondeo), proporcionalidad_cf (total, 50%, ventas cero), resumir_contingencias (basico, excluye descartados), formatear_pyg.",
+    "timestamp": "2026-06-10T07:18:00.000Z"
+  },
+  "0.2__4": {
+    "completed": true,
+    "briefing": "Creado tests/test_auth.py con 13 tests: JWT (crear token, claims, expiracion, invalido), password hashing (hash+verify, wrong password, salt unico), cifrado credenciales (cifrar/descifrar, Fernet unique IV), roles (admin/auditor acceso, activo, datos firma).",
+    "timestamp": "2026-06-10T07:19:00.000Z"
+  },
+  "0.2__5": {
+    "completed": true,
+    "briefing": "Creado tests/test_parser_rg90.py con 22 tests: helpers (detectar tipo compras/ventas/desconocido, limpiar RUC/CDC, normalizar fecha ISO/DDMMYYYY/datetime, int PYG, fila vacia), parsear compras fixture (3 registros, tipo, periodo, RUCs, montos, CDC valido/sin CDC), parsear ventas fixture (2 registros, tipo, montos).",
+    "timestamp": "2026-06-10T07:20:00.000Z"
+  },
+  "0.2__6": {
+    "completed": true,
+    "briefing": "Creado tests/test_sifen.py con 15 tests: validar CDC (44 digitos, corto, largo, letras, vacio), parsear XML (fixture, CDC, tipo DE, emisor, receptor, montos, timbrado, fecha, invalido, vacio). Namespace SIFEN http://ekuatia.set.gov.py/sifen/xsd.",
+    "timestamp": "2026-06-10T07:21:00.000Z"
+  },
+  "0.2__7": {
+    "completed": true,
+    "briefing": "Verificado: pytest -v ejecuta 85 tests, todos pasan en 4.76s. Python 3.12.10, pytest 9.0.3, pytest-asyncio 1.4.0. Modo asyncio=auto configurado en pyproject.toml.",
+    "timestamp": "2026-06-10T07:22:00.000Z"
+  },
+  "_lastSaved": "2026-06-10T07:22:00.000Z"
 }
