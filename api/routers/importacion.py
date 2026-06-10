@@ -305,11 +305,16 @@ def _extraer_monto(texto: str, patron: str) -> int:
 
 
 async def _guardar_archivo(firma_id: str, auditoria_id: str, tipo: str, archivo: UploadFile) -> Path:
-    """Guarda archivo en storage con estructura tenant/auditoria/tipo."""
-    directorio = Path(settings.storage_path) / firma_id / auditoria_id / tipo
-    directorio.mkdir(parents=True, exist_ok=True)
-    destino = directorio / archivo.filename
+    """Guarda archivo en storage usando StorageAdapter."""
+    from storage.adapter import get_storage
+    storage = get_storage()
     contenido = await archivo.read()
-    destino.write_bytes(contenido)
+    key = f"{firma_id}/{auditoria_id}/{tipo}/{archivo.filename}"
+    await storage.upload(key, contenido, archivo.content_type or "application/octet-stream")
     await archivo.seek(0)
-    return destino
+    # Retornar Path temporal local para parsing (se borra despues)
+    import tempfile
+    tmp = tempfile.NamedTemporaryFile(suffix=Path(archivo.filename).suffix, delete=False)
+    tmp.write(contenido)
+    tmp.close()
+    return Path(tmp.name)

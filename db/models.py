@@ -387,3 +387,39 @@ class AuditTrail(Base):
     detalle: Mapped[Optional[str]] = mapped_column(Text)
     datos_json: Mapped[Optional[str]] = mapped_column(Text)
     resultado: Mapped[str] = mapped_column(String(20), default="ok")
+
+
+class Suscripcion(Base):
+    """Suscripcion de una firma a un plan."""
+    __tablename__ = "suscripciones"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    firma_id: Mapped[str] = mapped_column(String(36), ForeignKey("firmas.id"), nullable=False)
+    plan_id: Mapped[str] = mapped_column(String(20), nullable=False)
+    estado: Mapped[str] = mapped_column(String(20), default="activa")
+    metodo_pago: Mapped[str] = mapped_column(String(20), default="transferencia")
+    fecha_inicio: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    fecha_fin: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    monto_pyg: Mapped[int] = mapped_column(Integer, default=0)
+    comprobante_nro: Mapped[Optional[str]] = mapped_column(String(100))
+    notas_admin: Mapped[Optional[str]] = mapped_column(Text)
+    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Job(Base):
+    """Trabajo en cola para ejecución en background (scraper, análisis, etc)."""
+    __tablename__ = "jobs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    firma_id: Mapped[str] = mapped_column(String(36), ForeignKey("firmas.id"), nullable=False)
+    tipo: Mapped[str] = mapped_column(String(50), nullable=False)  # 'scraper_rg90', 'scraper_hechauka', etc.
+    estado: Mapped[str] = mapped_column(String(20), default="pendiente")  # 'pendiente', 'ejecutando', 'completado', 'error', 'cancelado'
+    progreso: Mapped[int] = mapped_column(Integer, default=0)  # 0-100
+    params_json: Mapped[Optional[str]] = mapped_column(Text)  # JSON con parámetros del job
+    resultado_json: Mapped[Optional[str]] = mapped_column(Text)  # JSON con resultado
+    error_msg: Mapped[Optional[str]] = mapped_column(Text)
+    reintentos: Mapped[int] = mapped_column(Integer, default=0)
+    max_reintentos: Mapped[int] = mapped_column(Integer, default=3)
+    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    iniciado_en: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    completado_en: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))

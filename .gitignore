@@ -57,3 +57,7 @@ tmp/
 # Claude Code
 .claude/launch.json
 .claude/settings.local.json
+
+# Temporary scripts (generated during development)
+check_phase*.py
+update_roadmap*.py

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   AlertTriangle, Building2, FileSearch, Clock, ChevronRight, Plus, BarChart3, PieChart,
-  TrendingUp, Users, Activity, Shield, XCircle,
+  TrendingUp, Users, Activity, Shield, XCircle, CreditCard,
 } from 'lucide-react'
 import {
   PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer,
@@ -40,11 +40,13 @@ export default function Dashboard() {
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [suscripcion, setSuscripcion] = useState<{ plan_actual: string; en_trial: boolean; trial_expirado: boolean; suscripcion_activa: boolean; dias_restantes: number } | null>(null)
 
   useEffect(() => {
     Promise.all([
       api.get<DashboardData>('/dashboard'),
       api.get<Cliente[]>('/clientes'),
+      api.get('/suscripciones/mi-plan').then(setSuscripcion).catch(() => {}),
     ])
       .then(([d, c]) => { setData(d); setClientes(c) })
       .catch(e => setError(e instanceof Error ? e.message : 'Error al cargar'))
@@ -129,6 +131,22 @@ export default function Dashboard() {
             className={`py-2 px-4 rounded-xl text-xs font-bold whitespace-nowrap ${trialExpirado ? 'bg-red-500 text-white hover:bg-red-600' : 'btn-primary'}`}>
             Ver planes
           </a>
+        </div>
+      )}
+
+      {/* Subscription alert */}
+      {suscripcion && !suscripcion.en_trial && !suscripcion.suscripcion_activa && (
+        <div className="p-4 rounded-2xl border bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/20">
+              <CreditCard size={18} className="text-amber-600" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Sin suscripcion activa</p>
+              <p className="text-xs text-amber-600 dark:text-amber-400">Elegi un plan para continuar usando Inteliaudit</p>
+            </div>
+          </div>
+          <a href="/app/planes" className="py-2 px-4 rounded-xl bg-amber-500 text-white text-xs font-bold hover:bg-amber-600 shrink-0">Ver planes</a>
         </div>
       )}
 

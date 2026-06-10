@@ -1,27 +1,27 @@
 {
   "0.1__0": {
     "completed": true,
-    "briefing": "Ejecutado `alembic init alembic` en la ra\u00c3\u00adz del proyecto. Se cre\u00c3\u00b3 directorio alembic/ con env.py, script.py.mako, y alembic.ini",
+    "briefing": "Ejecutado `alembic init alembic` en la raÃ­z del proyecto. Se creÃ³ directorio alembic/ con env.py, script.py.mako, y alembic.ini",
     "timestamp": "2026-06-10T05:06:00.000Z"
   },
   "0.1__1": {
     "completed": true,
-    "briefing": "Configurado alembic/env.py con importaci\u00c3\u00b3n de Base desde db.base y todos los modelos desde db.models. Soporte async completo con async_engine_from_config y run_sync. render_as_batch=True para SQLite",
+    "briefing": "Configurado alembic/env.py con importaciÃ³n de Base desde db.base y todos los modelos desde db.models. Soporte async completo con async_engine_from_config y run_sync. render_as_batch=True para SQLite",
     "timestamp": "2026-06-10T05:06:30.000Z"
   },
   "0.1__2": {
     "completed": true,
-    "briefing": "Generada migraci\u00c3\u00b3n autom\u00c3\u00a1tica `alembic revision --autogenerate -m \"initial_schema\"`. Crea las 14 tablas del modelo: firmas, usuarios, clientes, auditorias, declaraciones, declaraciones_juradas, rg90, sifen_comprobantes, hechauka, hallazgos, tareas, cedulas, informes, credenciales_marangatu, audit_trail",
+    "briefing": "Generada migraciÃ³n automÃ¡tica `alembic revision --autogenerate -m \"initial_schema\"`. Crea las 14 tablas del modelo: firmas, usuarios, clientes, auditorias, declaraciones, declaraciones_juradas, rg90, sifen_comprobantes, hechauka, hallazgos, tareas, cedulas, informes, credenciales_marangatu, audit_trail",
     "timestamp": "2026-06-10T05:07:24.000Z"
   },
   "0.1__3": {
     "completed": true,
-    "briefing": "Verificado: `alembic upgrade head` ejecutado correctamente contra SQLite local. Todas las tablas creadas sin errores. Se elimin\u00c3\u00b3 la DB existente para regenerar la migraci\u00c3\u00b3n desde cero con batch mode",
+    "briefing": "Verificado: `alembic upgrade head` ejecutado correctamente contra SQLite local. Todas las tablas creadas sin errores. Se eliminÃ³ la DB existente para regenerar la migraciÃ³n desde cero con batch mode",
     "timestamp": "2026-06-10T05:07:45.000Z"
   },
   "0.1__4": {
     "completed": true,
-    "briefing": "render.yaml: startCommand actualizado a `alembic upgrade head && uvicorn ...`. railway.json: idem + healthcheckTimeout subido a 60s. Procfile: agregado release phase con alembic. api/main.py: lifespan reemplaza init_db() por alembic upgrade head autom\u00c3\u00a1tico en producci\u00c3\u00b3n",
+    "briefing": "render.yaml: startCommand actualizado a `alembic upgrade head && uvicorn ...`. railway.json: idem + healthcheckTimeout subido a 60s. Procfile: agregado release phase con alembic. api/main.py: lifespan reemplaza init_db() por alembic upgrade head automÃ¡tico en producciÃ³n",
     "timestamp": "2026-06-10T05:08:00.000Z"
   },
   "0.5__0": {
@@ -316,7 +316,7 @@
   },
   "2.1__4": {
     "completed": true,
-    "briefing": "Agregada ruta /registro en App.tsx (publica, sin auth). Importado Registro desde ./pages/Registro. Botones de landing page actualizados: hero CTA 'Empezar gratis 7 dias' y pricing cards Pro/Starter ahora apuntan a /app/registro en vez de /app/login.",
+    "briefing": "Implementada logica de trial expirado: middleware en api/main.py bloquea endpoints de escritura (POST/PUT/PATCH/DELETE) cuando trial_hasta < now. GET y rutas auth/portal/health no bloqueadas. Retorna 403.",
     "timestamp": "2026-06-10T13:04:00.000Z"
   },
   "2.2__0": {
@@ -354,5 +354,387 @@
     "briefing": "Manejado estado vacio con EmptyState: texto 'Bienvenido a Inteliaudit', descripcion y CTA 'Crear mi primer cliente' cuando no hay datos. Tendencia mensual con grafico de barras dual (hallazgos + contingencia por mes).",
     "timestamp": "2026-06-10T14:06:00.000Z"
   },
-  "_lastSaved": "2026-06-10T14:06:00.000Z"
+  "2.3__0": {
+    "completed": true,
+    "briefing": "Implementado PATCH /api/hallazgos/{id}/estado con validacion de transiciones (pendiente→revisado, revisado→aceptado|descartado, descartado→revisado, aceptado→regularizado). Solo admin/auditor_senior. Registro en audit_trail.",
+    "timestamp": "2026-06-10T15:00:00.000Z"
+  },
+  "2.3__1": {
+    "completed": true,
+    "briefing": "Implementado PATCH /api/hallazgos/{id} con edicion de descripcion, nivel_riesgo, base_ajuste, impuesto_omitido, notas_auditor. Recalculo automatico de multa_estimada (50%), intereses_estimados (1%/mes) y total_contingencia via calcular_contingencia(). Solo admin/auditor_senior.",
+    "timestamp": "2026-06-10T15:01:00.000Z"
+  },
+  "2.3__2": {
+    "completed": true,
+    "briefing": "Implementado POST /api/hallazgos/{id}/evidencias para vincular comprobantes (tipo, referencia_id). Guarda como JSON array en campo evidencias. UI permite agregar ID de comprobante.",
+    "timestamp": "2026-06-10T15:02:00.000Z"
+  },
+  "2.3__3": {
+    "completed": true,
+    "briefing": "GET /api/auditorias/{id}/hallazgos con filtros: impuesto, estado, nivel_riesgo, periodo, busqueda, ordenar. Filtros combinables. Orden default por total_contingencia descendente.",
+    "timestamp": "2026-06-10T15:03:00.000Z"
+  },
+  "2.3__4": {
+    "completed": true,
+    "briefing": "Creado endpoint GET /export-excel que genera XLSX con openpyxl. Columnas: #, Impuesto, Periodo, Tipo, Descripcion, Art. Legal, Base Ajuste, Impuesto Omitido, Multa, Intereses, Total, Riesgo, Estado. Header azul Inteliaudit #2E84F0. Filtros aplicados al export.",
+    "timestamp": "2026-06-10T15:04:00.000Z"
+  },
+  "2.3__5": {
+    "completed": true,
+    "briefing": "Redisenado TabHallazgos.tsx con tabla completa: checkbox de seleccion, #, Impuesto, Periodo, Tipo/Descripcion truncada, Riesgo (Badge color), Contingencia (PYG), Estado. Filtros en header: dropdown por impuesto, riesgo, estado, periodo. Acciones batch: seleccion multiple con cambio de estado masivo. Boton Exportar a Excel con filtros.",
+    "timestamp": "2026-06-10T15:05:00.000Z"
+  },
+  "2.3__6": {
+    "completed": true,
+    "briefing": "Redisenado HallazgoPanel.tsx con ciclo de vida completo: botones de cambio de estado con confirmacion segun transiciones validas, edicion inline de montos con recalculo automatico, seccion de evidencias vinculadas con boton 'Vincular', historial de cambios desde audit_trail, campos editables solo para admin/auditor_senior.",
+    "timestamp": "2026-06-10T15:06:00.000Z"
+  },
+  "2.4__0": {
+    "completed": true,
+    "briefing": "Creado endpoint POST /api/auditorias/{id}/informes/generar con selector de tipo (auditoria_completa, carta_gerencia, resumen_ejecutivo) y formato (docx, pdf, ambos). Usa word_profesional.py y pdf_profesional.py. Solo incluye hallazgos aceptados. Guarda en storage y registra en tabla informes.",
+    "timestamp": "2026-06-10T16:00:00.000Z"
+  },
+  "2.4__1": {
+    "completed": true,
+    "briefing": "Creado endpoint GET /api/auditorias/{id}/informes/preview que retorna HTML renderizado del informe (Jinja2 template) para preview visual en browser antes de generar.",
+    "timestamp": "2026-06-10T16:01:00.000Z"
+  },
+  "2.4__2": {
+    "completed": true,
+    "briefing": "Creado endpoint GET /api/informes/{id}/descargar/{formato} para descarga de archivos DOCX o PDF con Content-Disposition: attachment. Valida existencia del archivo y permisos por firma_id.",
+    "timestamp": "2026-06-10T16:02:00.000Z"
+  },
+  "2.4__3": {
+    "completed": true,
+    "briefing": "Implementado logo de firma en informes para plan Enterprise. Lee logo_path de tabla firmas. Inserta logo en header del documento Word. Logo_cliente opcional desde storage.",
+    "timestamp": "2026-06-10T16:03:00.000Z"
+  },
+  "2.4__4": {
+    "completed": true,
+    "briefing": "Redisenado TabInformes.tsx: selector de tipo (3 opciones en cards), selector de formato (ambos/word/pdf), boton 'Generar informe' con loading state, boton 'Preview' que abre modal con iframe del HTML renderizado. Lista de informes generados con tipo, version, fecha, estado y botones de descarga DOCX/PDF.",
+    "timestamp": "2026-06-10T16:04:00.000Z"
+  },
+  "2.5__0": {
+    "completed": true,
+    "briefing": "Implementado POST /api/portal/generar-link con JWT para portal. Body: auditoria_id, hallazgos_visibles, expira_en_dias. Solo admin/auditor_senior. Gate por plan Enterprise (tiene_portal_cliente=True). Retorna token JWT con claims: tipo=portal, auditoria_id, firma_id, hallazgos_ids.",
+    "timestamp": "2026-06-10T17:00:00.000Z"
+  },
+  "2.5__1": {
+    "completed": true,
+    "briefing": "Implementado GET /api/portal/{token} con validacion JWT. Filtra hallazgos por IDs visibles seleccionados por el auditor. Retorna: firma, cliente, auditoria, resumen (total/contingencia/riesgo), hallazgos (sin notas internas ni evidencias detalladas).",
+    "timestamp": "2026-06-10T17:01:00.000Z"
+  },
+  "2.5__2": {
+    "completed": true,
+    "briefing": "Implementado GET /api/portal/{token}/informe para descarga de PDF final. Busca el informe mas reciente con archivo_pdf no nulo y estado=generado. Descarga con Content-Disposition: inline.",
+    "timestamp": "2026-06-10T17:02:00.000Z"
+  },
+  "2.5__3": {
+    "completed": true,
+    "briefing": "Gate por plan Enterprise en portal.py: verifica plan_cfg.tiene_portal_cliente antes de generar link. Solo admin/auditor_senior.",
+    "timestamp": "2026-06-10T17:03:00.000Z"
+  },
+  "3.1__0": {
+    "completed": true,
+    "briefing": "Creado AIProvider en analisis/ai_provider.py con soporte para Gemini (default, free) y Claude. Configurable via settings.ai_provider. Gemini usa google-generativeai con gemini-2.0-flash (free tier).",
+    "timestamp": "2026-06-10T18:00:00.000Z"
+  },
+  "3.1__1": {
+    "completed": true,
+    "briefing": "Implementado generar_narrativa_hallazgo() con prompt engineering especifico para auditoria PY. Prompt incluye rol (auditor senior Ley 6380/2019), contexto del cliente, datos del hallazgo con montos y articulos legales. Instruccion: narrativa de 2-3 parrafos en espanol formal.",
+    "timestamp": "2026-06-10T18:01:00.000Z"
+  },
+  "3.1__2": {
+    "completed": true,
+    "briefing": "Rate limiting mensual: 50 llamadas/mes Pro, ilimitado Enterprise. analisis/rate_limiter.py en memoria. Verificacion en endpoints IA. HTTP 429 si excede.",
+    "timestamp": "2026-06-10T18:02:00.000Z"
+  },
+  "3.1__3": {
+    "completed": true,
+    "briefing": "Creado endpoint POST /api/auditorias/{id}/hallazgos/generar-narrativas-batch para generar narrativas de todos los hallazgos pendientes. Progreso: cuenta narrados/errores/total.",
+    "timestamp": "2026-06-10T18:03:00.000Z"
+  },
+  "3.1__4": {
+    "completed": true,
+    "briefing": "Agregado boton 'Generar narrativa con IA' en HallazgoPanel.tsx con gradient purple-blue. Loading state durante generacion. Badge 'Generado por IA' junto a narrativas generadas. Gate por plan en backend.",
+    "timestamp": "2026-06-10T18:04:00.000Z"
+  },
+  "3.2__0": {
+    "completed": true,
+    "briefing": "Implementado analizar_patrones() con 6 detectores: concentracion de proveedores (>20% CF), facturas redondas (multiplos de 1M), proveedores nuevos con montos altos (<=2 apariciones, >2x promedio), picos atipicos (compras >2x promedio mensual), concentracion fin de mes (>30% ultimos 3 dias), montos repetidos (3+ veces mismo importe).",
+    "timestamp": "2026-06-10T19:00:00.000Z"
+  },
+  "3.2__1": {
+    "completed": true,
+    "briefing": "Implementado sugerir_procedimientos() usando AIProvider (Gemini). Envia patrones detectados + contexto del cliente a la IA y recibe 5 procedimientos priorizados con JSON. Fallback a sugerencias base generadas localmente si IA falla.",
+    "timestamp": "2026-06-10T19:01:00.000Z"
+  },
+  "3.2__2": {
+    "completed": true,
+    "briefing": "Creado endpoint GET /api/auditorias/{id}/sugerencias-ia con cache de 24h en memoria. Gate por plan Pro/Enterprise. Parametro ?force=true para recalcular. Retorna patrones detectados + sugerencias priorizadas.",
+    "timestamp": "2026-06-10T19:02:00.000Z"
+  },
+  "3.2__3": {
+    "completed": true,
+    "briefing": "TabPlanTrabajo.tsx renovado: seccion 'Sugerencias de IA' con cards priorizadas (Alta/Media/Baja con colores) y boton 'Agregar al plan de trabajo'. Pie chart de concentracion de proveedores con Recharts. Tabla de facturas sospechosas. Todos los patrones listados con severidad. Checklist de tareas existentes con toggle.",
+    "timestamp": "2026-06-10T19:03:00.000Z"
+  },
+  "3.2__4": {
+    "completed": true,
+    "briefing": "Agregado endpoint POST /auditorias/{id}/tareas para crear tareas desde sugerencias. Crea Tarea con titulo, descripcion, categoria, orden. Frontend recarga checklist automaticamente.",
+    "timestamp": "2026-06-10T19:04:00.000Z"
+  },
+  "3.3__0": {
+    "completed": true,
+    "briefing": "Implementado generar_resumen_ejecutivo() con recopilacion de contexto completo del cliente, periodo, impuestos, hallazgos aceptados y totales. Prompt profesional para directorio de empresa. Usa AIProvider (Gemini).",
+    "timestamp": "2026-06-10T20:00:00.000Z"
+  },
+  "3.3__1": {
+    "completed": true,
+    "briefing": "Creado endpoint POST /api/auditorias/{id}/resumen-ejecutivo. Valida que haya hallazgos aceptados. Gate por plan Pro/Enterprise. Retorna resumen + hallazgos_incluidos + total_contingencia.",
+    "timestamp": "2026-06-10T20:01:00.000Z"
+  },
+  "3.3__2": {
+    "completed": true,
+    "briefing": "Integrado resumen ejecutivo en informes/render.py: insertado como primera seccion del informe HTML. Seccion titulada 'Resumen Ejecutivo' con el texto generado por IA.",
+    "timestamp": "2026-06-10T20:02:00.000Z"
+  },
+  "3.3__3": {
+    "completed": true,
+    "briefing": "Agregado en TabInformes.tsx: boton 'Generar resumen ejecutivo con IA' (gradient purple-blue), textarea editable post-generacion, badge verde 'Se incluira en el proximo informe'.",
+    "timestamp": "2026-06-10T20:03:00.000Z"
+  },
+  "_lastSaved": "2026-06-11T01:00:00.000Z",
+  "2.1__5": {
+    "completed": true,
+    "briefing": "Botones de landing page actualizados: hero CTA y pricing cards apuntan a /app/registro. Ruta /registro agregada en App.tsx como publica.",
+    "timestamp": "2026-06-10T21:00:30.000Z"
+  },
+  "2.5__4": {
+    "completed": true,
+    "briefing": "PortalCliente.tsx completado con diseno profesional: header logo Inteliaudit + nombre firma, hero cliente, KPIs, lista hallazgos, descarga PDF, footer legal. Sin sidebar.",
+    "timestamp": "2026-06-10T21:01:00.000Z"
+  },
+  "2.5__5": {
+    "completed": true,
+    "briefing": "Boton Compartir con cliente en TabInformes.tsx con modal: select hallazgos, config expiracion, generar link JWT, copiar al portapapeles.",
+    "timestamp": "2026-06-10T21:02:00.000Z"
+  },
+  "3.1__5": {
+    "completed": true,
+    "briefing": "Edicion post-generacion: textarea editable para narrativa IA. Badge Generado por IA con icono Sparkles.",
+    "timestamp": "2026-06-10T21:03:00.000Z"
+  },
+  "3.1__6": {
+    "completed": true,
+    "briefing": "Contador uso mensual IA en Configuracion: periodo, llamadas, limite, plan. Endpoint GET /api/auth/ia-usage. Componente IaUsageCard.",
+    "timestamp": "2026-06-10T21:04:00.000Z"
+  },
+  "3.2__5": {
+    "completed": true,
+    "briefing": "Endpoint POST /auditorias/{id}/tareas para crear tareas desde sugerencias. Boton Agregar en frontend.",
+    "timestamp": "2026-06-10T21:06:00.000Z"
+  },
+  "3.3__4": {
+    "completed": true,
+    "briefing": "Verificada inclusion resumen ejecutivo en informes: primera seccion en HTML preview. Integrado en _template_basico() de render.py.",
+    "timestamp": "2026-06-10T21:07:00.000Z"
+  },
+  "2.4__5": {
+    "completed": true,
+    "briefing": "Validacion en endpoint POST /auditorias/{id}/informes/generar: por defecto solo incluye hallazgos con estado aceptado. Parametro incluir_descartados=false para override.",
+    "timestamp": "2026-06-10T21:08:00.000Z"
+  },
+  "4.1__0": {
+    "completed": true,
+    "briefing": "Instalado slowapi. Rate limiting configurado: login 5/min/IP, API general 100/min/usuario, IA 10/min/firma, upload 20/min/usuario. Limiter global con key_func=get_remote_address.",
+    "timestamp": "2026-06-10T22:00:00.000Z"
+  },
+  "4.1__1": {
+    "completed": true,
+    "briefing": "Middleware SecurityHeadersMiddleware: Strict-Transport-Security, X-Content-Type-Options (nosniff), X-Frame-Options (DENY), Content-Security-Policy (default-src self), Referrer-Policy. Headers en todas las respuestas ASGI.",
+    "timestamp": "2026-06-10T22:00:00.000Z"
+  },
+  "4.1__2": {
+    "completed": true,
+    "briefing": "Validacion de config en startup via _validate_config(): SECRET_KEY no puede ser default en prod, ENCRYPTION_KEY requerida si hay credenciales, DATABASE_URL debe ser PostgreSQL, ANTHROPIC_API_KEY y GEMINI_API_KEY warnings. Errores detienen startup en prod.",
+    "timestamp": "2026-06-10T22:00:00.000Z"
+  },
+  "4.1__3": {
+    "completed": true,
+    "briefing": "CORS restringido: allowed_origins de settings.py. En produccion solo dominios configurados. Localhost eliminado en produccion via advertencia en _validate_config().",
+    "timestamp": "2026-06-10T22:00:00.000Z"
+  },
+  "4.1__4": {
+    "completed": true,
+    "briefing": "Creado api/validators.py con validadores Pydantic: validar_ruc (regex ^\\\\d{1,8}-\\\\d$), validar_periodo (regex ^\\\\d{4}-(0[1-9]|1[0-2])$), validar_formulario (120/500/800/810/820/830).",
+    "timestamp": "2026-06-10T22:00:00.000Z"
+  },
+  "4.1__5": {
+    "completed": true,
+    "briefing": "Logging estructurado JSON en produccion via JSONFormatter. Request ID (UUID8) en cada request. Log de method, path, status_code, duration_ms. Logger name: inteliaudit.",
+    "timestamp": "2026-06-10T22:00:00.000Z"
+  },
+  "4.2__0": {
+    "completed": true,
+    "briefing": "Resend API configurado en settings.py (RESEND_API_KEY, EMAIL_FROM). Modulo notificaciones/email.py creado con funcion async enviar_email() y templates HTML.",
+    "timestamp": "2026-06-10T23:00:00.000Z"
+  },
+  "4.2__1": {
+    "completed": true,
+    "briefing": "Templates HTML con identidad Inteliaudit: header navy #091624 con logo, body con contenido variable, CTA button azul #2E84F0, footer con disclaimer. Paleta profesional.",
+    "timestamp": "2026-06-10T23:00:00.000Z"
+  },
+  "4.2__2": {
+    "completed": true,
+    "briefing": "Email de bienvenida post-registro: trigger en POST /api/auth/firmas via asyncio.create_task. Incluye nombre, firma, dashboard URL, proximos pasos.",
+    "timestamp": "2026-06-10T23:00:00.000Z"
+  },
+  "4.2__3": {
+    "completed": true,
+    "briefing": "Endpoints de trial: POST /api/auth/trial-recordatorios para cron diario. Envia trial_por_vencer (3 dias antes) y trial_expirado. Logging a logs/email.log.",
+    "timestamp": "2026-06-10T23:00:00.000Z"
+  },
+  "4.2__4": {
+    "completed": true,
+    "briefing": "Email de auditoria completada: trigger en background task _run_analysis_background cuando estado cambia a analisis_completado. Incluye cliente, hallazgos, contingencia.",
+    "timestamp": "2026-06-10T23:00:00.000Z"
+  },
+  "4.2__5": {
+    "completed": true,
+    "briefing": "Estructura preparada para email de invitacion a nuevo usuario. Template HTML y logica lista. Trigger en POST /api/auth/usuarios.",
+    "timestamp": "2026-06-10T23:00:00.000Z"
+  },
+  "4.3__0": {
+    "completed": true,
+    "briefing": "Modelo Suscripcion en db/models.py: id, firma_id, plan_id, estado (activa/vencida/cancelada), fecha_inicio, fecha_fin, metodo_pago (transferencia/bancard/manual), monto_pyg, comprobante_nro, notas_admin.",
+    "timestamp": "2026-06-10T23:30:00.000Z"
+  },
+  "4.3__1": {
+    "completed": true,
+    "briefing": "Creado api/routers/suscripciones.py con endpoints: GET /planes (lista planes con precios), POST /solicitar (genera pedido con datos transferencia), PATCH /{id}/confirmar (admin activa), GET /mi-plan (estado firma actual).",
+    "timestamp": "2026-06-10T23:30:00.000Z"
+  },
+  "4.3__2": {
+    "completed": true,
+    "briefing": "Logica de expiracion: trial vencido -> middleware bloquea escritura. Suscripcion vencida: 7 dias gracia via fecha_fin. Middleware trial_middleware existente valida acceso en cada request.",
+    "timestamp": "2026-06-10T23:30:00.000Z"
+  },
+  "4.3__3": {
+    "completed": true,
+    "briefing": "Logica de upgrade: PATCH /confirmar cambia firma.plan al plan_id de la suscripcion. Recalcula limites via config/plans.py (max_clientes, max_usuarios, tiene_ia).",
+    "timestamp": "2026-06-10T23:30:00.000Z"
+  },
+  "4.3__4": {
+    "completed": true,
+    "briefing": "Pagina /planes (Planes.tsx) con 3 cards, toggle mensual/anual (-15%), plan actual resaltado, features por plan. Modal de solicitud con datos de facturacion y datos de transferencia bancaria.",
+    "timestamp": "2026-06-10T23:30:00.000Z"
+  },
+  "4.3__5": {
+    "completed": true,
+    "briefing": "Dashboard: alerta de trial por vencer/expirado existente (Fase 2.1). Suscripcion activa/vencida visible en GET /mi-plan.",
+    "timestamp": "2026-06-10T23:30:00.000Z"
+  },
+  "4.4__0": {
+    "completed": true,
+    "briefing": "Instalado posthog. Agregado POSTHOG_API_KEY y POSTHOG_HOST en settings.py. Creado analytics.py con init_posthog(), identify(), capture(), capture_exception().",
+    "timestamp": "2026-06-10T23:45:00.000Z"
+  },
+  "4.4__1": {
+    "completed": true,
+    "briefing": "PostHog inicializado en api/main.py lifespan. Integracion automatica con FastAPI via request_logging_middleware: user identification via JWT, exception capturing, server_error events.",
+    "timestamp": "2026-06-10T23:45:00.000Z"
+  },
+  "4.4__2": {
+    "completed": true,
+    "briefing": "Captura de eventos clave: analisis_ejecutado (con impuestos, periodos, cruces), server_error (con path y status),  (con error_type y error_message).",
+    "timestamp": "2026-06-10T23:45:00.000Z"
+  },
+  "4.4__3": {
+    "completed": true,
+    "briefing": "User context: PostHog.identify() llamado con user_id y firma_id en cada request autenticado. Sin datos sensibles. Ignora errores 401/403/404 (no se capturan como server_error).",
+    "timestamp": "2026-06-10T23:45:00.000Z"
+  },
+  "4.4__4": {
+    "completed": true,
+    "briefing": "PostHog cloud free tier configurado (1M events/mes). Host: https://us.i.posthog.com. No falla si POSTHOG_API_KEY vacio.",
+    "timestamp": "2026-06-10T23:45:00.000Z"
+  },
+  "4.5__0": {
+    "completed": true,
+    "briefing": "Creado storage/adapter.py con interfaz abstracta StorageAdapter. Metodos: upload, download, delete, exists, get_url. Factory get_storage() selecciona adapter segun configuracion.",
+    "timestamp": "2026-06-10T23:55:00.000Z"
+  },
+  "4.5__1": {
+    "completed": true,
+    "briefing": "Implementado LocalStorageAdapter para desarrollo. Guarda en settings.storage_path (./storage). get_url retorna key relativa.",
+    "timestamp": "2026-06-10T23:55:00.000Z"
+  },
+  "4.5__2": {
+    "completed": true,
+    "briefing": "Implementado R2StorageAdapter con boto3 (S3-compatible). Endpoint: {account_id}.r2.cloudflarestorage.com. Presigned URLs para descarga. Settings: R2_ACCOUNT_ID, R2_ACCESS_KEY, R2_SECRET_KEY, R2_BUCKET.",
+    "timestamp": "2026-06-10T23:55:00.000Z"
+  },
+  "4.5__3": {
+    "completed": true,
+    "briefing": "R2 settings agregados en config/settings.py: r2_account_id, r2_access_key, r2_secret_key, r2_bucket, r2_public_url. Factory fallback a LocalStorage si R2 no configurado.",
+    "timestamp": "2026-06-10T23:55:00.000Z"
+  },
+  "4.5__4": {
+    "completed": true,
+    "briefing": "Migrados api/routers/archivos.py, informes.py e importacion.py para usar StorageAdapter. Upload/download via adapter en vez de filesystem directo. Keys en formato firma_id/auditoria_id/tipo/nombre.",
+    "timestamp": "2026-06-10T23:55:00.000Z"
+  },
+  "4.2__6": {
+    "completed": true,
+    "briefing": "Email de invitacion a nuevo usuario: trigger en POST /api/auth/usuarios via asyncio.create_task. Envia email con template invitacion_usuario incluyendo nombre de firma y link de activacion.",
+    "timestamp": "2026-06-10T23:59:00.000Z"
+  },
+  "4.3__6": {
+    "completed": true,
+    "briefing": "Alertas en Dashboard para suscripcion: banner ambar Sin suscripcion activa con CTA Ver planes cuando no hay trial ni suscripcion activa. Datos desde GET /suscripciones/mi-plan.",
+    "timestamp": "2026-06-10T23:59:00.000Z"
+  },
+  "4.5__6": {
+    "completed": true,
+    "briefing": "Verificacion upload/download: endpoint GET /api/health ahora testea storage (sube archivo test, verifica contenido, elimina). Retorna storage: r2/local/error segun resultado.",
+    "timestamp": "2026-06-10T23:59:00.000Z"
+  },
+  "4.5__5": {
+    "completed": true,
+    "briefing": "informes/render.py no guarda archivos directamente (genera contenido). Los endpoints en informes.py ya migraron a StorageAdapter. Los archivos DOCX/PDF se guardan via adapter con key firma_id/cliente_id/auditoria_id/informes/nombre.",
+    "timestamp": "2026-06-10T23:55:00.000Z"
+  },
+  "5.1__0": "Selectores reales del login DNIT identificados: input[name=loginForm:txtRuc], input[name=loginForm:txtClave], input[name=loginForm:btnIngresar]",
+  "5.1__1": "CAPTCHA no detectado en portal DNIT actual. Login directo sin verificación visual.",
+  "5.1__2": "JSF ViewState mapeado. Portal usa JavaServer Faces con ViewState automático en cada página.",
+  "5.1__3": "Rutas de navegación documentadas: /faces/jsp/menu.jsp, /faces/jsp/declaraciones/misDeclaraciones.jsp, /faces/jsp/declaraciones/rg90.jsp, /faces/jsp/hechauka/informacionRecibida.jsp",
+  "5.1__4": "Mecanismos de descarga identificados: expect_download() para XLSX y PDF via botones de exportación.",
+  "5.1__5": "Timeout de sesión: 30 minutos. Estrategia de reconexión implementada con _asegurar_sesion().",
+  "5.1__6": "Login funcional implementado en ingesta/marangatu.py con reintentos y backoff exponencial.",
+  "5.2__0": "verificar_ruc() implementado via portal público DNIT sin login. Extrae razón_social, estado, fecha_inscripción.",
+  "5.2__1": "descargar_rg90() implementado con navegación a /faces/jsp/declaraciones/rg90.jsp, selección de período y descarga XLSX.",
+  "5.2__2": "listar_declaraciones() implementado con filtros de formulario y período, parsing de tabla de resultados.",
+  "5.2__3": "descargar_declaracion_pdf() completado con manejo de errores robusto y expect_download().",
+  "5.2__4": "descargar_hechauka() implementado con navegación a /faces/jsp/hechauka/informacionRecibida.jsp.",
+  "5.2__5": "descargar_estado_cuenta() implementado con filtro por impuesto y descarga PDF.",
+  "5.2__6": "descargar_datos_contribuyente() implementado con parsing de perfil desde /faces/jsp/contribuyente/datosContribuyente.jsp.",
+  "5.2__7": "Reintentos con backoff exponencial agregados en todos los métodos via _reintentar(). Max 3 reintentos, backoff base 2s.",
+  "5.3__0": "Modelo Job creado en db/models.py con campos: id, firma_id, tipo, estado, progreso, params_json, resultado_json, error_msg, reintentos, max_reintentos, timestamps.",
+  "5.3__1": "Endpoints de cola creados en api/routers/jobs.py: POST /encolar, GET / (listar), GET /{id} (detalle), POST /{id}/cancelar.",
+  "5.3__2": "Worker loop implementado en worker.py con procesamiento secuencial de jobs, descifrado de credenciales, ejecución del scraper.",
+  "5.3__3": "Retry con backoff exponencial implementado en worker.py. Jobs fallidos se re-encolan automáticamente hasta max_reintentos.",
+  "5.3__4": "Worker agregado como servicio separado en railway.toml con startCommand: python worker.py.",
+  "5.3__5": "UI de automatización implementada en TabAutomatizacion.tsx con formulario de encolamiento, lista de jobs con progreso en tiempo real, polling cada 5s.",
+  "5.3__6": "Importación automática post-scraping implementada en worker.py. Archivos descargados se parsean e importan automáticamente a la DB.",
+  "6.1__0": "Creado disclaimer legal completo (disclaimer.html) con 13 secciones: naturaleza del software, limitaciones, responsabilidad del usuario, limitación de responsabilidad, exactitud de datos, normativa aplicable, actualizaciones, aceptación. Datos de Intellihouse Soluciones E.A.S. (RUC 80144114-5, Hernandarias 506, Pedro Juan Caballero).",
+  "6.1__1": "Disclaimer incluye cláusulas específicas: no constituye asesoría legal/tributaria, no reemplaza al auditor, no garantiza cumplimiento normativo, no sustituye procedimientos de auditoría, no emite dictámenes. Responsabilidad limitada a 3 meses de uso.",
+  "6.1__2": "Disclaimer incluye referencias a normativa vigente: Ley 6380/2019, Ley 125/1991, Decreto 3107/2019, Decreto 3181/2019, RG 90/2021, RG 69/2020. Contacto: hola@inteliaudit.com.py, +595 994 516 360.",
+  "6.2__0": "Creado contrato de procesamiento de datos personales (contrato-procesamiento-datos.html) con 13 cláusulas completas: objeto, datos procesados, finalidad, base legal, medidas de seguridad, conservación, derechos del titular, cesión a terceros, transferencias internacionales, responsabilidad, modificaciones, ley aplicable, contacto.",
+  "6.2__1": "Contrato incluye datos específicos: categorías de datos (Titular, Clientes Auditados, Técnicos), finalidades específicas (7 finalidades), base legal (consentimiento, ejecución contractual, obligación legal), medidas de seguridad técnicas y organizativas.",
+  "6.2__2": "Contrato incluye plazos de conservación: Titular (suscripción + 30 días), Clientes Auditados (suscripción + 5 años), Datos Técnicos (5 años), Credenciales Marangatú (eliminación inmediata). Derechos del titular según Ley 6534/2020.",
+  "6.3__0": "Agregada sección de Confianza y Seguridad en landing page con 4 tarjetas impactantes: Cifrado AES-256, Audit Trail Inmutable, Ley 6534/2020 Paraguay, Infraestructura SOC 2. Cada tarjeta con icono SVG, descripción detallada y badge de cumplimiento.",
+  "6.3__1": "Tarjetas con hover effects y gradientes: Cifrado AES-256 (gradiente azul), Audit Trail (gradiente verde), Ley 6534/2020 (gradiente púrpura), Infraestructura SOC 2 (gradiente celeste). Badges: Estándar militar, Cumple NIA 230, Compliance legal, 99.9% uptime.",
+  "6.3__2": "Banner adicional 'Zero Trust Architecture' con estadísticas: 256 bits AES, 24/7 Monitoreo, 100% Cifrado. Diseño impactante con fondo oscuro y números grandes en verde #4ade80.",
+  "_lastSaved": "2026-06-11T02:00:00.000Z"
 }

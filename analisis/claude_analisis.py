@@ -1,210 +1,114 @@
 """
-Análisis inteligente vía Claude API.
-Interpreta hallazgos, sugiere procedimientos adicionales y redacta descripciones técnicas.
+Analisis inteligente via IA — Gemini (default) o Claude.
+Genera narrativa profesional de hallazgos de auditoria.
 """
 import json
 from typing import Optional
 
-import anthropic
 from rich.console import Console
 
+from analisis.ai_provider import AIProvider
 from config.settings import settings
 
 console = Console()
 
-MODEL = "claude-sonnet-4-6"
 
-
-class ClaudeAuditor:
+def generar_narrativa_hallazgo(
+    hallazgo: dict,
+    cliente: dict,
+    auditoria: dict,
+    provider: Optional[str] = None,
+) -> str:
     """
-    Usa Claude para asistir al auditor con interpretación, redacción y análisis.
+    Genera narrativa profesional de un hallazgo usando IA.
+
+    Args:
+        hallazgo: Dict con tipo_hallazgo, descripcion, articulo_legal,
+                  impuesto_omitido, multa_estimada, intereses_estimados,
+                  total_contingencia, nivel_riesgo, periodo
+        cliente: Dict con razon_social, ruc, actividad_principal
+        auditoria: Dict con periodo_desde, periodo_hasta
+        provider: "gemini" | "claude" (default: settings.ai_provider)
+
+    Returns:
+        Texto narrativo en espanol (2-3 parrafos)
     """
+    ai = AIProvider(provider)
 
-    def __init__(self):
-        self._client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+    system_prompt = """Sos un auditor impositivo senior en Paraguay especializado en Ley 6380/2019.
+Conoces a fondo la legislacion tributaria paraguaya, la Ley 125/1991, el Decreto 3107/2019,
+y las Resoluciones Generales SET (RG 24/2014, RG 69/2020, RG 80/2021, RG 90/2021).
 
-    # --------------------------------------------------------
-    #  Interpretación de hallazgos
-    # --------------------------------------------------------
+Respondes siempre en espanol formal, con precision tecnica y citando articulos legales exactos.
+No inventas cifras ni afirmaciones que no esten en los datos provistos."""
 
-    def interpretar_hallazgos(
-        self,
-        hallazgos: list[dict],
-        contexto_cliente: dict,
-    ) -> str:
-        """
-        Genera un análisis narrativo de los hallazgos para el informe de auditoría.
+    user_prompt = f"""
+Redacta una narrativa profesional del siguiente hallazgo de auditoria en 2-3 parrafos.
 
-        Args:
-            hallazgos: Lista de hallazgos con montos y tipos
-            contexto_cliente: Datos del cliente (ruc, razon_social, actividad, etc.)
+DATOS DEL CLIENTE:
+Razon Social: {cliente.get('razon_social', 'N/A')}
+RUC: {cliente.get('ruc', 'N/A')}
+Actividad: {cliente.get('actividad_principal', 'N/A')}
+Periodo auditado: {auditoria.get('periodo_desde', 'N/A')} a {auditoria.get('periodo_hasta', 'N/A')}
 
-        Returns:
-            Texto narrativo en español para incluir en el informe
-        """
-        prompt = _construir_prompt_interpretacion(hallazgos, contexto_cliente)
+HALLAZGO:
+Tipo: {hallazgo.get('tipo_hallazgo', 'N/A')}
+Periodo: {hallazgo.get('periodo', 'N/A')}
+Descripcion: {hallazgo.get('descripcion', 'N/A')}
+Articulo Legal: {hallazgo.get('articulo_legal', 'N/A')}
+Base de Ajuste: Gs. {hallazgo.get('base_ajuste', 0):,}
+Impuesto Omitido: Gs. {hallazgo.get('impuesto_omitido', 0):,}
+Multa Estimada (50%): Gs. {hallazgo.get('multa_estimada', 0):,}
+Intereses Estimados (1%/mes): Gs. {hallazgo.get('intereses_estimados', 0):,}
+Total Contingencia: Gs. {hallazgo.get('total_contingencia', 0):,}
+Nivel de Riesgo: {hallazgo.get('nivel_riesgo', 'N/A')}
 
-        response = self._client.messages.create(
-            model=MODEL,
-            max_tokens=2000,
-            system=_sistema_auditor(),
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return response.content[0].text
-
-    # --------------------------------------------------------
-    #  Sugerencia de procedimientos adicionales
-    # --------------------------------------------------------
-
-    def sugerir_procedimientos(
-        self,
-        hallazgos: list[dict],
-        impuesto: str,
-        contexto_cliente: dict,
-    ) -> list[str]:
-        """
-        Basándose en los hallazgos encontrados, sugiere procedimientos adicionales de auditoría.
-
-        Returns:
-            Lista de procedimientos adicionales sugeridos
-        """
-        prompt = f"""
-Estás auditando el {impuesto} de {contexto_cliente.get('razon_social', 'un contribuyente')}
-(RUC: {contexto_cliente.get('ruc', '')}, actividad: {contexto_cliente.get('actividad_principal', '')}).
-
-Se encontraron los siguientes hallazgos:
-{json.dumps(hallazgos, ensure_ascii=False, indent=2)}
-
-¿Qué procedimientos adicionales de auditoría recomendás ejecutar dado estos hallazgos?
-Respondé con una lista numerada, concisa, enfocada en el marco tributario paraguayo (Ley 6380/2019).
+INSTRUCCIONES:
+- Redacta en espanol formal paraguayo
+- Explica por que este hallazgo constituye una observacion de auditoria
+- Cita el articulo legal aplicable y explica su relevancia
+- Cuantifica la contingencia fiscal: impuesto omitido, multa (50%), intereses (1% mensual)
+- Tono: formal, objetivo, tecnico pero comprensible para el directorio de la empresa
+- 2-3 parrafos como maximo
 """
-        response = self._client.messages.create(
-            model=MODEL,
-            max_tokens=800,
-            system=_sistema_auditor(),
-            messages=[{"role": "user", "content": prompt}],
-        )
-        texto = response.content[0].text
-        # Parsear lista numerada
-        lineas = [l.strip() for l in texto.split("\n") if l.strip() and l.strip()[0].isdigit()]
-        return lineas if lineas else [texto]
 
-    # --------------------------------------------------------
-    #  Redacción de conclusión ejecutiva
-    # --------------------------------------------------------
+    try:
+        return ai.generar(system_prompt, user_prompt, max_tokens=1200)
+    except Exception as e:
+        return f"[Error al generar narrativa: {e}]"
 
-    def redactar_conclusion(
-        self,
-        resumen_contingencias: dict,
-        cliente: dict,
-        periodo_desde: str,
-        periodo_hasta: str,
-    ) -> str:
-        """
-        Redacta el párrafo de conclusión del informe de auditoría.
-        """
-        prompt = f"""
-Redactá el párrafo de conclusión para un informe de auditoría impositiva en Paraguay.
 
-Cliente: {cliente.get('razon_social')} — RUC {cliente.get('ruc')}
-Período auditado: {periodo_desde} a {periodo_hasta}
-Régimen: {cliente.get('regimen', 'general')}
+def generar_resumen_ejecutivo(
+    cliente: dict,
+    auditoria: dict,
+    hallazgos: list[dict],
+    resumen: dict,
+    provider: Optional[str] = None,
+) -> str:
+    """Genera resumen ejecutivo de la auditoria completa usando IA."""
+    ai = AIProvider(provider)
+    system_prompt = """Sos un auditor impositivo senior en Paraguay especializado en Ley 6380/2019.
+Redactas resumenes ejecutivos para directorios de empresas."""
 
-Resumen de contingencias:
-{json.dumps(resumen_contingencias, ensure_ascii=False, indent=2)}
+    user_prompt = f"""
+Redacta un resumen ejecutivo de auditoria impositiva de 3-4 parrafos.
 
-El párrafo debe:
-- Estar en español formal paraguayo
-- Citar los impuestos auditados
-- Mencionar la contingencia total estimada en Guaraníes
-- Señalar el nivel de riesgo predominante
-- Ser de 3-4 oraciones máximo
-- No usar lenguaje alarmista innecesario
+CLIENTE: {cliente.get('razon_social', 'N/A')} — RUC {cliente.get('ruc', 'N/A')}
+PERIODO: {auditoria.get('periodo_desde', 'N/A')} a {auditoria.get('periodo_hasta', 'N/A')}
+ACTIVIDAD: {cliente.get('actividad_principal', 'N/A')}
+REGIMEN: {cliente.get('regimen', 'N/A')}
+
+HALLAZGOS TOTALES: {resumen.get('cantidad_hallazgos', 0)}
+CONTINGENCIA TOTAL: Gs. {resumen.get('total_contingencia', 0):,}
+POR RIESGO: Alto={resumen.get('por_riesgo', {}).get('alto', 0)}, Medio={resumen.get('por_riesgo', {}).get('medio', 0)}, Bajo={resumen.get('por_riesgo', {}).get('bajo', 0)}
+
+Hallazgos mas significativos:
+{json.dumps(hallazgos[:5] if hallazgos else [], ensure_ascii=False, indent=2, default=str)}
+
+Incluir: alcance, principales hallazgos ordenados por materialidad, contingencia fiscal total, recomendaciones.
+Tono profesional, directo, sin tecnicismos innecesarios.
 """
-        response = self._client.messages.create(
-            model=MODEL,
-            max_tokens=500,
-            system=_sistema_auditor(),
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return response.content[0].text
-
-    # --------------------------------------------------------
-    #  Clasificación de hallazgo por descripción libre
-    # --------------------------------------------------------
-
-    def clasificar_hallazgo(self, descripcion_libre: str) -> dict:
-        """
-        Dado un texto libre describiendo una irregularidad, identifica
-        el tipo de hallazgo, impuesto y artículo legal aplicable.
-        """
-        prompt = f"""
-El auditor describió esta irregularidad:
-"{descripcion_libre}"
-
-Clasificala según el sistema Inteliaudit:
-- tipo_hallazgo: uno de los tipos del catálogo (IVA_CREDITO_RUC_INACTIVO, IVA_CREDITO_SIN_CDC,
-  IVA_COMPROBANTE_NO_DECLARADO, IVA_DIFERENCIA_RG90_DJ, IVA_DEBITO_OMITIDO_HECHAUKA,
-  IRE_GASTO_NO_DEDUCIBLE, IRE_DEPRECIACION_EXCEDIDA, IRE_INGRESO_NO_DECLARADO,
-  IRE_GASTO_SIN_COMPROBANTE, RET_NO_PRACTICADA, RET_NO_DEPOSITADA, RET_DIFERENCIA_HECHAUKA)
-- impuesto: IVA | IRE | RET_IVA | RET_IRE
-- articulo_legal: artículo exacto de Ley 6380/2019 o Ley 125/1991
-- nivel_riesgo: alto | medio | bajo
-
-Respondé SOLO con JSON válido, sin markdown.
-"""
-        response = self._client.messages.create(
-            model=MODEL,
-            max_tokens=300,
-            system=_sistema_auditor(),
-            messages=[{"role": "user", "content": prompt}],
-        )
-        try:
-            return json.loads(response.content[0].text)
-        except json.JSONDecodeError:
-            return {"error": "No se pudo parsear respuesta", "raw": response.content[0].text}
-
-
-# --------------------------------------------------------
-#  Prompts internos
-# --------------------------------------------------------
-
-def _sistema_auditor() -> str:
-    return """Sos un auditor impositivo experto en el sistema tributario paraguayo.
-Conocés a fondo la Ley 6380/2019, Ley 125/1991, el Código Tributario,
-las Resoluciones Generales SET (RG 24/2014, RG 69/2020, RG 80/2021, RG 90/2021),
-y los procedimientos del portal Marangatú.
-
-Respondés siempre en español formal, con precisión técnica.
-Citás artículos legales exactos cuando corresponde.
-No inventás cifras ni afirmaciones que no estén en los datos provistos."""
-
-
-def _construir_prompt_interpretacion(hallazgos: list[dict], contexto: dict) -> str:
-    resumen_por_tipo: dict = {}
-    for h in hallazgos:
-        tipo = h.get("tipo_hallazgo", "OTRO")
-        if tipo not in resumen_por_tipo:
-            resumen_por_tipo[tipo] = {"cantidad": 0, "total_contingencia": 0}
-        resumen_por_tipo[tipo]["cantidad"] += 1
-        resumen_por_tipo[tipo]["total_contingencia"] += h.get("total_contingencia", 0)
-
-    return f"""
-Analizá los siguientes hallazgos de auditoría y redactá una sección de "Observaciones de Auditoría"
-para el informe formal.
-
-Cliente: {contexto.get('razon_social')} — RUC {contexto.get('ruc')}
-Actividad: {contexto.get('actividad_principal', 'no especificada')}
-Régimen: {contexto.get('regimen', 'general')}
-
-Hallazgos encontrados ({len(hallazgos)} en total):
-{json.dumps(resumen_por_tipo, ensure_ascii=False, indent=2)}
-
-Detalle de los 5 más significativos:
-{json.dumps(sorted(hallazgos, key=lambda x: x.get('total_contingencia', 0), reverse=True)[:5], ensure_ascii=False, indent=2)}
-
-Redactá 2-3 párrafos en español formal, explicando:
-1. Los patrones encontrados y su significancia
-2. El riesgo tributario para el contribuyente
-3. Las acciones correctivas recomendadas
-"""
+    try:
+        return ai.generar(system_prompt, user_prompt, max_tokens=1500)
+    except Exception as e:
+        return f"[Error al generar resumen: {e}]"

@@ -3,10 +3,11 @@ Endpoints de autenticación: login, token, perfil, usuarios.
 Usa JWT (HS256) + bcrypt para passwords.
 Credenciales Marangatú cifradas con Fernet (AES-128-CBC).
 """
+import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import bcrypt as _bcrypt
 from jose import JWTError, jwt
@@ -17,6 +18,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from config.settings import settings
 from db.base import get_db
 from db.models import Firma, Usuario, CredencialMarangatu
+
+# Endpoints de solo lectura permitidos en trial expirado
+READ_ONLY_PATHS = ["GET", "/api/auth/me", "/api/portal", "/api/auditorias/", "/api/clientes", "/api/hallazgos", "/api/audit-trail", "/api/informes", "/api/dashboard"]
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -89,6 +93,15 @@ async def get_current_user(
 async def get_current_admin(user: Usuario = Depends(get_current_user)) -> Usuario:
     if user.rol not in ("super_admin", "admin"):
         raise HTTPException(403, "Se requiere rol admin")
+    return user
+
+
+async def check_trial_active(user: Usuario = Depends(get_current_user), db: AsyncSession = Depends(get_db)) -> Usuario:
+    """Verifica que el trial de la firma no haya vencido. Permite solo lectura si expiró."""
+    result = await db.execute(select(Firma).where(Firma.id == user.firma_id))
+    firma = result.scalar_one_or_none()
+    if firma and firma.plan == "trial" and firma.trial_hasta and datetime.now(timezone.utc) > firma.trial_hasta:
+        raise HTTPException(403, "Trial expirado. Elegí un plan para continuar usando Inteliaudit.")
     return user
 
 
@@ -259,6 +272,22 @@ async def crear_usuario(
     )
     db.add(user)
     await db.flush()
+
+    try:
+        from notificaciones.email import enviar_email
+        from db.models import Firma
+        f_res = await db.execute(select(Firma).where(Firma.id == admin.firma_id))
+        firma = f_res.scalar_one_or_none()
+        firma_nombre = firma.nombre if firma else "Inteliaudit"
+        asyncio.create_task(enviar_email(
+            to=body.email,
+            template="invitacion_usuario",
+            firma=firma_nombre,
+            activate_url=f"{settings.allowed_origins[0] if settings.allowed_origins else 'https://inteliaudit-production.up.railway.app'}/app/login",
+        ))
+    except Exception:
+        pass
+
     return _ser_usuario(user)
 
 
@@ -361,6 +390,23 @@ async def get_credencial(
 #  Super-admin: crear firmas
 # ============================================================
 
+@router.get("/ia-usage")
+async def get_ia_usage_endpoint(user: Usuario = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    """Retorna el uso de IA de la firma en el período actual."""
+    from analisis.rate_limiter import get_ia_usage
+    from config.plans import PLAN_ALIAS_MAP, get_plan
+    from db.models import Firma
+    result = await db.execute(select(Firma).where(Firma.id == user.firma_id))
+    firma = result.scalar_one_or_none()
+    plan_key = PLAN_ALIAS_MAP.get(firma.plan, firma.plan) if firma else "starter"
+    plan_cfg = get_plan(plan_key)
+    base = get_ia_usage(user.firma_id)
+    base["limite_mensual"] = "Ilimitado" if plan_cfg.max_clientes is None else 50
+    base["tiene_ia"] = plan_cfg.tiene_ia
+    base["plan"] = plan_cfg.nombre
+    return base
+
+
 @router.post("/firmas", status_code=201)
 async def crear_firma(body: FirmaCreate, db: AsyncSession = Depends(get_db)):
     """
@@ -405,6 +451,20 @@ async def crear_firma(body: FirmaCreate, db: AsyncSession = Depends(get_db)):
 
     token = _crear_token({"sub": admin.id, "firma_id": firma.id, "rol": "admin"})
 
+    # Email de bienvenida (no bloqueante)
+    try:
+        from notificaciones.email import enviar_email
+        asyncio.create_task(enviar_email(
+            to=body.admin_email,
+            template="bienvenida",
+            nombre=body.admin_nombre,
+            firma=firma.nombre,
+            dashboard_url=f"{settings.allowed_origins[0] if settings.allowed_origins else 'https://inteliaudit-production.up.railway.app'}/app/dashboard",
+            planes_url=f"{settings.allowed_origins[0] if settings.allowed_origins else 'https://inteliaudit.com'}/#precios",
+        ))
+    except Exception:
+        pass
+
     return {
         "access_token": token,
         "token_type": "bearer",
@@ -413,6 +473,61 @@ async def crear_firma(body: FirmaCreate, db: AsyncSession = Depends(get_db)):
         "trial_hasta": firma.trial_hasta.isoformat(),
         "plan_trial": trial_plan.nombre,
     }
+
+
+# ============================================================
+#  Trial reminders (scheduled task)
+# ============================================================
+
+@router.post("/trial-recordatorios")
+async def enviar_recordatorios_trial(db: AsyncSession = Depends(get_db)):
+    """Endpoint para cron job diario. Envia emails de trial por vencer y expirados."""
+    from sqlalchemy import select
+    from db.models import Firma, Usuario
+    from notificaciones.email import enviar_email
+    from datetime import datetime, timezone, timedelta
+
+    ahora = datetime.now(timezone.utc)
+    limite_por_vencer = ahora + timedelta(days=3)
+
+    result = await db.execute(
+        select(Firma).where(Firma.plan == "trial", Firma.activa == True)
+    )
+    firmas = result.scalars().all()
+    enviados = 0
+
+    for firma in firmas:
+        if not firma.trial_hasta:
+            continue
+
+        usuarios_res = await db.execute(
+            select(Usuario).where(Usuario.firma_id == firma.id, Usuario.activo == True).limit(1)
+        )
+        usuario = usuarios_res.scalar_one_or_none()
+        if not usuario or not usuario.email:
+            continue
+
+        # Trial por vencer (3 dias antes)
+        if firma.trial_hasta.date() == limite_por_vencer.date():
+            asyncio.create_task(enviar_email(
+                to=usuario.email,
+                template="trial_por_vencer",
+                nombre=usuario.nombre,
+                planes_url="https://inteliaudit.com/#precios",
+            ))
+            enviados += 1
+
+        # Trial expirado
+        if ahora > firma.trial_hasta:
+            asyncio.create_task(enviar_email(
+                to=usuario.email,
+                template="trial_expirado",
+                nombre=usuario.nombre,
+                planes_url="https://inteliaudit.com/#precios",
+            ))
+            enviados += 1
+
+    return {"ok": True, "enviados": enviados}
 
 
 # ============================================================

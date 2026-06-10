@@ -1,131 +1,134 @@
 """
-Portal de cliente — acceso read-only compartido.
-El auditor genera un token único; el cliente lo usa para ver sus hallazgos sin login.
+Portal de cliente — acceso read-only compartido via JWT.
+El auditor genera un token; el cliente lo usa para ver hallazgos sin login.
+Solo disponible en plan Enterprise.
 """
-import secrets
+import json
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select, update
+from fastapi.responses import FileResponse
+from jose import JWTError, jwt
+from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from config.plans import PLAN_ALIAS_MAP, get_plan
+from config.settings import settings
 from db.base import get_db
 from db import db as crud
-from db.models import Auditoria, Cliente, Firma, Hallazgo, Usuario
+from db.models import Auditoria, Cliente, Firma, Hallazgo, Informe, Usuario
 from api.routers.auth import get_current_user
 
 router = APIRouter(prefix="/portal", tags=["portal"])
 
-# ============================================================
-#  Generar token de acceso para portal cliente
-# ============================================================
 
-@router.post("/auditorias/{auditoria_id}/generar-token")
-async def generar_token_portal(
-    auditoria_id: str,
-    dias_validez: int = 30,
+class GenerarLinkBody(BaseModel):
+    auditoria_id: str
+    hallazgos_visibles: list[str] = []
+    expira_en_dias: int = 30
+
+
+@router.post("/generar-link", status_code=201)
+async def generar_link_portal(
+    body: GenerarLinkBody,
     user: Usuario = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Genera (o regenera) un token de acceso único para el portal del cliente."""
-    auditoria = await crud.get_auditoria(db, user.firma_id, auditoria_id)
+    """Genera link JWT para portal del cliente. Solo Enterprise y admin/auditor_senior."""
+    if user.rol not in ("super_admin", "admin", "auditor_senior"):
+        raise HTTPException(403, "Solo admin o auditor senior puede generar links")
+
+    firma_result = await db.execute(select(Firma).where(Firma.id == user.firma_id))
+    firma = firma_result.scalar_one_or_none()
+    if not firma:
+        raise HTTPException(404, "Firma no encontrada")
+
+    plan_key = PLAN_ALIAS_MAP.get(firma.plan, firma.plan)
+    plan_cfg = get_plan(plan_key)
+    if not plan_cfg.tiene_portal_cliente:
+        raise HTTPException(403, "Portal del cliente disponible solo en plan Enterprise")
+
+    auditoria = await crud.get_auditoria(db, user.firma_id, body.auditoria_id)
     if not auditoria:
-        raise HTTPException(404, "Auditoría no encontrada")
+        raise HTTPException(404, "Auditoria no encontrada")
 
-    token = secrets.token_urlsafe(32)
-    expira = datetime.now(timezone.utc) + timedelta(days=dias_validez)
-
-    # Guardar token en notas del campo reservado (reutilizamos notas con prefijo especial)
-    # En producción esto iría en una tabla dedicada portal_tokens
-    # Por ahora embebemos en notas con JSON-like prefix
-    import json
-    portal_data = {
-        "portal_token": token,
-        "portal_expira": expira.isoformat(),
-    }
-    notas_actuales = auditoria.notas or ""
-    # Limpiar portal_data anterior si existe
-    if "__portal__" in notas_actuales:
-        import re
-        notas_actuales = re.sub(r'__portal__\{.*?\}__portal__', '', notas_actuales).strip()
-
-    notas_nuevas = f"__portal__{json.dumps(portal_data)}__portal__\n{notas_actuales}".strip()
-
-    await db.execute(
-        update(Auditoria).where(Auditoria.id == auditoria_id).values(notas=notas_nuevas)
+    expira = datetime.now(timezone.utc) + timedelta(days=body.expira_en_dias)
+    token = jwt.encode(
+        {
+            "tipo": "portal",
+            "auditoria_id": body.auditoria_id,
+            "firma_id": user.firma_id,
+            "hallazgos_ids": body.hallazgos_visibles,
+            "exp": expira,
+        },
+        settings.secret_key,
+        algorithm=settings.jwt_algorithm,
     )
+
+    await crud.log_trail(db, firma_id=user.firma_id, usuario_id=user.id,
+        accion=f"Link portal generado para {body.auditoria_id[:8]}",
+        modulo="portal", auditoria_id=body.auditoria_id,
+        datos={"expira_dias": body.expira_en_dias, "hallazgos": len(body.hallazgos_visibles)})
     await db.commit()
-
-    await crud.log_trail(
-        db,
-        firma_id=user.firma_id,
-        usuario_id=user.id,
-        accion="Token portal cliente generado",
-        modulo="portal",
-        auditoria_id=auditoria_id,
-        datos={"dias_validez": dias_validez},
-    )
 
     return {
         "token": token,
-        "expira": expira.isoformat(),
         "url": f"/portal/{token}",
+        "expira": expira.isoformat(),
+        "hallazgos_incluidos": len(body.hallazgos_visibles),
     }
 
-
-# ============================================================
-#  Acceso público al portal (sin auth, sólo con token)
-# ============================================================
 
 @router.get("/{token}")
 async def ver_portal_cliente(
     token: str,
     db: AsyncSession = Depends(get_db),
 ):
-    """Endpoint público — el cliente accede con su token único."""
-    import json, re
-    from datetime import datetime, timezone
+    """Endpoint publico — el cliente accede con su token JWT."""
+    try:
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.jwt_algorithm])
+        if payload.get("tipo") != "portal":
+            raise HTTPException(403, "Token invalido")
+        auditoria_id = payload.get("auditoria_id")
+        firma_id = payload.get("firma_id")
+        hallazgos_ids = payload.get("hallazgos_ids", [])
+    except JWTError:
+        raise HTTPException(403, "Token invalido o expirado")
 
-    # Buscar la auditoría que tiene este token en sus notas
-    result = await db.execute(
-        select(Auditoria).where(Auditoria.notas.contains(token))
-    )
+    if not auditoria_id or not firma_id:
+        raise HTTPException(404, "Portal no encontrado")
+
+    result = await db.execute(select(Auditoria).where(Auditoria.id == auditoria_id, Auditoria.firma_id == firma_id))
     auditoria = result.scalar_one_or_none()
-
     if not auditoria:
-        raise HTTPException(404, "Portal no encontrado o token inválido")
+        raise HTTPException(404, "Auditoria no encontrada")
 
-    # Extraer y validar portal_data
-    notas = auditoria.notas or ""
-    match = re.search(r'__portal__(\{.*?\})__portal__', notas, re.DOTALL)
-    if not match:
-        raise HTTPException(404, "Token no válido")
-
-    portal_data = json.loads(match.group(1))
-    if portal_data.get("portal_token") != token:
-        raise HTTPException(403, "Token incorrecto")
-
-    expira = datetime.fromisoformat(portal_data["portal_expira"])
-    if datetime.now(timezone.utc) > expira:
-        raise HTTPException(403, "El enlace de acceso ha expirado. Contacte a su auditor.")
-
-    # Cargar datos de cliente y firma
-    cliente = await crud.get_cliente(db, auditoria.firma_id, id=auditoria.cliente_id)
-    firma_result = await db.execute(select(Firma).where(Firma.id == auditoria.firma_id))
+    cliente = await crud.get_cliente(db, firma_id, id=auditoria.cliente_id)
+    firma_result = await db.execute(select(Firma).where(Firma.id == firma_id))
     firma = firma_result.scalar_one_or_none()
 
-    # Cargar hallazgos (solo los no descartados)
-    hallazgos_result = await db.execute(
-        select(Hallazgo).where(
-            Hallazgo.auditoria_id == auditoria.id,
-            Hallazgo.firma_id == auditoria.firma_id,
-            Hallazgo.estado != "descartado",
-        ).order_by(Hallazgo.nivel_riesgo, Hallazgo.impuesto_omitido.desc())
-    )
+    # Hallazgos filtrados por los IDs que el auditor selecciono
+    if hallazgos_ids:
+        hallazgos_result = await db.execute(
+            select(Hallazgo).where(
+                Hallazgo.id.in_(hallazgos_ids),
+                Hallazgo.auditoria_id == auditoria_id,
+                Hallazgo.firma_id == firma_id,
+            ).order_by(Hallazgo.total_contingencia.desc())
+        )
+    else:
+        hallazgos_result = await db.execute(
+            select(Hallazgo).where(
+                Hallazgo.auditoria_id == auditoria_id,
+                Hallazgo.firma_id == firma_id,
+                Hallazgo.estado != "descartado",
+            ).order_by(Hallazgo.total_contingencia.desc())
+        )
     hallazgos = hallazgos_result.scalars().all()
 
-    import json as _json
     total_contingencia = sum(h.total_contingencia for h in hallazgos)
     por_riesgo = {"alto": 0, "medio": 0, "bajo": 0}
     for h in hallazgos:
@@ -144,7 +147,7 @@ async def ver_portal_cliente(
             "id": auditoria.id,
             "periodo_desde": auditoria.periodo_desde,
             "periodo_hasta": auditoria.periodo_hasta,
-            "impuestos": _json.loads(auditoria.impuestos),
+            "impuestos": json.loads(auditoria.impuestos),
             "estado": auditoria.estado,
             "auditor": auditoria.auditor,
         },
@@ -170,5 +173,49 @@ async def ver_portal_cliente(
             }
             for h in hallazgos
         ],
-        "token_expira": portal_data["portal_expira"],
+        "token_expira": datetime.fromtimestamp(payload["exp"], tz=timezone.utc).isoformat() if "exp" in payload else "",
     }
+
+
+@router.get("/{token}/informe")
+async def descargar_informe_portal(
+    token: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Descarga el informe PDF final de la auditoria. Sin auth, solo con token."""
+    try:
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.jwt_algorithm])
+        if payload.get("tipo") != "portal":
+            raise HTTPException(403, "Token invalido")
+        auditoria_id = payload.get("auditoria_id")
+    except JWTError:
+        raise HTTPException(403, "Token invalido o expirado")
+
+    if not auditoria_id:
+        raise HTTPException(404, "Auditoria no encontrada")
+
+    # Buscar el informe mas reciente con PDF
+    result = await db.execute(
+        select(Informe).where(
+            Informe.auditoria_id == auditoria_id,
+            Informe.archivo_pdf != None,
+            Informe.estado == "generado",
+        ).order_by(Informe.generado_en.desc()).limit(1)
+    )
+    informe = result.scalar_one_or_none()
+    if not informe or not informe.archivo_pdf:
+        raise HTTPException(404, "No hay informe PDF disponible para esta auditoria")
+
+    # Verificar que el archivo existe
+    ruta_informe = Path(settings.storage_path) / informe.archivo_pdf
+    if not ruta_informe.exists():
+        ruta_informe = Path(informe.archivo_pdf)
+    if not ruta_informe.exists():
+        raise HTTPException(404, "Archivo de informe no encontrado en storage")
+
+    return FileResponse(
+        path=str(ruta_informe),
+        media_type="application/pdf",
+        filename=f"informe_auditoria.pdf",
+        headers={"Content-Disposition": "inline; filename=informe_auditoria.pdf"},
+    )

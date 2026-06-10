@@ -80,7 +80,7 @@ export interface AuditoriaConCliente extends Auditoria {
 
 // ─── Hallazgos ───────────────────────────────────────────────────────────────
 export type NivelRiesgo = 'alto' | 'medio' | 'bajo'
-export type EstadoHallazgo = 'pendiente' | 'confirmado' | 'descartado' | 'regularizado'
+export type EstadoHallazgo = 'pendiente' | 'revisado' | 'aceptado' | 'descartado' | 'regularizado'
 export type TipoImpuesto = 'IVA' | 'IRE' | 'IRP' | 'IDU' | 'RET_IVA' | 'RET_IRE' | 'OTRO'
 
 export interface Hallazgo {

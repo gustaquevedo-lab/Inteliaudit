@@ -15,6 +15,7 @@ import InformesList from './pages/informes/InformesList'
 import Configuracion from './pages/admin/Configuracion'
 import AuditTrail from './pages/admin/AuditTrail'
 import PortalCliente from './pages/PortalCliente'
+import Planes from './pages/Planes'
 import Registro from './pages/Registro'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -52,6 +53,7 @@ function AppRoutes() {
         <Route path="auditorias/:id/evidencia" element={<EvidenceExplorer />} />
         <Route path="admin/usuarios" element={<Usuarios />} />
         <Route path="informes" element={<InformesList />} />
+        <Route path="planes" element={<Planes />} />
         <Route path="admin/configuracion" element={<Configuracion />} />
         <Route path="admin/trail" element={<AuditTrail />} />
       </Route>

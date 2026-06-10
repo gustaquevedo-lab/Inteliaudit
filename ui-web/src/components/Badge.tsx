@@ -22,14 +22,16 @@ export function BadgeRiesgo({ nivel }: { nivel: NivelRiesgo }) {
 export function BadgeEstadoHallazgo({ estado }: { estado: EstadoHallazgo }) {
   const labels: Record<EstadoHallazgo, string> = {
     pendiente: 'Pendiente',
-    confirmado: 'Confirmado',
+    revisado: 'Revisado',
+    aceptado: 'Aceptado',
     descartado: 'Descartado',
     regularizado: 'Regularizado',
   }
   return (
     <span className={clsx(
       'badge-gray',
-      estado === 'confirmado' && '!bg-blue-50 dark:!bg-blue-900/20 !text-blue-700 dark:!text-blue-400 !border-blue-100 dark:!border-blue-800/30',
+      estado === 'revisado' && '!bg-amber-50 dark:!bg-amber-900/20 !text-amber-700 dark:!text-amber-400 !border-amber-100 dark:!border-amber-800/30',
+      estado === 'aceptado' && '!bg-blue-50 dark:!bg-blue-900/20 !text-blue-700 dark:!text-blue-400 !border-blue-100 dark:!border-blue-800/30',
       estado === 'descartado' && '!bg-gray-100 dark:!bg-gray-700 !text-gray-500 dark:!text-gray-400',
       estado === 'regularizado' && '!bg-green-50 dark:!bg-green-900/20 !text-green-700 dark:!text-green-400 !border-green-100 dark:!border-green-800/30',
     )}>

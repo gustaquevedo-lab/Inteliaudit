@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { ShieldAlert, Building2, FileText, AlertTriangle, CheckCircle2, Clock, ExternalLink } from 'lucide-react'
+import { ShieldAlert, Building2, FileText, AlertTriangle, CheckCircle2, Clock, ExternalLink, Loader2 } from 'lucide-react'
 import { api } from '../api/client'
 import { pyg, fecha } from '../utils/formatters'
 
@@ -48,6 +48,7 @@ export default function PortalCliente() {
   const [data, setData] = useState<PortalData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [descargando, setDescargando] = useState(false)
 
   useEffect(() => {
     if (!token) return
@@ -60,6 +61,21 @@ export default function PortalCliente() {
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
   }, [token])
+
+  const descargarInforme = async () => {
+    if (!token) return
+    setDescargando(true)
+    try {
+      const res = await fetch(`/api/portal/${token}/informe`)
+      if (!res.ok) throw new Error('No disponible')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url; a.download = 'informe_auditoria.pdf'; a.click()
+      URL.revokeObjectURL(url)
+    } catch { /* ignore */ }
+    setDescargando(false)
+  }
 
   if (loading) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -135,6 +151,15 @@ export default function PortalCliente() {
             <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Riesgo Medio</p>
             <p className="text-2xl font-black text-amber-600">{resumen.por_riesgo.medio}</p>
           </div>
+        </div>
+
+        {/* Download button */}
+        <div className="flex justify-center">
+          <button onClick={descargarInforme} disabled={descargando}
+            className="bg-white dark:bg-gray-900 border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 shadow-sm">
+            {descargando ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
+            {descargando ? 'Descargando...' : 'Descargar informe PDF'}
+          </button>
         </div>
 
         {/* Hallazgos */}

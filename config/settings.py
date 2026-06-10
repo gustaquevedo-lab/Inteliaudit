@@ -25,8 +25,25 @@ class Settings(BaseSettings):
         url = url.replace("&sslmode=require", "&ssl=require")
         return url
 
-    # Claude API
+    # AI
     anthropic_api_key: str = ""
+    gemini_api_key: str = ""
+    ai_provider: str = "gemini"  # "gemini" | "claude"
+
+    # Emails transaccionales (Resend)
+    resend_api_key: str = ""
+    email_from: str = "Inteliaudit <noreply@inteliaudit.com>"
+
+    # PostHog (product analytics + error tracking)
+    posthog_api_key: str = ""
+    posthog_host: str = "https://us.i.posthog.com"
+
+    # Cloudflare R2 (S3-compatible storage)
+    r2_account_id: str = ""
+    r2_access_key: str = ""
+    r2_secret_key: str = ""
+    r2_bucket: str = "inteliaudit"
+    r2_public_url: str = ""  # opcional: dominio custom R2
 
     # App
     secret_key: str = "dev-secret-change-in-production"

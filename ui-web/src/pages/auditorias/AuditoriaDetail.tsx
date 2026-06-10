@@ -12,6 +12,7 @@ import TabArchivos from './tabs/TabArchivos'
 import TabInformes from './tabs/TabInformes'
 import TabPlanTrabajo from './tabs/TabPlanTrabajo'
 import TabAnalisis from './tabs/TabAnalisis'
+import TabAutomatizacion from './tabs/TabAutomatizacion'
 
 const TABS = [
   { id: 'resumen', label: 'Resumen', path: '' },
@@ -19,6 +20,7 @@ const TABS = [
   { id: 'analisis', label: 'Análisis', path: 'analisis' },
   { id: 'plan', label: 'Plan de Trabajo', path: 'plan-de-trabajo' },
   { id: 'archivos', label: 'Archivos', path: 'archivos' },
+  { id: 'automatizacion', label: 'Automatización', path: 'automatizacion' },
   { id: 'informes', label: 'Informes', path: 'informes' },
 ]
 
@@ -190,6 +192,8 @@ export default function AuditoriaDetail() {
             return <TabPlanTrabajo auditoria={auditoria} onUpdate={(updated) => setAuditoria(updated)} />
           case 'archivos':
             return <TabArchivos auditoriaId={id!} />
+          case 'automatizacion':
+            return <TabAutomatizacion auditoriaId={id!} clienteRuc={cliente.ruc} />
           case 'informes':
             return <TabInformes auditoriaId={id!} clienteRuc={cliente.ruc} />
           default:

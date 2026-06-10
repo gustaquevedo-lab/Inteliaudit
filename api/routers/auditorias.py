@@ -414,7 +414,7 @@ async def ejecutar_analisis(
     user: Usuario = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Ejecuta los análisis seleccionados en background. Retorna inmediatamente con job_id."""
+    """Ejecuta los analisis seleccionados en background."""
     from sqlalchemy import update as sa_update
     from db.models import Auditoria
 
@@ -482,6 +482,11 @@ async def ejecutar_analisis(
         periodos=periodos,
     ))
 
+    try:
+        from analytics import capture
+        capture(user.id, "analisis_ejecutado", {"impuestos": impuestos, "periodos": periodos, "cruces": len(cruces_plan)})
+    except Exception:
+        pass
     return {"ok": True, "job_id": job_id, "total_cruces": len(cruces_plan)}
 
 
@@ -508,6 +513,147 @@ async def estado_analisis(
         **estado,
         "hallazgos_por_riesgo": estado.get("hallazgos_por_riesgo", {}),
     }
+
+
+# ============================================================
+#  Sugerencias IA
+# ============================================================
+
+_sugerencias_cache: dict[str, dict] = {}
+
+
+@router.get("/{auditoria_id}/sugerencias-ia")
+async def sugerencias_ia(
+    auditoria_id: str,
+    force: bool = False,
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Retorna sugerencias de procedimientos basadas en patrones detectados. Cache de 24h."""
+    from config.plans import PLAN_ALIAS_MAP, get_plan
+    from db.models import Firma
+    import time
+
+    firma_res = await db.execute(select(Firma).where(Firma.id == user.firma_id))
+    firma = firma_res.scalar_one_or_none()
+    if not firma:
+        raise HTTPException(404, "Firma no encontrada")
+    plan_key = PLAN_ALIAS_MAP.get(firma.plan, firma.plan)
+    plan_cfg = get_plan(plan_key)
+    if not plan_cfg.tiene_ia:
+        raise HTTPException(403, "Sugerencias IA disponibles en plan Pro y Enterprise")
+
+    # Cache de 24h
+    cache_key = f"{auditoria_id}"
+    cached = _sugerencias_cache.get(cache_key)
+    if cached and not force:
+        elapsed = time.time() - cached.get("timestamp", 0)
+        if elapsed < 86400:
+            return {"ok": True, "cache": True, **cached["data"]}
+
+    auditoria = await crud.get_auditoria(db, user.firma_id, auditoria_id)
+    if not auditoria:
+        raise HTTPException(404, "Auditoria no encontrada")
+
+    cliente = await crud.get_cliente(db, user.firma_id, id=auditoria.cliente_id)
+    if not cliente:
+        raise HTTPException(404, "Cliente no encontrado")
+
+    from datetime import date
+    def _periodos_en_rango(desde: str, hasta: str) -> list[str]:
+        a_d, m_d = int(desde[:4]), int(desde[5:7])
+        a_h, m_h = int(hasta[:4]), int(hasta[5:7])
+        ps = []
+        a, m = a_d, m_d
+        while (a, m) <= (a_h, m_h):
+            ps.append(f"{a}-{m:02d}")
+            m += 1
+            if m > 12:
+                m = 1
+                a += 1
+        return ps
+
+    periodos = _periodos_en_rango(auditoria.periodo_desde, auditoria.periodo_hasta)
+
+    from analisis.ai_auditor import analizar_patrones, sugerir_procedimientos
+
+    patrones = await analizar_patrones(db, user.firma_id, auditoria.cliente_id, periodos)
+    sugerencias_list = await sugerir_procedimientos(db, user.firma_id, auditoria.cliente_id, auditoria_id, periodos)
+
+    data = {"patrones": patrones, "sugerencias": sugerencias_list}
+    _sugerencias_cache[cache_key] = {"data": data, "timestamp": time.time()}
+
+    return {"ok": True, "cache": False, **data}
+
+
+@router.post("/{auditoria_id}/resumen-ejecutivo")
+async def generar_resumen_ejecutivo(
+    auditoria_id: str,
+    body: dict = {},
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Genera resumen ejecutivo de la auditoria usando IA (Gemini)."""
+    from config.plans import PLAN_ALIAS_MAP, get_plan
+    from db.models import Firma, Hallazgo
+    from analisis.claude_analisis import generar_resumen_ejecutivo as gre
+    from analisis.riesgo import resumir_contingencias
+
+    firma_res = await db.execute(select(Firma).where(Firma.id == user.firma_id))
+    firma = firma_res.scalar_one_or_none()
+    if not firma:
+        raise HTTPException(404, "Firma no encontrada")
+    plan_key = PLAN_ALIAS_MAP.get(firma.plan, firma.plan)
+    plan_cfg = get_plan(plan_key)
+    if not plan_cfg.tiene_ia:
+        raise HTTPException(403, "Resumen IA disponible en plan Pro y Enterprise")
+
+    from analisis.rate_limiter import check_ia_rate_limit, increment_ia_usage as inc
+    puede, msg, _ = check_ia_rate_limit(user.firma_id, firma.plan)
+    if not puede:
+        raise HTTPException(429, msg)
+
+    auditoria = await crud.get_auditoria(db, user.firma_id, auditoria_id)
+    if not auditoria:
+        raise HTTPException(404, "Auditoria no encontrada")
+    cliente = await crud.get_cliente(db, user.firma_id, id=auditoria.cliente_id)
+    if not cliente:
+        raise HTTPException(404, "Cliente no encontrado")
+
+    # Solo hallazgos aceptados
+    h_result = await db.execute(select(Hallazgo).where(Hallazgo.auditoria_id == auditoria_id, Hallazgo.firma_id == user.firma_id, Hallazgo.estado == "aceptado").order_by(Hallazgo.total_contingencia.desc()))
+    hallazgos_db = h_result.scalars().all()
+    if not hallazgos_db:
+        raise HTTPException(400, "No hay hallazgos aceptados. Revisa y acepta hallazgos primero.")
+
+    # Serializar y generar resumen de contingencias
+    hallazgos_data = [{
+        "id": h.id, "impuesto": h.impuesto, "periodo": h.periodo,
+        "tipo_hallazgo": h.tipo_hallazgo, "descripcion": h.descripcion,
+        "articulo_legal": h.articulo_legal, "base_ajuste": h.base_ajuste,
+        "impuesto_omitido": h.impuesto_omitido, "multa_estimada": h.multa_estimada,
+        "intereses_estimados": h.intereses_estimados,
+        "total_contingencia": h.total_contingencia, "nivel_riesgo": h.nivel_riesgo,
+        "estado": h.estado,
+    } for h in hallazgos_db]
+
+    resumen = resumir_contingencias(hallazgos_data)
+
+    texto = gre(
+        cliente={"razon_social": cliente.razon_social, "ruc": cliente.ruc, "actividad_principal": cliente.actividad_principal or "", "regimen": cliente.regimen},
+        auditoria={"periodo_desde": auditoria.periodo_desde, "periodo_hasta": auditoria.periodo_hasta, "impuestos": json.loads(auditoria.impuestos)},
+        hallazgos=hallazgos_data,
+        resumen=resumen,
+    )
+
+    await crud.log_trail(db, firma_id=user.firma_id, usuario_id=user.id,
+        accion=f"Resumen ejecutivo generado ({len(hallazgos_db)} hallazgos)",
+        modulo="analisis", auditoria_id=auditoria_id)
+    await db.commit()
+
+    inc(user.firma_id)
+
+    return {"ok": True, "resumen": texto, "hallazgos_incluidos": len(hallazgos_db), "total_contingencia": resumen["total_contingencia"]}
 
 
 async def _run_analysis_background(
@@ -639,6 +785,25 @@ async def _run_analysis_background(
                 datos={"job_id": job_id, "hallazgos": total_hallazgos},
             )
             await db.commit()
+
+            # Email de auditoria completada (no bloqueante)
+            try:
+                from notificaciones.email import enviar_email
+                from db.models import Cliente
+                cli_res = await db.execute(select(Cliente).where(Cliente.id == auditoria.cliente_id))
+                cli = cli_res.scalar_one_or_none()
+                if cli and auditoria:
+                    asyncio.create_task(enviar_email(
+                        to="",
+                        template="auditoria_completada",
+                        cliente=cli.razon_social,
+                        hallazgos=total_hallazgos,
+                        contingencia=sum(c.get("hallazgos", 0) for c in cruces),
+                        periodo_desde=auditoria.periodo_desde,
+                        periodo_hasta=auditoria.periodo_hasta,
+                    ))
+            except Exception:
+                pass
 
             _analysis_progress[job_id].update({
                 "estado": "completado",
@@ -1212,6 +1377,40 @@ async def analisis_claude(
         "conclusion": conclusion,
         "procedimientos": procedimientos,
     }
+
+
+@router.post("/{auditoria_id}/tareas", status_code=201)
+async def crear_tarea(
+    auditoria_id: str,
+    body: dict,
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Crea una nueva tarea en el plan de trabajo."""
+    from db.models import Tarea
+    from datetime import datetime
+
+    auditoria = await crud.get_auditoria(db, user.firma_id, auditoria_id)
+    if not auditoria:
+        raise HTTPException(404, "Auditoria no encontrada")
+
+    tarea = Tarea(
+        firma_id=user.firma_id,
+        auditoria_id=auditoria_id,
+        titulo=body.get("titulo", "Nueva tarea"),
+        descripcion=body.get("descripcion"),
+        categoria=body.get("categoria", "general"),
+        orden=int(body.get("orden", 99)),
+    )
+    db.add(tarea)
+    await db.flush()
+
+    await crud.log_trail(db, firma_id=user.firma_id, usuario_id=user.id,
+        accion=f"Tarea creada: {tarea.titulo}",
+        modulo="tareas", auditoria_id=auditoria_id)
+    await db.commit()
+
+    return {"id": tarea.id, "titulo": tarea.titulo, "orden": tarea.orden}
 
 
 @router.post("/{auditoria_id}/tareas/{tarea_id}/toggle")

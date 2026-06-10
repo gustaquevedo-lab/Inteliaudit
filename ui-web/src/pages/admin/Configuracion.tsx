@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Settings, Building2, Save, CheckCircle, AlertCircle, Loader2, Crown, Calendar } from 'lucide-react'
+import { Settings, Building2, Save, CheckCircle, AlertCircle, Loader2, Crown, Calendar, Sparkles } from 'lucide-react'
 import { api } from '../../api/client'
 import { useToast } from '../../components/Toaster'
 import { fecha } from '../../utils/formatters'
@@ -204,6 +204,47 @@ export default function Configuracion() {
           en los informes Word y PDF generados.
         </p>
       </div>
+
+      {/* Uso de IA */}
+      <IaUsageCard />
     </div>
   )
 }
+
+function IaUsageCard() {
+  const [data, setData] = useState<{ periodo: string; llamadas_realizadas: number; limite_mensual: string; tiene_ia: boolean; plan: string } | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    api.get('/auth/ia-usage').then(setData).catch(() => {}).finally(() => setLoading(false))
+  }, [])
+
+  if (loading) return <div className="card p-5"><Loader2 size={18} className="animate-spin text-gray-400 mx-auto" /></div>
+
+  return (
+    <div className="card p-5 space-y-4">
+      <div className="flex items-center gap-2">
+        <Sparkles size={16} className="text-purple-500" />
+        <p className="font-black text-sm uppercase tracking-wide">Uso de IA</p>
+      </div>
+      {data ? (
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-4 rounded-xl bg-purple-50 dark:bg-purple-900/10 border border-purple-200 dark:border-purple-800/30 text-center">
+            <p className="text-[10px] font-bold text-purple-600 uppercase mb-1">Periodo actual</p>
+            <p className="text-sm font-bold text-purple-800 dark:text-purple-300">{data.periodo}</p>
+          </div>
+          <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800/30 text-center">
+            <p className="text-[10px] font-bold text-blue-600 uppercase mb-1">Llamadas realizadas</p>
+            <p className="text-2xl font-black text-blue-700 dark:text-blue-300">{data.llamadas_realizadas}</p>
+            <p className="text-[10px] text-blue-500 mt-1">Limite: {data.limite_mensual}</p>
+          </div>
+          <div className="col-span-2 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 text-xs text-gray-500 text-center">
+            Plan actual: <strong className="text-gray-700 dark:text-gray-300">{data.plan}</strong>
+            {data.tiene_ia ? ' — IA habilitada' : ' — IA no disponible'}
+          </div>
+        </div>
+      ) : (
+        <p className="text-xs text-gray-400 text-center py-4">No disponible</p>
+      )}
+    </div>
+  )
