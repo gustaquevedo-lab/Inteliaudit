@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual de Usuario — Inteliaudit</title>
+  <meta name="description" content="Manual de usuario completo de Inteliaudit — la plataforma de auditoría impositiva automatizada para Paraguay">
+  <style>
+    :root {
+      --blue: #2E84F0;
+      --blue-dark: #1558B0;
+      --green: #22C47E;
+      --green-dark: #169058;
+      --navy: #091624;
+      --gray-text: #6B7E9C;
+      --gray-light: #F5F7FB;
+      --border: #E4EAF4;
+      --white: #FFFFFF;
+      --red: #E53E3E;
+      --amber: #D97706;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      background: var(--gray-light);
+      color: #1a1a2e;
+      line-height: 1.6;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 280px;
+      background: var(--navy);
+      color: var(--white);
+      overflow-y: auto;
+      z-index: 100;
+    }
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-header .logo {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .sidebar-header .logo span:first-child { color: var(--blue); }
+    .sidebar-header .logo span:last-child { color: var(--green); }
+    .sidebar-nav { padding: 16px 0; }
+    .sidebar-nav .group-label {
+      padding: 8px 20px 4px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.35);
+      font-weight: 600;
+    }
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 20px;
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 14px;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+    }
+    .sidebar-nav a:hover,
+    .sidebar-nav a.active {
+      background: rgba(255,255,255,0.06);
+      color: var(--white);
+      border-left-color: var(--blue);
+    }
+    .sidebar-nav a .icon { width: 18px; text-align: center; font-size: 14px; }
+    .main {
+      margin-left: 280px;
+      min-height: 100vh;
+    }
+    .topbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar h1 { font-size: 20px; font-weight: 600; }
+    .topbar .badge {
+      background: var(--green);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .content {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 32px 80px;
+    }
+    .section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+    .section h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--gray-light);
+    }
+    .section h3 {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--blue-dark);
+      margin: 24px 0 8px;
+    }
+    .section h4 {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 16px 0 4px;
+      color: #333;
+    }
+    .section p { margin-bottom: 12px; color: #444; }
+    .section ul, .section ol { margin: 8px 0 16px 20px; }
+    .section li { margin-bottom: 6px; color: #444; }
+    .section strong { color: #1a1a2e; }
+    .section code {
+      background: var(--gray-light);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: var(--blue-dark);
+    }
+    .section .note {
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin: 12px 0;
+      font-size: 14px;
+      color: #1e40af;
+    }
+    .section .note strong { color: #1e40af; }
+    .section .tip {
+      background: #F0FDF4;
+      border: 1px solid #BBF7D0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin: 12px 0;
+      font-size: 14px;
+      color: #166534;
+    }
+    .section .tip strong { color: #166534; }
+    .section .warn {
+      background: #FFFBEB;
+      border: 1px solid #FDE68A;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin: 12px 0;
+      font-size: 14px;
+      color: #92400e;
+    }
+    .section .warn strong { color: #92400e; }
+    .step-list { counter-reset: step; }
+    .step-list li {
+      counter-increment: step;
+      list-style: none;
+      position: relative;
+      padding-left: 36px;
+      margin-bottom: 12px;
+    }
+    .step-list li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 24px;
+      height: 24px;
+      background: var(--blue);
+      color: white;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: var(--gray-light);
+      font-weight: 600;
+      color: var(--navy);
+    }
+    tr:hover td { background: #FAFBFF; }
+    .status-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status-badge.working { background: #DCFCE7; color: #166534; }
+    .status-badge.building { background: #FEF3C7; color: #92400e; }
+    .status-badge.missing { background: #FEE2E2; color: #991b1b; }
+    .toc { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 24px 32px; margin-bottom: 24px; }
+    .toc h2 { font-size: 18px; margin-bottom: 12px; border: none; padding: 0; }
+    .toc ul { list-style: none; margin: 0; columns: 2; column-gap: 24px; }
+    .toc li { margin-bottom: 4px; }
+    .toc a { color: var(--blue); text-decoration: none; font-size: 14px; }
+    .toc a:hover { text-decoration: underline; }
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .content { padding: 24px 16px; }
+      .section { padding: 20px; }
+      .toc ul { columns: 1; }
+      .topbar { padding: 12px 16px; }
+    }
+    .screenshot-placeholder {
+      background: var(--gray-light);
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 40px 20px;
+      text-align: center;
+      margin: 16px 0;
+      color: var(--gray-text);
+      font-size: 14px;
+    }
+    .screenshot-placeholder .icon { font-size: 32px; margin-bottom: 8px; }
+    .flow-diagram {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 16px 0;
+      padding: 20px;
+      background: var(--gray-light);
+      border-radius: 8px;
+    }
+    .flow-diagram .step {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--navy);
+    }
+    .flow-diagram .arrow { color: var(--gray-text); font-size: 18px; }
+    .flow-diagram .step.active { border-color: var(--blue); background: #EFF6FF; color: var(--blue); }
+    hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+  </style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo"><span>Inteli</span><span>audit</span></div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="group-label">General</div>
+    <a href="#introduccion" class="active"><span class="icon">🏠</span> Introducción</a>
+    <a href="#acceso"><span class="icon">🔑</span> Acceso al Sistema</a>
+    <a href="#dashboard"><span class="icon">📊</span> Panel de Control</a>
+    <a href="#clientes"><span class="icon">👥</span> Gestión de Clientes</a>
+    <div class="group-label">Auditorías</div>
+    <a href="#crear-auditoria"><span class="icon">➕</span> Crear Auditoría</a>
+    <a href="#archivos"><span class="icon">📁</span> Archivos e Importación</a>
+    <a href="#automatizacion"><span class="icon">🤖</span> Automatización</a>
+    <a href="#analisis"><span class="icon">⚡</span> Análisis Automático</a>
+    <a href="#hallazgos"><span class="icon">🔍</span> Hallazgos</a>
+    <a href="#plan-trabajo"><span class="icon">✅</span> Plan de Trabajo</a>
+    <a href="#informes"><span class="icon">📄</span> Informes</a>
+    <div class="group-label">Avanzado</div>
+    <a href="#evidencia"><span class="icon">🔬</span> Explorador de Evidencia</a>
+    <a href="#portal"><span class="icon">🔗</span> Portal del Cliente</a>
+    <div class="group-label">Administración</div>
+    <a href="#configuracion"><span class="icon">⚙️</span> Configuración</a>
+    <a href="#usuarios"><span class="icon">👤</span> Usuarios</a>
+    <a href="#trail"><span class="icon">📋</span> Audit Trail</a>
+    <a href="#planes"><span class="icon">💳</span> Planes</a>
+    <div class="group-label">Soporte</div>
+    <a href="#faq"><span class="icon">❓</span> FAQ</a>
+    <a href="#soporte"><span class="icon">💬</span> Soporte Técnico</a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <h1>Manual de Usuario</h1>
+    <span class="badge">v1.0</span>
+  </div>
+
+  <div class="content">
+
+    <!-- INTRODUCCION -->
+    <div class="section" id="introduccion">
+      <h2>Introducción</h2>
+      <p><strong>Inteliaudit</strong> es una plataforma SaaS de automatización de auditoría impositiva diseñada específicamente para el mercado paraguayo. Automatiza el trabajo del auditor desde la descarga de datos en Marangatú (DNIT) hasta la generación de informes finales firmables.</p>
+      <p>El sistema cruza automáticamente múltiples fuentes de datos —RG90, SIFEN, HECHAUKA, declaraciones juradas— y aplica más de 12 procedimientos de auditoría basados en la normativa vigente (Ley 6380/2019, Ley 125/1991, Decreto 3107/2019, RG 90/2021).</p>
+      <div class="flow-diagram">
+        <span class="step active">Cargar datos</span><span class="arrow">→</span>
+        <span class="step">Ejecutar análisis</span><span class="arrow">→</span>
+        <span class="step">Revisar hallazgos</span><span class="arrow">→</span>
+        <span class="step">Generar informe</span>
+      </div>
+      <h3>¿Qué problema resuelve?</h3>
+      <p>El auditor impositivo paraguayo tradicionalmente pasa días cruzando manualmente archivos RG90 contra SIFEN y HECHAUKA, calculando a mano multas e intereses, y armando informes en Word desde cero. Inteliaudit reduce ese proceso de días a horas, garantizando que ningún hallazgo se escape y que cada informe sea profesional y completo.</p>
+    </div>
+
+    <!-- ACCESO -->
+    <div class="section" id="acceso">
+      <h2>Acceso al Sistema</h2>
+
+      <h3>Ingresar a la plataforma</h3>
+      <ol class="step-list">
+        <li><strong>Dirígete a</strong> <code>inteliaudit.vercel.app/login</code></li>
+        <li><strong>Ingresa tu RUC</strong> como nombre de usuario</li>
+        <li><strong>Ingresa tu contraseña</strong> (la que creaste durante el registro)</li>
+        <li><strong>Haz clic en "Ingresar"</strong></li>
+      </ol>
+      <div class="tip"><strong>Tip:</strong> Si marcas "Recordarme", tu sesión se mantendrá activa por más tiempo. No marques esta opción en computadoras compartidas.</div>
+
+      <h3>Registrar una nueva firma</h3>
+      <p>Si aún no tienes cuenta, el registro se realiza en dos pasos:</p>
+      <ol class="step-list">
+        <li><strong>Paso 1 — Datos de la firma:</strong> Ingresa el nombre de tu firma, tu RUC y un email de contacto. El RUC debe tener el formato <code>XXXXXXXXX-X</code> (ej: <code>80144114-5</code>).</li>
+        <li><strong>Paso 2 — Administrador:</strong> Crea el usuario administrador con nombre, email, contraseña y rol (Admin o Auditor Senior).</li>
+      </ol>
+      <div class="note"><strong>Nota:</strong> El registro es completamente autogestionado. Al completarlo, accederás automáticamente al sistema con un período de prueba de 7 días del plan Pro.</div>
+
+      <h3>¿Olvidaste tu contraseña?</h3>
+      <p>Actualmente, la recuperación de contraseña se gestiona a través del soporte. Contacta al equipo de Inteliaudit por WhatsApp al <strong>+595 994 516 360</strong> para restablecer tu acceso.</p>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="section" id="dashboard">
+      <h2>Panel de Control (Dashboard)</h2>
+      <p>El Dashboard es la pantalla principal que ves al iniciar sesión. Te da una vista panorámica del estado de tu firma.</p>
+
+      <h3>Indicadores clave (KPIs)</h3>
+      <p>En la parte superior verás cuatro tarjetas con métricas principales:</p>
+      <ul>
+        <li><strong>Clientes activos:</strong> Total de clientes registrados en tu firma</li>
+        <li><strong>Auditorías en curso:</strong> Auditorías que están en estado borrador o en progreso</li>
+        <li><strong>Hallazgos activos:</strong> Total de hallazgos pendientes o en revisión en todas las auditorías</li>
+        <li><strong>Contingencia total:</strong> Suma de todos los montos de ajuste detectados (en guaraníes)</li>
+      </ul>
+
+      <h3>Gráficos</h3>
+      <ul>
+        <li><strong>Hallazgos por impuesto:</strong> Gráfico de torta que muestra la distribución de hallazgos por tipo de impuesto (IVA, IRE, Retenciones, etc.)</li>
+        <li><strong>Auditorías por mes:</strong> Gráfico de barras con la cantidad de auditorías creadas en los últimos meses</li>
+      </ul>
+
+      <h3>Secciones adicionales</h3>
+      <ul>
+        <li><strong>Top Clientes:</strong> Los 5 clientes con mayor cantidad de hallazgos</li>
+        <li><strong>Actividad reciente:</strong> Últimas acciones registradas en el sistema (auditorías creadas, hallazgos actualizados, informes generados)</li>
+        <li><strong>Banner de suscripción:</strong> Si estás en período de prueba o sin suscripción activa, verás un aviso con enlace a los planes</li>
+      </ul>
+    </div>
+
+    <!-- CLIENTES -->
+    <div class="section" id="clientes">
+      <h2>Gestión de Clientes</h2>
+      <p>Accede desde el menú lateral en <strong>Clientes</strong>.</p>
+
+      <h3>Crear un nuevo cliente</h3>
+      <ol class="step-list">
+        <li>Haz clic en <strong>"+ Nuevo Cliente"</strong></li>
+        <li>Completa: RUC, razón social, email, teléfono, actividad económica y régimen tributario</li>
+        <li>Haz clic en <strong>"Guardar"</strong></li>
+      </ol>
+
+      <h3>Ver detalle del cliente</h3>
+      <p>Al hacer clic en un cliente de la lista, accedes a su perfil con:</p>
+      <ul>
+        <li><strong>Información general:</strong> Datos del cliente, RUC, actividad, régimen</li>
+        <li><strong>Auditorías:</strong> Lista de todas las auditorías asociadas a este cliente</li>
+        <li><strong>Credenciales Marangatú:</strong> Sección para guardar las credenciales de acceso al portal DNIT del cliente (cifradas con AES-256)</li>
+      </ul>
+      <div class="warn"><strong>Importante:</strong> Las credenciales Marangatú se almacenan cifradas. Solo el auditor asignado puede acceder a ellas. Cada acceso queda registrado en el audit trail.</div>
+
+      <h3>Límite de clientes</h3>
+      <p>El número máximo de clientes que puedes tener depende de tu plan:</p>
+      <ul>
+        <li><strong>Starter:</strong> 5 clientes</li>
+        <li><strong>Pro:</strong> 15 clientes</li>
+        <li><strong>Enterprise:</strong> Ilimitado</li>
+      </ul>
+    </div>
+
+    <!-- CREAR AUDITORIA -->
+    <div class="section" id="crear-auditoria">
+      <h2>Crear una Auditoría</h2>
+      <p>Accede desde el menú lateral en <strong>Auditorías → Nueva auditoría</strong> o desde el botón en el header superior.</p>
+      <p>El asistente de creación tiene 4 pasos:</p>
+
+      <h3>Paso 1: Seleccionar Cliente</h3>
+      <p>Elige el cliente al que se realizará la auditoría de la lista desplegable. También puedes escribir para buscar.</p>
+
+      <h3>Paso 2: Tipo de Auditoría</h3>
+      <p>Selecciona los impuestos que cubrirá la auditoría:</p>
+      <ul>
+        <li><strong>IVA</strong> — Impuesto al Valor Agregado (Form. 120 + RG90)</li>
+        <li><strong>IRE</strong> — Impuesto a la Renta Empresarial (Form. 500)</li>
+        <li><strong>IRP</strong> — Impuesto a la Renta Personal (Form. 510)</li>
+        <li><strong>IDU</strong> — Impuesto a los Dividendos y Utilidades (Form. 530)</li>
+        <li><strong>Retenciones IVA</strong> — Retenciones de IVA (Forms. 800/810)</li>
+        <li><strong>Retenciones IRE</strong> — Retenciones de IRE (Forms. 820/830)</li>
+      </ul>
+      <div class="tip"><strong>Tip:</strong> Puedes seleccionar varios impuestos. El sistema ejecutará los procedimientos correspondientes para cada uno.</div>
+
+      <h3>Paso 3: Período</h3>
+      <p>Define el período que cubrirá la auditoría:</p>
+      <ul>
+        <li><strong>Desde:</strong> Mes y año de inicio</li>
+        <li><strong>Hasta:</strong> Mes y año de fin</li>
+      </ul>
+      <p>Puede ser un mes específico (ej: enero 2024 → enero 2024) o un rango completo (ej: enero 2024 → diciembre 2024).</p>
+
+      <h3>Paso 4: Materialidad</h3>
+      <p>Define los umbrales de materialidad para la auditoría:</p>
+      <ul>
+        <li><strong>Materialidad general:</strong> Monto en guaraníes. Los hallazgos por debajo de este umbral se considerarán no materiales</li>
+        <li><strong>Materialidad específica:</strong> Opcional. Para partidas específicas con un umbral diferente</li>
+      </ul>
+      <p>Al hacer clic en <strong>"Crear Auditoría"</strong>, el sistema te redirige automáticamente al detalle de la auditoría.</p>
+    </div>
+
+    <div class="section" id="navegar-auditoria">
+      <h2>Navegar una Auditoría</h2>
+      <p>Al entrar en una auditoría, ves un encabezado con KPIs específicos y 7 pestañas de trabajo. Cada pestaña corresponde a una etapa del proceso de auditoría:</p>
+
+      <table>
+        <tr><th>Pestaña</th><th>Qué hace</th><th>Orden sugerido</th></tr>
+        <tr>
+          <td><strong>Archivos</strong></td>
+          <td>Importar datos: subir RG90, HECHAUKA, declaraciones PDF</td>
+          <td>1°</td>
+        </tr>
+        <tr>
+          <td><strong>Automatización</strong></td>
+          <td>Encolar trabajos de scraping automático en Marangatú</td>
+          <td>1° (alternativa)</td>
+        </tr>
+        <tr>
+          <td><strong>Análisis</strong></td>
+          <td>Ejecutar el motor de análisis automático y ver resultados</td>
+          <td>2°</td>
+        </tr>
+        <tr>
+          <td><strong>Hallazgos</strong></td>
+          <td>Revisar, clasificar y gestionar hallazgos detectados</td>
+          <td>3°</td>
+        </tr>
+        <tr>
+          <td><strong>Plan de Trabajo</strong></td>
+          <td>Gestionar tareas, ver sugerencias de IA, detectar patrones</td>
+          <td>4°</td>
+        </tr>
+        <tr>
+          <td><strong>Informes</strong></td>
+          <td>Generar informes Word y PDF</td>
+          <td>5°</td>
+        </tr>
+        <tr>
+          <td><strong>Resumen</strong></td>
+          <td>Vista general con KPIs de la auditoría</td>
+          <td>—</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ARCHIVOS -->
+    <div class="section" id="archivos">
+      <h2>Archivos e Importación de Datos</h2>
+      <p>Antes de ejecutar el análisis, necesitas cargar los datos del cliente. La pestaña <strong>Archivos</strong> te permite importar toda la información necesaria.</p>
+
+      <h3>Importar RG90 (Detalle de Comprobantes IVA)</h3>
+      <ol class="step-list">
+        <li>Haz clic en <strong>"Seleccionar archivo"</strong> en la sección RG90 Compras o Ventas</li>
+        <li>Selecciona el archivo <strong>XLSX</strong> descargado de Marangatú</li>
+        <li>El sistema muestra una <strong>previsualización</strong> de los datos detectados (columnas, filas, período)</li>
+        <li>Si los datos se ven correctos, haz clic en <strong>"Confirmar importación"</strong></li>
+      </ol>
+      <div class="note"><strong>Nota:</strong> El sistema detecta automáticamente las columnas del RG90 según el formato estándar de Marangatú. Revisa siempre la previsualización antes de confirmar.</div>
+
+      <h3>Importar HECHAUKA</h3>
+      <p>El proceso es similar al RG90: selecciona el archivo XLSX descargado de la sección HECHAUKA de Marangatú, previsualiza y confirma.</p>
+
+      <h3>Importar Declaraciones Juradas (Formularios)</h3>
+      <p>Puedes subir archivos PDF de las declaraciones juradas presentadas (Form. 120, Form. 500, etc.). El sistema extraerá los datos relevantes para el análisis.</p>
+
+      <h3>Validación SIFEN</h3>
+      <p>La sección SIFEN te permite <strong>validar los CDC</strong> (Código de Control) de los comprobantes electrónicos importados:</p>
+      <ol class="step-list">
+        <li>Haz clic en <strong>"Validar en SIFEN"</strong></li>
+        <li>El sistema consulta el portal público de la DNIT para verificar cada CDC</li>
+        <li>Los resultados se clasifican en: Válidos, No encontrados, Error</li>
+      </ol>
+      <div class="warn"><strong>Límite:</strong> La consulta a SIFEN está limitada a 3 consultas por segundo. El sistema maneja automáticamente esta limitación.</div>
+
+      <h3>Historial de importaciones</h3>
+      <p>Al final de la pestaña, verás el historial de todas las importaciones realizadas, con fecha, tipo de archivo, usuario y estado.</p>
+    </div>
+
+    <!-- AUTOMATIZACION -->
+    <div class="section" id="automatizacion">
+      <h2>Automatización (Scraping Marangatú)</h2>
+      <p>En lugar de descargar manualmente los archivos de Marangatú, puedes automatizar todo el proceso. La pestaña <strong>Automatización</strong> te permite encolar trabajos de scraping.</p>
+
+      <h3>Requisito previo</h3>
+      <p>Debes haber guardado las <strong>credenciales Marangatú</strong> del cliente. Esto se hace desde el perfil del cliente (<code>/clientes/:ruc</code>), en la sección "Credenciales Marangatú".</p>
+
+      <h3>Encolar un trabajo</h3>
+      <ol class="step-list">
+        <li>Selecciona el tipo de trabajo: <strong>Descargar RG90</strong>, <strong>Descargar HECHAUKA</strong> o <strong>Descargar DJ</strong></li>
+        <li>Selecciona el período (mes y año)</li>
+        <li>Haz clic en <strong>"Encolar trabajo"</strong></li>
+      </ol>
+
+      <h3>Seguimiento</h3>
+      <p>La lista de trabajos se actualiza automáticamente cada 5 segundos. Cada trabajo muestra:</p>
+      <ul>
+        <li><strong>Estado:</strong> Pendiente, En progreso, Completado, Error, Cancelado</li>
+        <li><strong>Progreso:</strong> Barra de progreso con porcentaje</li>
+        <li><strong>Tipo:</strong> RG90, HECHAUKA, DJ</li>
+        <li><strong>Iniciado:</strong> Fecha y hora de inicio</li>
+      </ul>
+      <div class="tip"><strong>Tip:</strong> Cuando un trabajo se completa, el archivo descargado se importa automáticamente al sistema. No necesitas hacer nada adicional.</div>
+    </div>
+
+    <!-- ANALISIS -->
+    <div class="section" id="analisis">
+      <h2>Análisis Automático</h2>
+      <p>Una vez que tienes los datos importados (manualmente o por automatización), la pestaña <strong>Análisis</strong> ejecuta el motor de auditoría.</p>
+
+      <h3>Ejecutar el análisis</h3>
+      <ol class="step-list">
+        <li>Selecciona el <strong>impuesto</strong> a analizar (IVA, IRE, Retenciones) o "Todos"</li>
+        <li>Confirma el rango de períodos</li>
+        <li>Haz clic en <strong>"Ejecutar Análisis"</strong></li>
+      </ol>
+
+      <h3>Progreso en vivo</h3>
+      <p>El análisis se ejecuta en segundo plano. Verás una barra de progreso con el estado actual:</p>
+      <ul>
+        <li><strong>Iniciando...</strong> — Preparando el motor de análisis</li>
+        <li><strong>Ejecutando procedimientos...</strong> — Corriendo los cruces y validaciones</li>
+        <li><strong>Generando hallazgos...</strong> — Creando los hallazgos detectados</li>
+        <li><strong>Completado</strong> — Análisis finalizado</li>
+      </ul>
+
+      <h3>Resultados</h3>
+      <p>Al finalizar, verás un resumen con:</p>
+      <ul>
+        <li>Cantidad de hallazgos detectados por impuesto</li>
+        <li>Contingencia total estimada</li>
+        <li>Hallazgos por nivel de riesgo</li>
+      </ul>
+      <div class="note"><strong>Nota:</strong> El análisis incluye más de 12 procedimientos automatizados: cruce RG90 vs Form. 120, validación de CDCs en SIFEN, verificación de RUC activos, detección de gastos sin comprobante, proporcionalidad de crédito fiscal, tasas de depreciación IRE, retenciones no practicadas, y más.</div>
+    </div>
+
+    <!-- HALLAZGOS -->
+    <div class="section" id="hallazgos">
+      <h2>Gestión de Hallazgos</h2>
+      <p>La pestaña <strong>Hallazgos</strong> es donde revisas, clasificas y gestionas cada irregularidad detectada.</p>
+
+      <h3>Estructura de la pantalla</h3>
+      <p>La pantalla se divide en dos áreas:</p>
+      <ul>
+        <li><strong>Tabla de hallazgos:</strong> Lista completa con filtros y acciones en lote</li>
+        <li><strong>Panel lateral:</strong> Al hacer clic en un hallazgo, se abre el detalle completo a la derecha</li>
+      </ul>
+
+      <h3>Filtros disponibles</h3>
+      <table>
+        <tr><th>Filtro</th><th>Opciones</th></tr>
+        <tr><td>Impuesto</td><td>Todos, IVA, IRE, Retenciones, IRP, IDU</td></tr>
+        <tr><td>Riesgo</td><td>Todos, Alto, Medio, Bajo</td></tr>
+        <tr><td>Estado</td><td>Todos, Pendiente, Revisado, Aceptado, Descartado, Confirmado, Regularizado</td></tr>
+        <tr><td>Período</td><td>Desde / Hasta (mes y año)</td></tr>
+      </table>
+
+      <h3>Ciclo de vida de un hallazgo</h3>
+      <div class="flow-diagram">
+        <span class="step">Pendiente</span><span class="arrow">→</span>
+        <span class="step">Revisado</span><span class="arrow">→</span>
+        <span class="step">Aceptado</span><span class="arrow">→</span>
+        <span class="step">Regularizado</span>
+      </div>
+      <p style="margin-top: 8px;">Un hallazgo también puede pasar de <strong>Revisado → Descartado</strong> si determines que no corresponde.</p>
+
+      <h3>Panel de detalle</h3>
+      <p>Al hacer clic en un hallazgo, el panel lateral muestra:</p>
+      <ul>
+        <li><strong>Descripción:</strong> Detalle de la irregularidad detectada</li>
+        <li><strong>Base legal:</strong> Artículo de la ley aplicable (ej: Art. 175 Ley 125/1991)</li>
+        <li><strong>Monto de ajuste:</strong> En guaraníes</li>
+        <li><strong>Contingencia calculada:</strong> Impuesto omitido + multa (50%) + intereses (1% mensual)</li>
+        <li><strong>Nivel de riesgo:</strong> Alto, Medio o Bajo</li>
+        <li><strong>Evidencia:</strong> Referencia al comprobante o documento que sustenta el hallazgo</li>
+        <li><strong>Narrativa IA:</strong> Si tu plan lo incluye, verás una redacción automática del hallazgo con terminología técnica</li>
+        <li><strong>Notas del auditor:</strong> Espacio para que agregues tus comentarios</li>
+      </ul>
+
+      <h3>Acciones en lote</h3>
+      <p>Puedes seleccionar múltiples hallazgos usando los checkboxes y aplicar acciones masivas:</p>
+      <ul>
+        <li><strong>Cambiar estado:</strong> Marcar varios como Revisado, Aceptado, etc.</li>
+        <li><strong>Exportar Excel:</strong> Descargar la lista de hallazgos seleccionados en formato XLSX</li>
+      </ul>
+
+      <h3>Edición de campos</h3>
+      <p>Desde el panel lateral puedes editar directamente:</p>
+      <ul>
+        <li>La descripción del hallazgo</li>
+        <li>El nivel de riesgo (alto/medio/bajo)</li>
+        <li>Las notas del auditor</li>
+        <li>El monto de ajuste (la contingencia se recalcula automáticamente)</li>
+      </ul>
+    </div>
+
+    <!-- PLAN DE TRABAJO -->
+    <div class="section" id="plan-trabajo">
+      <h2>Plan de Trabajo</h2>
+      <p>La pestaña <strong>Plan de Trabajo</strong> te ayuda a organizar las tareas de la auditoría y aprovechar las sugerencias de inteligencia artificial.</p>
+
+      <h3>Checklist de tareas</h3>
+      <p>El plan de trabajo muestra una lista de tareas agrupadas por categoría:</p>
+      <ul>
+        <li><strong>Importación de datos</strong> — Verificar que todos los archivos estén cargados</li>
+        <li><strong>Validación de fuentes</strong> — Confirmar validez de CDCs y RUCs</li>
+        <li><strong>Análisis por impuesto</strong> — Tareas específicas para IVA, IRE, Retenciones</li>
+        <li><strong>Revisión de hallazgos</strong> — Pendientes de revisión del auditor</li>
+        <li><strong>Generación de informes</strong> — Preparación de informes finales</li>
+      </ul>
+      <p>Cada tarea tiene un checkbox que puedes marcar al completarla. Una barra de progreso muestra el avance general.</p>
+
+      <h3>Sugerencias de IA</h3>
+      <p>El sistema analiza los datos de la auditoría y sugiere tareas adicionales basadas en patrones detectados:</p>
+      <ul>
+        <li><strong>Patrones anómalos:</strong> Concentración de proveedores, montos redondos, proveedores nuevos, picos atípicos, facturas a fin de mes, montos repetidos</li>
+        <li><strong>Procedimientos sugeridos:</strong> El sistema recomienda procedimientos de auditoría adicionales según las características del cliente</li>
+      </ul>
+      <div class="tip"><strong>Tip:</strong> Las sugerencias de IA son solo eso — sugerencias. El juicio profesional del auditor es siempre el que prevalece.</div>
+    </div>
+
+    <!-- INFORMES -->
+    <div class="section" id="informes">
+      <h2>Informes</h2>
+      <p>La pestaña <strong>Informes</strong> dentro de cada auditoría te permite generar documentos profesionales con un solo clic. La página independiente <strong>/informes</strong> está actualmente en desarrollo para mostrar un listado global.</p>
+
+      <h3>Tipos de informe</h3>
+      <table>
+        <tr><th>Tipo</th><th>Contenido</th><th>Uso recomendado</th></tr>
+        <tr>
+          <td><strong>Completo</strong></td>
+          <td>Informe completo con portada, resumen ejecutivo, detalle de hallazgos, matriz de riesgo, cálculo de contingencia, base legal y anexos</td>
+          <td>Informe final para el cliente</td>
+        </tr>
+        <tr>
+          <td><strong>Carta de Gerencia</strong></td>
+          <td>Resumen ejecutivo con principales hallazgos y recomendaciones, sin detalle exhaustivo</td>
+          <td>Presentación a la dirección</td>
+        </tr>
+        <tr>
+          <td><strong>Resumen Ejecutivo</strong></td>
+          <td>Una página con los hallazgos principales, KPIs y contingencia total</td>
+          <td>Reunión rápida con el cliente</td>
+        </tr>
+      </table>
+
+      <h3>Formatos de descarga</h3>
+      <ul>
+        <li><strong>Word (.docx)</strong> — Editable, para personalizar antes de entregar</li>
+        <li><strong>PDF</strong> — Formato final no editable, listo para firmar</li>
+        <li><strong>Ambos</strong> — Descarga los dos formatos simultáneamente</li>
+      </ul>
+
+      <h3>Generar un informe</h3>
+      <ol class="step-list">
+        <li>Selecciona el <strong>tipo de informe</strong> (Completo, Carta de Gerencia, Resumen Ejecutivo)</li>
+        <li>Selecciona el <strong>formato</strong> (DOCX, PDF, Ambos)</li>
+        <li>Si lo deseas, genera un <strong>Resumen Ejecutivo con IA</strong> haciendo clic en el botón correspondiente. La IA redactará un resumen profesional basado en los hallazgos.</li>
+        <li>Haz clic en <strong>"Generar Informe"</strong></li>
+        <li>Una vez generado, puedes <strong>previsualizarlo</strong> en el navegador o <strong>descargarlo</strong></li>
+      </ol>
+
+      <h3>Compartir con el cliente</h3>
+      <p>Desde la misma pestaña, puedes generar un <strong>link de portal de cliente</strong> para compartir los hallazgos con tu cliente de forma segura (ver sección Portal del Cliente).</p>
+
+      <div class="note"><strong>Nota sobre la página "Informes" del menú lateral:</strong> La ruta <code>/informes</code> del menú principal está identificada como "En construcción". Actualmente los informes se gestionan dentro de cada auditoría en la pestaña correspondiente. La página global de informes estará disponible en una próxima actualización.</div>
+    </div>
+
+    <!-- EVIDENCIA -->
+    <div class="section" id="evidencia">
+      <h2>Explorador de Evidencia</h2>
+      <p>El Explorador de Evidencia es una herramienta avanzada que te permite revisar hallazgos y evidencia en una vista de panel dividido. Accede desde el botón <strong>"Explorar Evidencia"</strong> dentro de una auditoría.</p>
+
+      <h3>Vista de panel dividido</h3>
+      <ul>
+        <li><strong>Panel izquierdo:</strong> Lista de hallazgos con filtros rápidos</li>
+        <li><strong>Panel derecho:</strong> Detalle completo del hallazgo seleccionado, con campos editables y acciones</li>
+      </ul>
+
+      <h3>Validación SIFEN integrada</h3>
+      <p>Desde el explorador puedes ejecutar la validación de CDCs en SIFEN y ver los resultados en tiempo real.</p>
+
+      <h3>Generación rápida de informes</h3>
+      <p>Al pie del panel derecho, hay un botón para generar un informe en Word del hallazgo seleccionado, útil para documentación de trabajo.</p>
+    </div>
+
+    <!-- PORTAL -->
+    <div class="section" id="portal">
+      <h2>Portal del Cliente</h2>
+      <p>El Portal del Cliente te permite compartir los resultados de la auditoría con tu cliente de forma segura y profesional, sin darle acceso al sistema completo.</p>
+
+      <h3>Generar un link de portal</h3>
+      <ol class="step-list">
+        <li>En la pestaña <strong>Informes</strong> de la auditoría, haz clic en <strong>"Compartir vía Portal"</strong></li>
+        <li>Selecciona qué hallazgos incluir (puedes elegir solo los confirmados)</li>
+        <li>Define una <strong>fecha de expiración</strong> opcional para el link</li>
+        <li>Haz clic en <strong>"Generar Link"</strong></li>
+        <li>Copia el link generado y compártelo con tu cliente</li>
+      </ol>
+
+      <h3>Vista del cliente</h3>
+      <p>Al abrir el link, tu cliente ve:</p>
+      <ul>
+        <li><strong>Cabecera:</strong> Nombre de tu firma, nombre del cliente, período auditado</li>
+        <li><strong>KPIs:</strong> Contingencia total, hallazgos por riesgo, monto total de ajustes</li>
+        <li><strong>Tabla de hallazgos:</strong> Lista de cada hallazgo con descripción, riesgo, estado y contingencia</li>
+        <li><strong>Botón de descarga:</strong> Puede descargar el informe en PDF</li>
+      </ul>
+      <div class="warn"><strong>Seguridad:</strong> El link contiene un token JWT único. No lo compartas por canales no seguros. Si el link se ve comprometido, puedes cancelarlo desde la pestaña Informes.</div>
+    </div>
+
+    <!-- CONFIGURACION -->
+    <div class="section" id="configuracion">
+      <h2>Configuración de la Firma</h2>
+      <p>Accede desde <strong>Administración → Configuración</strong> (solo visible para usuarios con rol Admin o Super Admin).</p>
+
+      <h3>Datos de la firma</h3>
+      <p>Puedes editar:</p>
+      <ul>
+        <li><strong>Nombre de la firma</strong></li>
+        <li><strong>RUC</strong> (no recomendado cambiar frecuentemente)</li>
+        <li><strong>Email de contacto</strong></li>
+        <li><strong>Slogan o descripción corta</strong></li>
+      </ul>
+
+      <h3>Plan actual</h3>
+      <p>Muestra el plan en el que estás (Starter, Pro o Enterprise), el estado de la suscripción y un enlace a la página de planes para cambiar o renovar.</p>
+
+      <h3>Uso de IA</h3>
+      <p>Si tu plan incluye IA, ves un resumen del uso: cantidad de solicitudes realizadas en el mes actual y límite disponible.</p>
+
+      <h3>Información de la cuenta</h3>
+      <p>Muestra datos del usuario actual: nombre, email, rol, fecha de registro.</p>
+    </div>
+
+    <!-- USUARIOS -->
+    <div class="section" id="usuarios">
+      <h2>Gestión de Usuarios</h2>
+      <p>Accede desde <strong>Administración → Usuarios</strong> (solo Admin/Super Admin).</p>
+
+      <h3>Roles del sistema</h3>
+      <table>
+        <tr><th>Rol</th><th>Permisos</th></tr>
+        <tr><td><strong>Super Admin</strong></td><td>Acceso total al sistema. Puede crear/modificar cualquier recurso, gestionar usuarios, ver audit trail.</td></tr>
+        <tr><td><strong>Admin</strong></td><td>Acceso a administración, usuarios, configuración. Puede crear y gestionar auditorías y clientes.</td></tr>
+        <tr><td><strong>Auditor Senior</strong></td><td>Puede crear auditorías, gestionar hallazgos, cambiar estados. Acceso a clientes.</td></tr>
+        <tr><td><strong>Auditor</strong></td><td>Puede ver y trabajar en auditorías asignadas. Acceso limitado a administración.</td></tr>
+      </table>
+
+      <h3>Crear un usuario</h3>
+      <ol class="step-list">
+        <li>Haz clic en <strong>"+ Nuevo Usuario"</strong></li>
+        <li>Completa: nombre, email, contraseña y rol</li>
+        <li>Haz clic en <strong>"Guardar"</strong></li>
+      </ol>
+      <div class="note"><strong>Nota:</strong> Al crear un usuario, se envía un correo de invitación automático (si la integración con Resend está configurada).</div>
+
+      <h3>Gestionar usuarios existentes</h3>
+      <p>Desde la tabla de usuarios puedes:</p>
+      <ul>
+        <li><strong>Buscar</strong> usuarios por nombre o email</li>
+        <li><strong>Activar/Desactivar</strong> un usuario usando el toggle correspondiente</li>
+        <li>Ver el <strong>rol</strong> de cada usuario con su badge de color</li>
+      </ul>
+    </div>
+
+    <!-- AUDIT TRAIL -->
+    <div class="section" id="trail">
+      <h2>Audit Trail</h2>
+      <p>Accede desde <strong>Administración → Audit Trail</strong>. Es el registro de auditoría de toda la actividad en el sistema.</p>
+
+      <h3>Qué registra</h3>
+      <p>Cada acción importante queda registrada con:</p>
+      <ul>
+        <li><strong>Fecha y hora</strong> de la acción</li>
+        <li><strong>Usuario</strong> que realizó la acción</li>
+        <li><strong>Módulo</strong> (Clientes, Auditorías, Hallazgos, Usuarios, etc.)</li>
+        <li><strong>Acción</strong> (Crear, Actualizar, Eliminar, etc.)</li>
+        <li><strong>Descripción</strong> detallada de lo que se hizo</li>
+        <li><strong>IP</strong> desde donde se realizó</li>
+      </ul>
+
+      <h3>Filtros</h3>
+      <p>Puedes filtrar por módulo, rango de fechas y buscar texto específico.</p>
+      <div class="tip"><strong>Tip:</strong> El audit trail es fundamental para cumplir con normas de control interno y para resolver disputas sobre quién hizo qué y cuándo.</div>
+    </div>
+
+    <!-- PLANES -->
+    <div class="section" id="planes">
+      <h2>Planes y Suscripción</h2>
+      <p>Accede desde el menú en la página de <strong>Planes</strong> o desde el banner de suscripción en el Dashboard.</p>
+
+      <h3>Planes disponibles</h3>
+      <table>
+        <tr><th>Característica</th><th>Starter</th><th>Pro</th><th>Enterprise</th></tr>
+        <tr><td>Clientes activos</td><td>5</td><td>15</td><td>Ilimitados</td></tr>
+        <tr><td>Usuarios por firma</td><td>3</td><td>8</td><td>Ilimitados</td></tr>
+        <tr><td>Análisis IVA + IRE + Retenciones</td><td>✓</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Cruce RG90 vs SIFEN vs HECHAUKA</td><td>✓</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Informes Word + PDF</td><td>✓</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Brain AI Auditor™</td><td>—</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Narrativa Técnica Automatizada</td><td>—</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Credenciales encriptadas AES-256</td><td>—</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Portal de cliente</td><td>—</td><td>—</td><td>✓</td></tr>
+        <tr><td>Logo de firma en informes</td><td>—</td><td>—</td><td>✓</td></tr>
+        <tr><td>Precio mensual</td><td>Gs. 490.000</td><td>Gs. 890.000</td><td>Gs. 1.790.000</td></tr>
+      </table>
+
+      <h3>Solicitar un plan</h3>
+      <ol class="step-list">
+        <li>En la página de Planes, selecciona <strong>Mensual</strong> o <strong>Anual</strong> (−15%)</li>
+        <li>Haz clic en <strong>"Solicitar"</strong> en el plan deseado</li>
+        <li>Confirma la solicitud</li>
+        <li>Recibirás los datos de <strong>transferencia bancaria</strong> para realizar el pago</li>
+        <li>Una vez acreditado el pago, el equipo de Inteliaudit activará tu plan</li>
+      </ol>
+      <div class="warn"><strong>Importante:</strong> El pago es por transferencia bancaria (sin integración de pagos online por el momento). Tu plan se activa manualmente al confirmar el pago.</div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="section" id="faq">
+      <h2>Preguntas Frecuentes</h2>
+
+      <h3>¿Inteliaudit reemplaza al auditor?</h3>
+      <p>No. Inteliaudit es una herramienta de soporte, no un sustituto. Automatiza la recopilación de datos, el cruce entre fuentes y la detección de irregularidades. El juicio profesional, la confirmación de hallazgos y las conclusiones finales siempre son del auditor.</p>
+
+      <h3>¿Cómo se integra con Marangatú?</h3>
+      <p>Marangatú no tiene API pública. Inteliaudit funciona de dos maneras: (1) podés subir manualmente los archivos descargados de Marangatú, o (2) podés guardar las credenciales del cliente con encriptación AES-256 y el sistema descarga automáticamente.</p>
+
+      <h3>¿Los informes generados son aceptados por la DNIT?</h3>
+      <p>Inteliaudit genera informes de auditoría privada, no declaraciones juradas. Son documentos de trabajo del auditor que sirven como evidencia para recomendaciones y soporte en fiscalizaciones. La firma del auditor habilitado sigue siendo necesaria para darles valor legal.</p>
+
+      <h3>¿Qué impuestos cubre el análisis?</h3>
+      <p>IVA (Form. 120 + RG90), IRE (Form. 500), IRP (Form. 510), IDU (Form. 530) y Retenciones (Forms. 800-830). Podés elegir qué impuestos incluir en cada auditoría.</p>
+
+      <h3>¿Puedo probar antes de pagar?</h3>
+      <p>Sí. Tenés 7 días de prueba gratuita con acceso completo al plan Pro, sin tarjeta de crédito.</p>
+
+      <h3>¿Qué pasa si la DNIT modifica una resolución?</h3>
+      <p>El equipo de Inteliaudit monitorea continuamente las resoluciones de la DNIT y actualiza la lógica de análisis. Las actualizaciones se aplican automáticamente.</p>
+    </div>
+
+    <!-- SOPORTE -->
+    <div class="section" id="soporte">
+      <h2>Soporte Técnico</h2>
+
+      <h3>Canales de contacto</h3>
+      <ul>
+        <li><strong>WhatsApp:</strong> +595 994 516 360 (soporte prioritario para planes Pro y Enterprise)</li>
+        <li><strong>Email:</strong> hola@inteliaudit.com.py</li>
+        <li><strong>Web:</strong> inteliaudit.vercel.app</li>
+      </ul>
+
+      <h3>Horario de atención</h3>
+      <p>Lunes a viernes de 08:00 a 17:00 (GMT-4, hora de Paraguay).</p>
+
+      <h3>Reportar un problema</h3>
+      <p>Si encontrás un error o tenés una sugerencia, contactanos por WhatsApp o email. Incluí:</p>
+      <ul>
+        <li>Descripción del problema</li>
+        <li>Pasos para reproducirlo</li>
+        <li>Captura de pantalla (si aplica)</li>
+        <li>Navegador y sistema operativo</li>
+      </ul>
+
+      <hr>
+
+      <p style="text-align:center; color: var(--gray-text); font-size: 13px;">
+        <strong>Inteliaudit</strong> — Parte del ecosistema <strong>Intelihouse</strong> Soluciones E.A.S.<br>
+        RUC 80144114-5 · Hernandarias 506, Pedro Juan Caballero, Paraguay<br>
+        © 2026 Inteliaudit · Versión 1.0
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', function(e) {
+      document.querySelectorAll('.sidebar-nav a').forEach(l => l.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+  window.addEventListener('scroll', () => {
+    const sections = document.querySelectorAll('.section[id]');
+    const scrollPos = window.scrollY + 120;
+    sections.forEach(section => {
+      const id = section.getAttribute('id');
+      const link = document.querySelector(`.sidebar-nav a[href="#${id}"]`);
+      if (link) {
+        if (section.offsetTop <= scrollPos && section.offsetTop + section.offsetHeight > scrollPos) {
+          document.querySelectorAll('.sidebar-nav a').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

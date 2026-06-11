@@ -9,6 +9,7 @@
     { "source": "/ley-6380", "destination": "/landing/ley-6380.html" },
     { "source": "/rg-90", "destination": "/landing/rg-90.html" },
     { "source": "/contrato-procesamiento-datos", "destination": "/landing/contrato-procesamiento-datos.html" },
+    { "source": "/manual-de-usuario", "destination": "/landing/manual-de-usuario.html" },
     { "source": "/(.*)", "destination": "/app.html" }
   ],
   "headers": [
