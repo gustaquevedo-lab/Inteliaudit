@@ -311,8 +311,20 @@ async def get_dashboard(
 ):
     from sqlalchemy import select, func
     from db.models import Auditoria, Cliente, Hallazgo, AuditTrail, Firma
+    import traceback
 
     firma_id = user.firma_id
+
+    try:
+        return await _get_dashboard_data(db, firma_id)
+    except Exception as e:
+        logger.error(f"Dashboard error: {e}\n{traceback.format_exc()}")
+        raise HTTPException(500, detail=str(e))
+
+
+async def _get_dashboard_data(db: AsyncSession, firma_id: str):
+    from sqlalchemy import select, func
+    from db.models import Auditoria, Cliente, Hallazgo, AuditTrail, Firma
 
     total_contingencia = await db.execute(
         select(func.coalesce(func.sum(Hallazgo.total_contingencia), 0))
@@ -353,8 +365,9 @@ async def get_dashboard(
     )
     top_clientes = await db.execute(
         select(Cliente.razon_social, Cliente.ruc, func.coalesce(func.sum(Hallazgo.total_contingencia), 0).label("contingencia"))
-        .join(Hallazgo, Hallazgo.auditoria_id == Auditoria.id)
+        .select_from(Cliente)
         .join(Auditoria, Auditoria.cliente_id == Cliente.id)
+        .join(Hallazgo, Hallazgo.auditoria_id == Auditoria.id)
         .where(Hallazgo.firma_id == firma_id, Hallazgo.estado != "descartado", Auditoria.firma_id == firma_id)
         .group_by(Cliente.id, Cliente.razon_social, Cliente.ruc)
         .order_by(func.sum(Hallazgo.total_contingencia).desc()).limit(5)
