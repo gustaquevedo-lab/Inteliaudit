@@ -13,8 +13,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
@@ -429,34 +428,6 @@ app.include_router(api)
 #  Static files
 # ============================================================
 
-_LANDING_DIR = Path(__file__).parent.parent / "landing"
-_LANDING = _LANDING_DIR / "index.html"
-_ROADMAP_HTML = Path(__file__).parent.parent / "ROADMAP.html"
-_UI_DIST = Path(__file__).parent.parent / "ui-web-dist"
-
-
-@app.get("/roadmap", response_class=FileResponse, include_in_schema=False)
-async def serve_roadmap():
-    return FileResponse(str(_ROADMAP_HTML))
-
-@app.get("/", response_class=FileResponse, include_in_schema=False)
-async def serve_landing():
-    return FileResponse(str(_LANDING))
-
-@app.get("/{filename}", response_class=FileResponse, include_in_schema=False)
-async def serve_landing_static(filename: str):
-    if filename.startswith(("api", "app", "portal")):
-        return FileResponse(str(_LANDING))
-    requested = _LANDING_DIR / filename
-    if requested.exists() and requested.is_file():
-        return FileResponse(str(requested))
-    return FileResponse(str(_LANDING))
-
-app.mount("/app/assets", StaticFiles(directory=str(_UI_DIST / "assets")), name="vite-assets")
-
-@app.get("/app/{full_path:path}", response_class=FileResponse, include_in_schema=False)
-async def serve_spa(full_path: str):
-    requested = _UI_DIST / full_path
-    if requested.exists() and requested.is_file():
-        return FileResponse(str(requested))
-    return FileResponse(str(_UI_DIST / "index.html"))
+@app.get("/", include_in_schema=False)
+async def root():
+    return {"status": "ok", "service": "inteliaudit-api"}
