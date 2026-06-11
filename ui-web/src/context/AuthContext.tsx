@@ -75,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('ia_token')
     setUser(null)
     setPlanInfo(null)
-    window.location.href = '/app/login'
+    window.location.href = '/login'
   }
 
   const isAdmin = user?.rol === 'admin' || user?.rol === 'super_admin'

@@ -1,4 +1,4 @@
-const BASE = '/api'
+const BASE = import.meta.env.VITE_API_URL || '/api'
 
 function getToken(): string | null {
   return localStorage.getItem('ia_token')
@@ -12,7 +12,7 @@ function authHeaders(): Record<string, string> {
 async function handleResponse<T>(res: Response): Promise<T> {
   if (res.status === 401) {
     localStorage.removeItem('ia_token')
-    window.location.href = '/app/login'
+    window.location.href = '/login'
     throw new Error('No autorizado')
   }
   if (!res.ok) {

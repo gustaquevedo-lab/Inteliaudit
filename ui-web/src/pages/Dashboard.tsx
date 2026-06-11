@@ -146,7 +146,7 @@ export default function Dashboard() {
               <p className="text-xs text-amber-600 dark:text-amber-400">Elegi un plan para continuar usando Inteliaudit</p>
             </div>
           </div>
-          <a href="/app/planes" className="py-2 px-4 rounded-xl bg-amber-500 text-white text-xs font-bold hover:bg-amber-600 shrink-0">Ver planes</a>
+          <a href="/planes" className="py-2 px-4 rounded-xl bg-amber-500 text-white text-xs font-bold hover:bg-amber-600 shrink-0">Ver planes</a>
         </div>
       )}
 

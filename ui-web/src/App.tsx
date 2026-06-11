@@ -69,7 +69,7 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <ToasterProvider>
-          <BrowserRouter basename="/app">
+          <BrowserRouter>
             <AppRoutes />
           </BrowserRouter>
         </ToasterProvider>

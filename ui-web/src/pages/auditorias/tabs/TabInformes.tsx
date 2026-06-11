@@ -122,7 +122,7 @@ export default function TabInformes({ auditoriaId, clienteRuc }: Props) {
         hallazgos_visibles: Array.from(hallazgosSeleccionados),
         expira_en_dias: diasPortal,
       })
-      setPortalLink(`${window.location.origin}/app/portal/${res.token}`)
+      setPortalLink(`${window.location.origin}/portal/${res.token}`)
       setPortalExpira(res.expira)
       success('Link generado')
     } catch (e: unknown) { error(e instanceof Error ? e.message : 'Error') }
@@ -262,7 +262,7 @@ export default function TabInformes({ auditoriaId, clienteRuc }: Props) {
           setGenerandoLink(true)
           try {
             const res = await api.post<{ token: string; url: string; expira: string }>('/portal/generar-link', { auditoria_id: auditoriaId, hallazgos_visibles: Array.from(hallazgosSeleccionados), expira_en_dias: diasPortal })
-            setPortalLink(`${window.location.origin}/app/portal/${res.token}`)
+            setPortalLink(`${window.location.origin}/portal/${res.token}`)
             setPortalExpira(res.expira)
             success('Link generado')
           } catch (e: unknown) { error(e instanceof Error ? e.message : 'Error') }

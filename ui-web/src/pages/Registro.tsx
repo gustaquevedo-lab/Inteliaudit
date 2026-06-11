@@ -186,7 +186,7 @@ export default function Registro() {
 
               <p className="text-center text-xs" style={{ color: '#6B7A90' }}>
                 Ya tenes cuenta?{' '}
-                <a href="/app/login" style={{ color: '#2E84F0' }}>Inicia sesion</a>
+                <a href="/login" style={{ color: '#2E84F0' }}>Inicia sesion</a>
               </p>
             </motion.div>
           ) : (

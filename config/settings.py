@@ -62,8 +62,9 @@ class Settings(BaseSettings):
     # Cifrado de credenciales Marangatú en DB
     encryption_key: str = ""
 
-    # CORS
-    allowed_origins: list[str] = ["http://localhost:3000", "http://localhost:8000"]
+    # CORS — en producción setear ALLOWED_ORIGINS="https://inteliaudit.com,https://www.inteliaudit.com"
+    frontend_url: str = ""
+    allowed_origins: list[str] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:8000"]
 
     @property
     def is_postgres(self) -> bool:
