@@ -323,76 +323,88 @@ async def get_dashboard(
 
 
 async def _get_dashboard_data(db: AsyncSession, firma_id: str):
-    from sqlalchemy import select, func
+    from sqlalchemy import select, func, case
     from db.models import Auditoria, Cliente, Hallazgo, AuditTrail, Firma
 
     total_contingencia = await db.execute(
         select(func.coalesce(func.sum(Hallazgo.total_contingencia), 0))
         .where(Hallazgo.firma_id == firma_id, Hallazgo.estado != "descartado")
     )
-    total_cont = total_contingencia.scalar() or 0
+    total_cont = int(total_contingencia.scalar() or 0)
 
-    aud_count = await db.execute(
-        select(
-            func.count(Auditoria.id).filter(Auditoria.estado.in_(["en_progreso", "analizando"])).label("activas"),
-            func.count(Auditoria.id).filter(Auditoria.estado == "analisis_completado").label("cerradas"),
-        ).where(Auditoria.firma_id == firma_id)
-    )
-    aud_row = aud_count.one()
+    aud_activas = (await db.execute(
+        select(func.count(Auditoria.id))
+        .where(Auditoria.firma_id == firma_id, Auditoria.estado.in_(["en_progreso", "analizando"]))
+    )).scalar() or 0
 
-    hallazgos_count = await db.execute(
-        select(
-            func.count(Hallazgo.id).filter(Hallazgo.estado == "pendiente").label("pendientes"),
-            func.count(Hallazgo.id).filter(Hallazgo.nivel_riesgo == "alto", Hallazgo.estado != "descartado").label("alto_riesgo"),
-        ).where(Hallazgo.firma_id == firma_id)
-    )
-    hal_row = hallazgos_count.one()
+    aud_cerradas = (await db.execute(
+        select(func.count(Auditoria.id))
+        .where(Auditoria.firma_id == firma_id, Auditoria.estado == "analisis_completado")
+    )).scalar() or 0
 
-    clientes_count = await db.execute(
+    hal_pendientes = (await db.execute(
+        select(func.count(Hallazgo.id))
+        .where(Hallazgo.firma_id == firma_id, Hallazgo.estado == "pendiente")
+    )).scalar() or 0
+
+    hal_alto = (await db.execute(
+        select(func.count(Hallazgo.id))
+        .where(Hallazgo.firma_id == firma_id, Hallazgo.nivel_riesgo == "alto", Hallazgo.estado != "descartado")
+    )).scalar() or 0
+
+    total_clientes = (await db.execute(
         select(func.count(Cliente.id)).where(Cliente.firma_id == firma_id)
-    )
-    total_clientes = clientes_count.scalar() or 0
+    )).scalar() or 0
 
-    riesgo_rows = await db.execute(
+    riesgo_rows = (await db.execute(
         select(Hallazgo.nivel_riesgo, func.count(Hallazgo.id).label("cantidad"), func.coalesce(func.sum(Hallazgo.total_contingencia), 0).label("monto"))
         .where(Hallazgo.firma_id == firma_id, Hallazgo.estado != "descartado")
         .group_by(Hallazgo.nivel_riesgo).order_by(Hallazgo.nivel_riesgo)
-    )
-    impuesto_rows = await db.execute(
+    )).all()
+
+    impuesto_rows = (await db.execute(
         select(Hallazgo.impuesto, func.count(Hallazgo.id).label("cantidad"))
         .where(Hallazgo.firma_id == firma_id, Hallazgo.estado != "descartado")
         .group_by(Hallazgo.impuesto).order_by(func.count(Hallazgo.id).desc())
-    )
-    top_clientes = await db.execute(
+    )).all()
+
+    top_clientes = (await db.execute(
         select(Cliente.razon_social, Cliente.ruc, func.coalesce(func.sum(Hallazgo.total_contingencia), 0).label("contingencia"))
         .select_from(Cliente)
         .join(Auditoria, Auditoria.cliente_id == Cliente.id)
         .join(Hallazgo, Hallazgo.auditoria_id == Auditoria.id)
-        .where(Hallazgo.firma_id == firma_id, Hallazgo.estado != "descartado", Auditoria.firma_id == firma_id)
+        .where(Hallazgo.firma_id == firma_id, Hallazgo.estado != "descartado")
         .group_by(Cliente.id, Cliente.razon_social, Cliente.ruc)
         .order_by(func.sum(Hallazgo.total_contingencia).desc()).limit(5)
-    )
-    trail_rows = await db.execute(
-        select(AuditTrail, Usuario.nombre.label("usuario_nombre"))
+    )).all()
+
+    trail_rows = (await db.execute(
+        select(AuditTrail.accion, AuditTrail.timestamp, AuditTrail.auditoria_id, AuditTrail.modulo, Usuario.nombre)
         .outerjoin(Usuario, AuditTrail.usuario_id == Usuario.id)
         .where(AuditTrail.firma_id == firma_id)
         .order_by(AuditTrail.timestamp.desc()).limit(10)
-    )
+    )).all()
+
+    tendencia = (await db.execute(
+        select(Hallazgo.periodo, func.count(Hallazgo.id).label("hallazgos"), func.coalesce(func.sum(Hallazgo.total_contingencia), 0).label("contingencia"))
+        .where(Hallazgo.firma_id == firma_id, Hallazgo.estado != "descartado")
+        .group_by(Hallazgo.periodo).order_by(Hallazgo.periodo).limit(12)
+    )).all()
 
     return {
         "kpis": {
             "total_contingencia": total_cont,
-            "auditorias_activas": aud_row.activas or 0,
-            "auditorias_cerradas": aud_row.cerradas or 0,
-            "hallazgos_pendientes": hal_row.pendientes or 0,
-            "hallazgos_alto_riesgo": hal_row.alto_riesgo or 0,
-            "clientes_total": total_clientes,
+            "auditorias_activas": int(aud_activas),
+            "auditorias_cerradas": int(aud_cerradas),
+            "hallazgos_pendientes": int(hal_pendientes),
+            "hallazgos_alto_riesgo": int(hal_alto),
+            "clientes_total": int(total_clientes),
         },
-        "hallazgos_por_riesgo": [{"nivel": r.nivel_riesgo, "cantidad": r.cantidad, "monto": r.monto} for r in riesgo_rows],
-        "hallazgos_por_impuesto": [{"impuesto": r.impuesto, "cantidad": r.cantidad} for r in impuesto_rows],
-        "top_clientes_contingencia": [{"razon_social": r.razon_social, "ruc": r.ruc, "contingencia": r.contingencia} for r in top_clientes],
-        "actividad_reciente": [{"accion": t.accion, "usuario": n or "Sistema", "timestamp": t.timestamp.isoformat() if t.timestamp else None, "auditoria": t.auditoria_id or "", "modulo": t.modulo or ""} for t, n in trail_rows],
-        "tendencia_mensual": [{"mes": r.periodo, "hallazgos": r.hallazgos, "contingencia": r.contingencia} for r in (await db.execute(select(Hallazgo.periodo, func.count(Hallazgo.id).label("hallazgos"), func.coalesce(func.sum(Hallazgo.total_contingencia), 0).label("contingencia")).where(Hallazgo.firma_id == firma_id, Hallazgo.estado != "descartado").group_by(Hallazgo.periodo).order_by(Hallazgo.periodo).limit(12))).all()],
+        "hallazgos_por_riesgo": [{"nivel": r.nivel_riesgo, "cantidad": int(r.cantidad), "monto": int(r.monto)} for r in riesgo_rows],
+        "hallazgos_por_impuesto": [{"impuesto": r.impuesto, "cantidad": int(r.cantidad)} for r in impuesto_rows],
+        "top_clientes_contingencia": [{"razon_social": r.razon_social, "ruc": r.ruc, "contingencia": int(r.contingencia)} for r in top_clientes],
+        "actividad_reciente": [{"accion": r.accion, "usuario": r.nombre or "Sistema", "timestamp": r.timestamp.isoformat() if r.timestamp else None, "auditoria": r.auditoria_id or "", "modulo": r.modulo or ""} for r in trail_rows],
+        "tendencia_mensual": [{"mes": r.periodo, "hallazgos": int(r.hallazgos), "contingencia": int(r.contingencia)} for r in tendencia],
     }
 
 
