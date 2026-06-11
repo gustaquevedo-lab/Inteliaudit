@@ -137,6 +137,15 @@ export default function Layout() {
           ))}
         </nav>
 
+        {/* Soporte */}
+        <div className="px-4 py-2">
+          <a href="/manual-de-usuario" target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 text-[13px] font-bold text-blue-100/60 hover:bg-white/8 hover:text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="shrink-0"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+            <span>Manual de usuario</span>
+          </a>
+        </div>
+
         {/* User section */}
         <div className="p-4 border-t border-white/8 space-y-3">
           {/* Plan badge + trial */}
@@ -217,6 +226,17 @@ export default function Layout() {
                   </button>
                 ))}
               </div>
+
+              {/* Ayuda */}
+              <a
+                href="/manual-de-usuario"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-primary hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+                title="Manual de usuario"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+              </a>
 
               {/* Nueva auditoría shortcut */}
               <button
