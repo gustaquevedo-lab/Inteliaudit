@@ -1,8 +1,4 @@
 {
-  "buildCommand": "cd ui-web && npm ci && npm run build",
-  "outputDirectory": "ui-web/dist",
-  "framework": null,
-  "installCommand": "echo skip",
   "rewrites": [
     { "source": "/", "destination": "/landing/index.html" },
     { "source": "/terminos", "destination": "/landing/terminos.html" },
@@ -13,7 +9,7 @@
     { "source": "/ley-6380", "destination": "/landing/ley-6380.html" },
     { "source": "/rg-90", "destination": "/landing/rg-90.html" },
     { "source": "/contrato-procesamiento-datos", "destination": "/landing/contrato-procesamiento-datos.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/(.*)", "destination": "/app.html" }
   ],
   "headers": [
     {

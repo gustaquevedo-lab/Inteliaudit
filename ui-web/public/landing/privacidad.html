@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Política de Privacidad — Inteliaudit</title>
+  <meta name="description" content="Política de privacidad y tratamiento de datos de Inteliaudit. AES-256, sin compartir con terceros, encriptación de credenciales Marangatú. Última actualización: mayo 2026." />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2" />
+  <link rel="shortcut icon" href="favicon.svg?v=2" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #104c91; --primary-dark: #0a356b; --primary-light: #256ebf;
+      --primary-600: #1561e1; --secondary: #00a651; --secondary-dark: #00823e;
+      --secondary-light: #1ecb73; --body-bg: #f0f4f8; --text-dark: #0f172a;
+      --text-muted: #64748b; --border: #e2e8f0;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--body-bg); color: var(--text-dark); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+    /* NAVBAR */
+    .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(255,255,255,0.92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(16,76,145,0.07); transition: box-shadow 0.3s ease; }
+    .navbar.scrolled { box-shadow: 0 2px 24px rgba(16,76,145,0.10); }
+    .navbar-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo svg { height: 36px; width: auto; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a { font-size: 14px; font-weight: 600; color: #475569; text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--primary); }
+    .btn-nav { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--secondary), var(--secondary-dark)); color: white; font-weight: 700; font-size: 14px; padding: 10px 22px; border-radius: 12px; border: none; cursor: pointer; text-decoration: none; box-shadow: 0 4px 18px rgba(0,166,81,0.35); transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,166,81,0.45); }
+    .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; flex-shrink: 0; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--primary); margin: 4px 0; transition: all 0.3s; border-radius: 2px; }
+    .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+    .mobile-nav { display: none; position: fixed; top: 68px; left: 0; right: 0; bottom: 0; z-index: 99; }
+    .mobile-nav.open { display: block; }
+    .mobile-nav-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); }
+    .mobile-nav-panel { position: absolute; top: 0; left: 0; right: 0; background: white; padding: 24px; border-bottom: 1px solid var(--border); box-shadow: 0 8px 32px rgba(0,0,0,0.12); animation: slideDown 0.25s ease; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    .mobile-nav-panel a { display: block; padding: 13px 0; font-size: 16px; font-weight: 600; color: #374151; text-decoration: none; border-bottom: 1px solid #f1f5f9; transition: color 0.2s; }
+    .mobile-nav-panel a:last-child { border-bottom: none; }
+    .mobile-nav-panel a:hover { color: var(--primary); }
+    .mobile-nav-cta { display: block; margin-top: 16px; background: linear-gradient(135deg, var(--secondary), var(--secondary-dark)); color: white !important; font-weight: 700; font-size: 15px !important; padding: 14px 20px !important; border-radius: 12px; text-align: center; border-bottom: none !important; box-shadow: 0 4px 16px rgba(0,166,81,0.35); }
+
+    /* PAGE HERO */
+    .page-hero { background: linear-gradient(135deg, #071e3d 0%, #0d3a6b 50%, #104c91 100%); padding: 110px 24px 60px; position: relative; overflow: hidden; }
+    .page-hero::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 26px 26px; pointer-events: none; }
+    .page-hero-inner { max-width: 760px; margin: 0 auto; position: relative; z-index: 1; }
+    .page-hero-tag { display: inline-block; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.5); margin-bottom: 16px; }
+    .page-hero h1 { font-size: clamp(28px, 4vw, 44px); font-weight: 900; color: white; letter-spacing: -0.02em; margin-bottom: 12px; }
+    .page-hero .update-date { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 8px; }
+
+    /* SECURITY BADGES */
+    .security-badges { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+    .security-badge { display: inline-flex; align-items: center; gap: 7px; background: rgba(0,166,81,0.15); border: 1px solid rgba(0,166,81,0.3); border-radius: 99px; padding: 5px 13px; font-size: 12px; font-weight: 700; color: #4ade80; }
+
+    /* CONTENT */
+    .content-wrap { max-width: 760px; margin: 0 auto; padding: 64px 24px 96px; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text-muted); text-decoration: none; transition: color 0.2s; margin-bottom: 48px; }
+    .back-link:hover { color: var(--primary); }
+
+    /* LEGAL DOC */
+    .legal-section { margin-bottom: 48px; }
+    .legal-section-header { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #f1f5f9; }
+    .legal-section-num { font-size: 13px; font-weight: 800; color: var(--secondary-dark); background: #f0fdf4; padding: 4px 12px; border-radius: 8px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+    .legal-section-header h2 { font-size: 18px; font-weight: 800; color: var(--text-dark); line-height: 1.3; }
+    .legal-section p { font-size: 15px; line-height: 1.8; color: #334155; margin-bottom: 14px; }
+    .legal-section p:last-child { margin-bottom: 0; }
+    .legal-section ul { padding-left: 20px; margin: 12px 0 14px; }
+    .legal-section ul li { font-size: 15px; line-height: 1.7; color: #334155; margin-bottom: 8px; }
+    .legal-section ul li::marker { color: var(--secondary); }
+    .legal-section strong { color: var(--text-dark); font-weight: 700; }
+
+    /* DATA TABLE */
+    .data-table { width: 100%; border-collapse: collapse; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin: 20px 0 24px; }
+    .data-table thead tr { background: linear-gradient(135deg, var(--secondary-dark), var(--secondary)); }
+    .data-table thead th { padding: 12px 16px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: white; text-align: left; }
+    .data-table tbody tr { background: white; border-top: 1px solid #f1f5f9; }
+    .data-table tbody tr:hover { background: #f8fafc; }
+    .data-table td { padding: 12px 16px; font-size: 14px; color: #334155; vertical-align: top; }
+    .data-table td:first-child { font-weight: 700; color: var(--text-dark); }
+
+    /* HIGHLIGHT BOX */
+    .highlight-box { background: #f0fdf4; border-left: 4px solid var(--secondary); border-radius: 0 12px 12px 0; padding: 16px 20px; margin: 16px 0; }
+    .highlight-box p { font-size: 14px; color: #334155; line-height: 1.7; margin: 0; }
+    .highlight-box strong { color: var(--secondary-dark); }
+    .highlight-box.blue { background: #eff6ff; border-left-color: var(--primary-600); }
+    .highlight-box.blue strong { color: var(--primary); }
+
+    /* DERECHOS GRID */
+    .derechos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0 24px; }
+    .derecho-item { background: white; border-radius: 12px; padding: 16px 18px; border: 1px solid var(--border); display: flex; gap: 12px; align-items: flex-start; }
+    .derecho-icon { width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0; background: linear-gradient(135deg, #f0fdf4, #dcfce7); display: flex; align-items: center; justify-content: center; }
+    .derecho-item h4 { font-size: 13px; font-weight: 700; color: var(--text-dark); margin-bottom: 3px; }
+    .derecho-item p { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+    /* DIVIDER */
+    .legal-divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+    /* FOOTER */
+    .footer { background: #0f172a; padding: 56px 24px 32px; color: rgba(255,255,255,0.5); }
+    .footer-inner { max-width: 1200px; margin: 0 auto; }
+    .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+    .footer-brand p { font-size: 14px; line-height: 1.7; color: rgba(255,255,255,0.45); margin-top: 12px; max-width: 280px; }
+    .footer-col h4 { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.6); margin-bottom: 16px; }
+    .footer-col a { display: block; font-size: 14px; color: rgba(255,255,255,0.45); text-decoration: none; margin-bottom: 10px; transition: color 0.2s; }
+    .footer-col a:hover { color: white; }
+    .footer-bottom { padding-top: 28px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 12px; }
+    .footer-watermark { display: flex; align-items: center; gap: 8px; }
+    .footer-watermark span { color: rgba(255,255,255,0.4); font-size: 12px; }
+    .footer-watermark b { color: rgba(255,255,255,0.7); }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) { .footer-top { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 768px) {
+      .derechos-grid { grid-template-columns: 1fr; }
+      nav.navbar .btn-nav { display: none !important; } nav.navbar .nav-links { display: none !important; }
+      nav.navbar .hamburger { display: flex !important; flex-direction: column; justify-content: center; }
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+    }
+    @media (max-width: 480px) { .footer-top { grid-template-columns: 1fr; gap: 28px; } .footer-bottom { flex-direction: column; align-items: flex-start; } }
+  </style>
+</head>
+<body>
+
+<nav class="navbar" id="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="nav-logo">
+      <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="2" width="36" height="36" rx="10" fill="url(#navGrad)"/>
+        <circle cx="16" cy="18" r="7" stroke="white" stroke-width="2.2"/>
+        <line x1="21.5" y1="23.5" x2="27" y2="29" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M13 18.2l2 2 3.5-3.5" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="30" cy="7" r="3.5" fill="#00a651"/>
+        <text x="44" y="26" font-family="Inter,sans-serif" font-weight="900" font-size="18" fill="#104c91">Inteli</text>
+        <text x="91" y="26" font-family="Inter,sans-serif" font-weight="300" font-size="18" fill="#00a651">audit</text>
+        <defs>
+          <linearGradient id="navGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#1561e1"/><stop offset="1" stop-color="#104c91"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#dolor">¿Por qué Inteliaudit?</a>
+      <a href="index.html#como-funciona">Cómo funciona</a>
+      <a href="index.html#funcionalidades">Funcionalidades</a>
+      <a href="index.html#precios">Precios</a>
+      <a href="index.html#faq">FAQ</a>
+    </div>
+    <a href="/login" class="btn-nav">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+      Ingresar al sistema
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="Menú"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+  <div class="mobile-nav-panel">
+    <a href="index.html#dolor" class="mobile-nav-link">¿Por qué Inteliaudit?</a>
+    <a href="index.html#como-funciona" class="mobile-nav-link">Cómo funciona</a>
+    <a href="index.html#funcionalidades" class="mobile-nav-link">Funcionalidades</a>
+    <a href="index.html#precios" class="mobile-nav-link">Precios</a>
+    <a href="index.html#faq" class="mobile-nav-link">FAQ</a>
+    <a href="/login" class="mobile-nav-cta">Ingresar al sistema →</a>
+  </div>
+</div>
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-tag">Documento legal</div>
+    <h1>Política de Privacidad</h1>
+    <div class="update-date">Última actualización: Mayo 2026 · Versión 1.0</div>
+    <div class="security-badges">
+      <div class="security-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        AES-256
+      </div>
+      <div class="security-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        HTTPS obligatorio
+      </div>
+      <div class="security-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Sin venta de datos
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="content-wrap">
+
+  <a href="index.html" class="back-link">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Volver al inicio
+  </a>
+
+  <!-- 1. Responsable del tratamiento -->
+  <div class="legal-section">
+    <div class="legal-section-header">
+      <div class="legal-section-num">1</div>
+      <h2>Responsable del tratamiento</h2>
+    </div>
+    <p>El responsable del tratamiento de los datos personales recopilados a través de Inteliaudit es:</p>
+    <ul>
+      <li><strong>Empresa:</strong> Intellihouse</li>
+      <li><strong>Domicilio:</strong> Pedro Juan Caballero, Amambay, República del Paraguay</li>
+      <li><strong>Email de contacto:</strong> <a href="mailto:hola@inteliaudit.com.py" style="color:var(--primary);font-weight:600;">hola@inteliaudit.com.py</a></li>
+    </ul>
+    <p>Intellihouse es la entidad que determina los fines y los medios del tratamiento de los datos recopilados directamente de los usuarios de la plataforma (nombre, email, datos de cuenta). Para los datos de contribuyentes procesados como parte del servicio de auditoría, Intellihouse actúa como procesador por cuenta del usuario auditor.</p>
+  </div>
+
+  <hr class="legal-divider" />
+
+  <!-- 2. Datos que recopilamos -->
+  <div class="legal-section">
+    <div class="legal-section-header">
+      <div class="legal-section-num">2</div>
+      <h2>Datos que recopilamos</h2>
+    </div>
+    <p>Inteliaudit recopila y procesa dos categorías de datos:</p>
+
+    <p><strong>2.1 Datos del usuario (cuenta)</strong></p>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Dato</th>
+          <th>Finalidad</th>
+          <th>Base legal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Nombre y apellido</td>
+          <td>Identificación del usuario en la plataforma</td>
+          <td>Ejecución del contrato</td>
+        </tr>
+        <tr>
+          <td>Correo electrónico</td>
+          <td>Autenticación, notificaciones, soporte</td>
+          <td>Ejecución del contrato</td>
+        </tr>
+        <tr>
+          <td>Nombre de la firma auditora</td>
+          <td>Personalización del servicio e informes</td>
+          <td>Ejecución del contrato</td>
+        </tr>
+        <tr>
+          <td>RUC de la firma (opcional)</td>
+          <td>Facturación y personalización de informes</td>
+          <td>Interés legítimo / Contrato</td>
+        </tr>
+        <tr>
+          <td>Credenciales Marangatú (RUC + Clave SET)</td>
+          <td>Acceso automatizado a datos del portal SET para el servicio</td>
+          <td>Consentimiento explícito</td>
+        </tr>
+        <tr>
+          <td>Datos de facturación / pago</td>
+          <td>Procesamiento de suscripción y pagos</td>
+          <td>Ejecución del contrato</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><strong>2.2 Datos procesados como parte del servicio de auditoría</strong></p>
+    <p>Durante el uso del servicio, el usuario carga o genera datos de los contribuyentes que audita: declaraciones juradas (Form. 120, 500, etc.), archivos RG90, datos de SIFEN y HECHAUKA, comprobantes y registros contables. Estos datos son procesados por Inteliaudit exclusivamente para prestar el servicio contratado y pertenecen al usuario.</p>
+
+    <div class="highlight-box">
+      <p><strong>Credenciales Marangatú:</strong> Las credenciales de acceso al portal SET (RUC y clave) se almacenan siempre encriptadas con AES-256. Nunca se almacenan en texto plano. El acceso a estas credenciales está restringido al proceso automatizado de descarga de datos y al propio usuario.</p>
+    </div>
+  </div>
+
+  <hr class="legal-divider" />
+
+  <!-- 3. Finalidad -->
+  <div class="legal-section">
+    <div class="legal-section-header">
+      <div class="legal-section-num">3</div>
+      <h2>Finalidad del tratamiento</h2>
+    </div>
+    <p>Los datos recopilados se utilizan exclusivamente para las siguientes finalidades:</p>
+    <ul>
+      <li>Prestación del servicio de auditoría impositiva automatizada contratado por el usuario.</li>
+      <li>Autenticación y gestión de la cuenta del usuario en la plataforma.</li>
+      <li>Envío de notificaciones relacionadas con el servicio (alertas de auditoría, actualizaciones, vencimientos).</li>
+      <li>Facturación y gestión de la suscripción.</li>
+      <li>Soporte técnico ante solicitudes del usuario.</li>
+      <li>Mejora del servicio mediante análisis agregados y anónimos de uso de la plataforma.</li>
+    </ul>
+    <p>Los datos nunca son utilizados para elaborar perfiles con fines comerciales ajenos al servicio, ni para publicidad dirigida a terceros.</p>
+  </div>
+
+  <hr class="legal-divider" />
+
+  <!-- 4. Almacenamiento y seguridad -->
+  <div class="legal-section">
+    <div class="legal-section-header">
+      <div class="legal-section-num">4</div>
+      <h2>Almacenamiento y seguridad</h2>
+    </div>
+    <p>Inteliaudit implementa las siguientes medidas técnicas y organizativas para proteger los datos:</p>
+    <ul>
+      <li><strong>Encriptación en reposo:</strong> Todos los datos sensibles (credenciales, datos de auditoría) se almacenan encriptados con AES-256.</li>
+      <li><strong>Encriptación en tránsito:</strong> Todas las comunicaciones entre el navegador del usuario y los servidores de Inteliaudit se realizan mediante HTTPS/TLS 1.3. No se acepta tráfico HTTP sin cifrar.</li>
+      <li><strong>Control de acceso:</strong> El acceso a los datos de producción está restringido al personal técnico estrictamente necesario, bajo autenticación multifactor.</li>
+      <li><strong>Audit trail:</strong> Todas las acciones realizadas sobre datos de auditoría quedan registradas con marca de tiempo, usuario y dirección IP. El registro no puede modificarse ni eliminarse.</li>
+      <li><strong>Backups:</strong> Los datos se respaldan automáticamente con frecuencia diaria y se almacenan de forma segura con retención de 30 días.</li>
+      <li><strong>Pruebas de seguridad:</strong> La plataforma se somete a revisiones periódicas de seguridad.</li>
+    </ul>
+  </div>
+
+  <hr class="legal-divider" />
+
+  <!-- 5. Compartición de datos -->
+  <div class="legal-section">
+    <div class="legal-section-header">
+      <div class="legal-section-num">5</div>
+      <h2>Compartición de datos con terceros</h2>
+    </div>
+    <div class="highlight-box">
+      <p><strong>Compromisos principales:</strong> Inteliaudit NO vende, NO cede y NO comparte los datos del usuario ni de los contribuyentes auditados con terceros para fines comerciales propios o ajenos.</p>
+    </div>
+    <p>Los únicos terceros que pueden tener acceso a datos son los proveedores de infraestructura tecnológica necesarios para la operación del servicio:</p>
+    <ul>
+      <li><strong>Proveedor de hosting / servidores:</strong> Para el almacenamiento y procesamiento de datos en la nube. El proveedor opera bajo acuerdo de confidencialidad y procesamiento de datos.</li>
+      <li><strong>Proveedor de base de datos:</strong> Para el almacenamiento estructurado de información. Mismo régimen de confidencialidad.</li>
+      <li><strong>Proveedor de pagos:</strong> Únicamente recibe los datos de facturación necesarios para procesar la transacción. No accede a datos de auditoría.</li>
+    </ul>
+    <p>Todos los proveedores de infraestructura son seleccionados por sus certificaciones de seguridad y están sujetos a acuerdos de procesamiento de datos que les prohíben usar los datos para fines distintos a la prestación del servicio.</p>
+    <p>La Empresa puede revelar datos cuando sea requerido por orden judicial o requerimiento legal válido de autoridad competente de la República del Paraguay, notificando al usuario afectado en la medida en que la ley lo permita.</p>
+  </div>
+
+  <hr class="legal-divider" />
+
+  <!-- 6. Retención de datos -->
+  <div class="legal-section">
+    <div class="legal-section-header">
+      <div class="legal-section-num">6</div>
+      <h2>Retención de datos</h2>
+    </div>
+    <p>Los datos del usuario y los datos de auditoría procesados en la plataforma se retienen según el siguiente esquema:</p>
+    <ul>
+      <li><strong>Durante la suscripción activa:</strong> Todos los datos se conservan íntegramente y están disponibles para el usuario.</li>
+      <li><strong>Tras la cancelación de la suscripción:</strong> Los datos permanecen disponibles durante 30 días adicionales para que el usuario pueda exportarlos. Transcurrido ese plazo, se eliminan de forma permanente e irrecuperable.</li>
+      <li><strong>Datos de facturación:</strong> Se conservan por el período legalmente exigido según la normativa tributaria paraguaya (mínimo 5 años).</li>
+      <li><strong>Logs de seguridad y audit trail:</strong> Se conservan por un mínimo de 12 meses por razones de seguridad e integridad del sistema.</li>
+    </ul>
+    <p>El usuario puede solicitar la eliminación anticipada de sus datos enviando un email a <a href="mailto:hola@inteliaudit.com.py" style="color:var(--primary);font-weight:600;">hola@inteliaudit.com.py</a>, lo cual implica la cancelación inmediata de la suscripción y la pérdida de acceso al servicio.</p>
+  </div>
+
+  <hr class="legal-divider" />
+
+  <!-- 7. Derechos del usuario -->
+  <div class="legal-section">
+    <div class="legal-section-header">
+      <div class="legal-section-num">7</div>
+      <h2>Derechos del usuario</h2>
+    </div>
+    <p>El usuario tiene los siguientes derechos sobre sus datos personales, ejercibles en cualquier momento:</p>
+
+    <div class="derechos-grid">
+      <div class="derecho-item">
+        <div class="derecho-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <div>
+          <h4>Acceso</h4>
+          <p>Conocer qué datos personales tenemos almacenados sobre vos.</p>
+        </div>
+      </div>
+      <div class="derecho-item">
+        <div class="derecho-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </div>
+        <div>
+          <h4>Rectificación</h4>
+          <p>Corregir datos inexactos o incompletos desde la configuración de tu cuenta.</p>
+        </div>
+      </div>
+      <div class="derecho-item">
+        <div class="derecho-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </div>
+        <div>
+          <h4>Eliminación</h4>
+          <p>Solicitar la eliminación de tus datos y la cancelación de tu cuenta.</p>
+        </div>
+      </div>
+      <div class="derecho-item">
+        <div class="derecho-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <div>
+          <h4>Portabilidad</h4>
+          <p>Exportar tus datos y los de tus auditorías en formatos estándar (CSV, XLSX).</p>
+        </div>
+      </div>
+      <div class="derecho-item">
+        <div class="derecho-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        </div>
+        <div>
+          <h4>Oposición</h4>
+          <p>Oponerte al tratamiento de tus datos para fines de comunicación comercial.</p>
+        </div>
+      </div>
+      <div class="derecho-item">
+        <div class="derecho-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        </div>
+        <div>
+          <h4>Limitación</h4>
+          <p>Solicitar que limitemos el tratamiento de tus datos mientras se resuelve una reclamación.</p>
+        </div>
+      </div>
+    </div>
+
+    <p>Para ejercer cualquiera de estos derechos, enviá un email a <a href="mailto:hola@inteliaudit.com.py" style="color:var(--primary);font-weight:600;">hola@inteliaudit.com.py</a> indicando el derecho que querés ejercer y tu identificación. Respondemos dentro de los 10 días hábiles.</p>
+  </div>
+
+  <hr class="legal-divider" />
+
+  <!-- 8. Cookies -->
+  <div class="legal-section">
+    <div class="legal-section-header">
+      <div class="legal-section-num">8</div>
+      <h2>Cookies y tecnologías de seguimiento</h2>
+    </div>
+    <p>Inteliaudit utiliza un número mínimo de cookies, todas ellas estrictamente necesarias para el funcionamiento del servicio:</p>
+    <ul>
+      <li><strong>Cookie de sesión:</strong> Mantiene al usuario autenticado durante su navegación en la aplicación. Se elimina al cerrar el navegador o al cerrar sesión. No contiene datos personales, solo un token de sesión encriptado.</li>
+      <li><strong>Cookie de preferencias:</strong> Almacena configuraciones básicas del usuario (idioma, zona horaria) para mejorar la experiencia. No se transmite a terceros.</li>
+    </ul>
+    <p>Inteliaudit <strong>no utiliza</strong> cookies de tracking, cookies de publicidad, píxeles de seguimiento ni ninguna tecnología de análisis conductual de terceros (como Google Analytics u otras plataformas similares).</p>
+    <div class="highlight-box blue">
+      <p><strong>Sin tracking:</strong> No rastreamos tu comportamiento dentro de la aplicación para fines publicitarios ni compartimos datos de uso con plataformas de terceros. Los únicos datos de uso que recopilamos son logs técnicos para seguridad y diagnóstico de errores.</p>
+    </div>
+  </div>
+
+  <hr class="legal-divider" />
+
+  <!-- 9. Seguridad -->
+  <div class="legal-section">
+    <div class="legal-section-header">
+      <div class="legal-section-num">9</div>
+      <h2>Seguridad de la información</h2>
+    </div>
+    <p>Inteliaudit implementa un modelo de seguridad en capas:</p>
+    <ul>
+      <li><strong>Encriptación AES-256:</strong> Para todos los datos sensibles almacenados, incluyendo credenciales Marangatú, tokens de sesión y datos de auditoría marcados como confidenciales.</li>
+      <li><strong>HTTPS obligatorio:</strong> Toda comunicación entre el cliente y el servidor usa TLS 1.3. No se sirve contenido sensible por HTTP sin cifrar.</li>
+      <li><strong>Autenticación multifactor (MFA):</strong> Disponible y recomendada para todos los usuarios; obligatoria para administradores de cuenta Enterprise.</li>
+      <li><strong>Audit trail inmutable:</strong> Registro completo de accesos y operaciones sobre datos de auditoría. Cada acción queda registrada con usuario, timestamp e IP, y no puede ser modificada ni por administradores.</li>
+      <li><strong>Aislamiento de datos:</strong> Los datos de cada firma auditora están aislados mediante segmentación lógica de base de datos. Un usuario de una firma no puede acceder a los datos de otra firma bajo ninguna circunstancia.</li>
+      <li><strong>Gestión de vulnerabilidades:</strong> Las dependencias de software se actualizan regularmente. Se realizan análisis de seguridad periódicos.</li>
+    </ul>
+    <p>En caso de detectarse una brecha de seguridad que afecte datos personales, la Empresa notificará a los usuarios afectados dentro de las 72 horas de confirmada la brecha, detallando la naturaleza del incidente y las medidas adoptadas.</p>
+  </div>
+
+  <hr class="legal-divider" />
+
+  <!-- 10. Contacto -->
+  <div class="legal-section">
+    <div class="legal-section-header">
+      <div class="legal-section-num">10</div>
+      <h2>Contacto y consultas sobre privacidad</h2>
+    </div>
+    <p>Para cualquier consulta, reclamo o ejercicio de derechos relacionado con esta Política de Privacidad, podés contactarnos en:</p>
+    <ul>
+      <li><strong>Email:</strong> <a href="mailto:hola@inteliaudit.com.py" style="color:var(--primary);font-weight:600;">hola@inteliaudit.com.py</a></li>
+      <li><strong>Asunto del email sugerido:</strong> "Privacidad — [tu consulta]"</li>
+      <li><strong>Domicilio:</strong> Pedro Juan Caballero, Amambay, República del Paraguay</li>
+      <li><strong>Tiempo de respuesta:</strong> Dentro de los 10 días hábiles de recibida la solicitud</li>
+    </ul>
+    <p>Esta política puede actualizarse para reflejar cambios en el servicio o en la normativa aplicable. Las modificaciones sustanciales se notificarán por email con 30 días de anticipación a su entrada en vigor.</p>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:32px;">
+          <rect x="0" y="2" width="36" height="36" rx="10" fill="url(#footGrad)"/>
+          <circle cx="16" cy="18" r="7" stroke="white" stroke-width="2.2"/>
+          <line x1="21.5" y1="23.5" x2="27" y2="29" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M13 18.2l2 2 3.5-3.5" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="30" cy="7" r="3.5" fill="#00a651"/>
+          <text x="44" y="26" font-family="Inter,sans-serif" font-weight="900" font-size="18" fill="#256ebf">Inteli</text>
+          <text x="91" y="26" font-family="Inter,sans-serif" font-weight="300" font-size="18" fill="#1ecb73">audit</text>
+          <defs>
+            <linearGradient id="footGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#1561e1"/><stop offset="1" stop-color="#104c91"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <p>Auditoría impositiva inteligente para Paraguay. La única herramienta construida desde cero para la realidad tributaria paraguaya.</p>
+        <p style="margin-top:8px;font-size:12px;">Parte del ecosistema <b style="color:rgba(255,255,255,0.6);">Intelihouse</b></p>
+      </div>
+      <div class="footer-col">
+        <h4>Producto</h4>
+        <a href="index.html#como-funciona">Cómo funciona</a>
+        <a href="index.html#funcionalidades">Funcionalidades</a>
+        <a href="index.html#precios">Precios</a>
+        <a href="index.html#faq">FAQ</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="ley-6380.html">Ley 6380/2019</a>
+        <a href="rg-90.html">RG 90/2021</a>
+        <a href="terminos.html">Términos de uso</a>
+        <a href="privacidad.html">Política de privacidad</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contacto</h4>
+        <a href="mailto:hola@inteliaudit.com.py">hola@inteliaudit.com.py</a>
+        <a href="https://wa.me/595994516360?text=Hola%21%20Necesito%20soporte%20con%20Inteliaudit" target="_blank" rel="noopener">WhatsApp soporte</a>
+        <a href="/login">Acceder al sistema</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-watermark">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:18px;opacity:0.5;">
+          <rect width="20" height="20" rx="5" fill="#1561e1"/>
+          <circle cx="9" cy="10" r="4" stroke="white" stroke-width="1.4"/>
+          <line x1="12" y1="13" x2="15" y2="16" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M7.5 10.2l1.2 1.2 2-2" stroke="#4ade80" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>© 2026 <b>Inteliaudit</b> · Desarrollado por <b>Intellihouse</b> · Pedro Juan Caballero, Paraguay</span>
+      </div>
+      <span style="font-size:12px;color:rgba(255,255,255,0.25);">Auditoría impositiva inteligente para Paraguay</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const mobileNav = document.getElementById('mobileNav');
+  const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+  function closeMobileNav() { hamburger.classList.remove('open'); mobileNav.classList.remove('open'); document.body.style.overflow = ''; }
+  hamburger.addEventListener('click', () => { const isOpen = mobileNav.classList.toggle('open'); hamburger.classList.toggle('open', isOpen); document.body.style.overflow = isOpen ? 'hidden' : ''; });
+  mobileNavOverlay.addEventListener('click', closeMobileNav);
+  document.querySelectorAll('.mobile-nav-link, .mobile-nav-cta').forEach(a => a.addEventListener('click', closeMobileNav));
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 20));
+</script>
+</body>
+</html>

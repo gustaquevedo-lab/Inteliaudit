@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador OG Image PNG</title>
+  <style>
+    body { font-family: Inter, sans-serif; max-width: 1400px; margin: 0 auto; padding: 40px; background: #f0f4f8; }
+    h1 { color: #104c91; margin-bottom: 10px; }
+    p { color: #64748b; margin-bottom: 30px; }
+    .preview { border: 2px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    canvas { display: block; max-width: 100%; height: auto; }
+    button { background: linear-gradient(135deg, #00a651, #00823e); color: white; border: none; padding: 14px 28px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 18px rgba(0,166,81,0.35); }
+    button:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,166,81,0.45); }
+    .info { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 20px; margin-top: 20px; }
+    .info h3 { color: #1561e1; margin-top: 0; }
+  </style>
+</head>
+<body>
+  <h1>Generador de OG Image para Inteliaudit</h1>
+  <p>Esta herramienta convierte el SVG de la OG image a PNG (1200x630px) listo para usar en meta tags.</p>
+  
+  <div class="preview">
+    <canvas id="canvas" width="1200" height="630"></canvas>
+  </div>
+  
+  <button onclick="downloadPNG()">Descargar og-image.png</button>
+  
+  <div class="info">
+    <h3>Instrucciones</h3>
+    <ol>
+      <li>Haz clic en "Descargar og-image.png"</li>
+      <li>Guarda el archivo como <code>og-image.png</code> en la carpeta <code>landing/</code></li>
+      <li>El archivo estará listo para ser usado en los meta tags OG</li>
+    </ol>
+    <p><strong>Dimensiones:</strong> 1200x630px (estándar OG/Twitter)</p>
+  </div>
+
+  <script>
+    const svgData = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#071e3d"/>
+      <stop offset="35%" style="stop-color:#0d3a6b"/>
+      <stop offset="70%" style="stop-color:#104c91"/>
+      <stop offset="100%" style="stop-color:#1561e1"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00a651"/>
+      <stop offset="100%" style="stop-color:#1ecb73"/>
+    </linearGradient>
+    <pattern id="dots" x="0" y="0" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1" fill="rgba(255,255,255,0.06)"/>
+    </pattern>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+  
+  <circle cx="1050" cy="100" r="200" fill="rgba(0,166,81,0.08)"/>
+  <circle cx="150" cy="550" r="180" fill="rgba(30,203,115,0.06)"/>
+  
+  <g transform="translate(100, 220)">
+    <rect width="80" height="80" rx="20" fill="url(#greenGrad)" filter="url(#glow)"/>
+    <circle cx="35" cy="38" r="16" stroke="white" stroke-width="4" fill="none"/>
+    <line x1="47" y1="50" x2="60" y2="63" stroke="white" stroke-width="5" stroke-linecap="round"/>
+    <path d="M28 38.5l5 5 9-9" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <circle cx="68" cy="14" r="7" fill="#4ade80"/>
+  </g>
+  
+  <text x="220" y="265" font-family="Inter, -apple-system, sans-serif" font-weight="900" font-size="72" fill="white" letter-spacing="-2">
+    Inteliaudit
+  </text>
+  
+  <text x="220" y="320" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="28" fill="rgba(255,255,255,0.85)">
+    Auditoría impositiva que se hace sola.
+  </text>
+  
+  <g transform="translate(220, 380)">
+    <rect width="760" height="120" rx="16" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+    
+    <g transform="translate(30, 25)">
+      <circle cx="15" cy="15" r="15" fill="rgba(0,166,81,0.3)"/>
+      <text x="15" y="20" font-family="Inter, sans-serif" font-size="14" fill="#4ade80" text-anchor="middle" font-weight="700">✓</text>
+      <text x="40" y="14" font-family="Inter, sans-serif" font-size="16" fill="white" font-weight="700">Cruce automático</text>
+      <text x="40" y="34" font-family="Inter, sans-serif" font-size="13" fill="rgba(255,255,255,0.7)">RG90 × SIFEN × HECHAUKA</text>
+    </g>
+    
+    <g transform="translate(280, 25)">
+      <circle cx="15" cy="15" r="15" fill="rgba(0,166,81,0.3)"/>
+      <text x="15" y="20" font-family="Inter, sans-serif" font-size="14" fill="#4ade80" text-anchor="middle" font-weight="700">✓</text>
+      <text x="40" y="14" font-family="Inter, sans-serif" font-size="16" fill="white" font-weight="700">IA integrada</text>
+      <text x="40" y="34" font-family="Inter, sans-serif" font-size="13" fill="rgba(255,255,255,0.7)">Narrativa con base legal</text>
+    </g>
+    
+    <g transform="translate(510, 25)">
+      <circle cx="15" cy="15" r="15" fill="rgba(0,166,81,0.3)"/>
+      <text x="15" y="20" font-family="Inter, sans-serif" font-size="14" fill="#4ade80" text-anchor="middle" font-weight="700">✓</text>
+      <text x="40" y="14" font-family="Inter, sans-serif" font-size="16" fill="white" font-weight="700">Informes PDF/Word</text>
+      <text x="40" y="34" font-family="Inter, sans-serif" font-size="13" fill="rgba(255,255,255,0.7)">Firmables en 1 clic</text>
+    </g>
+    
+    <text x="380" y="90" font-family="Inter, sans-serif" font-size="14" fill="rgba(255,255,255,0.6)" text-anchor="middle">
+      Para firmas auditoras paraguayas · Ley 6380/2019
+    </text>
+  </g>
+  
+  <g transform="translate(220, 170)">
+    <rect width="280" height="32" rx="16" fill="rgba(0,166,81,0.2)" stroke="rgba(0,166,81,0.4)" stroke-width="1"/>
+    <circle cx="18" cy="16" r="5" fill="#4ade80"/>
+    <text x="32" y="21" font-family="Inter, sans-serif" font-size="12" fill="#4ade80" font-weight="700" letter-spacing="0.5">
+      SISTEMA SIN PRECEDENTES EN PARAGUAY
+    </text>
+  </g>
+  
+  <rect x="0" y="580" width="1200" height="50" fill="rgba(0,0,0,0.3)"/>
+  <text x="100" y="610" font-family="Inter, sans-serif" font-size="14" fill="rgba(255,255,255,0.6)">
+    inteliaudit.com.py
+  </text>
+  <text x="1100" y="610" font-family="Inter, sans-serif" font-size="14" fill="rgba(255,255,255,0.6)" text-anchor="end">
+    Desarrollado por Intellihouse Soluciones E.A.S.
+  </text>
+</svg>`;
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    
+    img.onload = function() {
+      ctx.drawImage(img, 0, 0);
+    };
+    
+    const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    img.src = url;
+
+    function downloadPNG() {
+      canvas.toBlob(function(blob) {
+        const link = document.createElement('a');
+        link.download = 'og-image.png';
+        link.href = URL.createObjectURL(blob);
+        link.click();
+      }, 'image/png');
+    }
+  </script>
+</body>
+</html>
