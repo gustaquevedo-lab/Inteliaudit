@@ -1,7 +1,8 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
+  "buildCommand": "cd ui-web && npm ci && npm run build",
+  "outputDirectory": "ui-web/dist",
+  "framework": null,
+  "installCommand": "echo skip",
   "rewrites": [
     { "source": "/", "destination": "/landing/index.html" },
     { "source": "/terminos", "destination": "/landing/terminos.html" },

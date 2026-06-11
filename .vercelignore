@@ -1,0 +1,15 @@
+pyproject.toml
+*.py
+api/
+db/
+analisis/
+ingesta/
+informes/
+papeles/
+config/
+storage/
+notificaciones/
+alembic/
+__pycache__/
+*.pyc
+.venv/

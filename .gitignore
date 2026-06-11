@@ -61,3 +61,5 @@ tmp/
 # Temporary scripts (generated during development)
 check_phase*.py
 update_roadmap*.py
+
+.vercel
