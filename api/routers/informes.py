@@ -429,6 +429,63 @@ async def preview_informe(
     return HTMLResponse(_template_basico(ctx))
 
 
+@_informes_router_v2.get("")
+async def listar_informes_global(
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Lista todos los informes generados por la firma, con datos de auditoria y cliente."""
+    result = await db.execute(
+        select(
+            Informe.id,
+            Informe.tipo,
+            Informe.version,
+            Informe.estado,
+            Informe.archivo_docx,
+            Informe.archivo_pdf,
+            Informe.generado_en,
+            Informe.auditoria_id,
+        )
+        .where(Informe.firma_id == user.firma_id)
+        .order_by(Informe.generado_en.desc())
+    )
+    rows = result.all()
+    if not rows:
+        return []
+
+    from db.models import Auditoria, Cliente
+    auditoria_ids = [r.auditoria_id for r in rows]
+    auds = await db.execute(
+        select(Auditoria.id, Auditoria.cliente_ruc, Auditoria.periodo_desde, Auditoria.periodo_hasta)
+        .where(Auditoria.id.in_(auditoria_ids))
+    )
+    aud_map = {a.id: a for a in auds.all()}
+    cliente_rucs = list({a.cliente_ruc for a in aud_map.values()})
+    clientes = await db.execute(
+        select(Cliente.ruc, Cliente.razon_social)
+        .where(Cliente.ruc.in_(cliente_rucs))
+    )
+    cli_map = {c.ruc: c.razon_social for c in clientes.all()}
+
+    return [
+        {
+            "id": r.id,
+            "auditoria_id": r.auditoria_id,
+            "tipo": r.tipo,
+            "version": r.version,
+            "estado": r.estado,
+            "archivo_docx": r.archivo_docx is not None,
+            "archivo_pdf": r.archivo_pdf is not None,
+            "generado_en": r.generado_en.isoformat() if r.generado_en else None,
+            "cliente_ruc": aud_map.get(r.auditoria_id).cliente_ruc if aud_map.get(r.auditoria_id) else None,
+            "cliente_razon_social": cli_map.get(aud_map.get(r.auditoria_id).cliente_ruc) if aud_map.get(r.auditoria_id) else None,
+            "periodo_desde": aud_map.get(r.auditoria_id).periodo_desde if aud_map.get(r.auditoria_id) else None,
+            "periodo_hasta": aud_map.get(r.auditoria_id).periodo_hasta if aud_map.get(r.auditoria_id) else None,
+        }
+        for r in rows
+    ]
+
+
 @_informes_router_v2.get("/{informe_id}/descargar/{formato}")
 async def descargar_informe(
     informe_id: str,
