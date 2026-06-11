@@ -239,12 +239,14 @@ export default function Layout() {
               </a>
 
               {/* Nueva auditoría shortcut */}
-              <button
-                onClick={() => navigate('/auditorias/nueva')}
-                className="btn-primary py-2 px-4 text-xs hidden sm:flex"
-              >
-                + Nueva auditoría
-              </button>
+              {['super_admin', 'admin', 'auditor_senior'].includes(user?.rol ?? '') && (
+                <button
+                  onClick={() => navigate('/auditorias/nueva')}
+                  className="btn-primary py-2 px-4 text-xs hidden sm:flex"
+                >
+                  + Nueva auditoría
+                </button>
+              )}
             </div>
           </div>
         </header>
