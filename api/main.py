@@ -421,12 +421,19 @@ async def save_roadmap_state(body: dict):
     return {"ok": True}
 
 
+@api.post("/seed-demo", include_in_schema=False)
+async def run_seed_demo(request: Request):
+    """Endpoint temporal para ejecutar seed de demo en producción. ELIMINAR después de uso."""
+    auth = request.headers.get("X-Seed-Token", "")
+    if auth != "inteliaudit-seed-2026":
+        raise HTTPException(403, "Forbidden")
+    from seed_demo import seed_demo
+    await seed_demo()
+    return {"status": "ok", "message": "Seed demo ejecutado"}
+
+
 app.include_router(api)
 
-
-# ============================================================
-#  Static files
-# ============================================================
 
 @app.get("/", include_in_schema=False)
 async def root():
