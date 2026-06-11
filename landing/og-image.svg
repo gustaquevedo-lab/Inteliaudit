@@ -1,103 +1,137 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#071e3d"/>
-      <stop offset="35%" style="stop-color:#0d3a6b"/>
-      <stop offset="70%" style="stop-color:#104c91"/>
+      <stop offset="0%" style="stop-color:#051526"/>
+      <stop offset="40%" style="stop-color:#0a2d54"/>
+      <stop offset="75%" style="stop-color:#104c91"/>
       <stop offset="100%" style="stop-color:#1561e1"/>
     </linearGradient>
-    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#00a651"/>
       <stop offset="100%" style="stop-color:#1ecb73"/>
     </linearGradient>
-    <pattern id="dots" x="0" y="0" width="26" height="26" patternUnits="userSpaceOnUse">
-      <circle cx="1" cy="1" r="1" fill="rgba(255,255,255,0.06)"/>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(255,255,255,0.1)"/>
+      <stop offset="100%" style="stop-color:rgba(255,255,255,0.04)"/>
+    </linearGradient>
+    <pattern id="dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="0.8" fill="rgba(255,255,255,0.05)"/>
     </pattern>
     <filter id="glow">
-      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
       <feMerge>
         <feMergeNode in="coloredBlur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
+    <filter id="softShadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="rgba(0,0,0,0.3)"/>
+    </filter>
   </defs>
-  
+
   <!-- Background -->
   <rect width="1200" height="630" fill="url(#bgGrad)"/>
   <rect width="1200" height="630" fill="url(#dots)"/>
-  
-  <!-- Decorative circles -->
-  <circle cx="1050" cy="100" r="200" fill="rgba(0,166,81,0.08)"/>
-  <circle cx="150" cy="550" r="180" fill="rgba(30,203,115,0.06)"/>
-  
-  <!-- Logo icon -->
-  <g transform="translate(100, 220)">
-    <rect width="80" height="80" rx="20" fill="url(#greenGrad)" filter="url(#glow)"/>
-    <circle cx="35" cy="38" r="16" stroke="white" stroke-width="4" fill="none"/>
-    <line x1="47" y1="50" x2="60" y2="63" stroke="white" stroke-width="5" stroke-linecap="round"/>
-    <path d="M28 38.5l5 5 9-9" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    <circle cx="68" cy="14" r="7" fill="#4ade80"/>
-  </g>
-  
-  <!-- Main title -->
-  <text x="220" y="265" font-family="Inter, -apple-system, sans-serif" font-weight="900" font-size="72" fill="white" letter-spacing="-2">
-    Inteliaudit
-  </text>
-  
-  <!-- Tagline -->
-  <text x="220" y="320" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="28" fill="rgba(255,255,255,0.85)">
-    Auditoría impositiva que se hace sola.
-  </text>
-  
-  <!-- Features -->
-  <g transform="translate(220, 380)">
-    <rect width="760" height="120" rx="16" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-    
-    <!-- Feature 1 -->
-    <g transform="translate(30, 25)">
-      <circle cx="15" cy="15" r="15" fill="rgba(0,166,81,0.3)"/>
-      <text x="15" y="20" font-family="Inter, sans-serif" font-size="14" fill="#4ade80" text-anchor="middle" font-weight="700">✓</text>
-      <text x="40" y="14" font-family="Inter, sans-serif" font-size="16" fill="white" font-weight="700">Cruce automático</text>
-      <text x="40" y="34" font-family="Inter, sans-serif" font-size="13" fill="rgba(255,255,255,0.7)">RG90 × SIFEN × HECHAUKA</text>
-    </g>
-    
-    <!-- Feature 2 -->
-    <g transform="translate(280, 25)">
-      <circle cx="15" cy="15" r="15" fill="rgba(0,166,81,0.3)"/>
-      <text x="15" y="20" font-family="Inter, sans-serif" font-size="14" fill="#4ade80" text-anchor="middle" font-weight="700">✓</text>
-      <text x="40" y="14" font-family="Inter, sans-serif" font-size="16" fill="white" font-weight="700">IA integrada</text>
-      <text x="40" y="34" font-family="Inter, sans-serif" font-size="13" fill="rgba(255,255,255,0.7)">Narrativa con base legal</text>
-    </g>
-    
-    <!-- Feature 3 -->
-    <g transform="translate(510, 25)">
-      <circle cx="15" cy="15" r="15" fill="rgba(0,166,81,0.3)"/>
-      <text x="15" y="20" font-family="Inter, sans-serif" font-size="14" fill="#4ade80" text-anchor="middle" font-weight="700">✓</text>
-      <text x="40" y="14" font-family="Inter, sans-serif" font-size="16" fill="white" font-weight="700">Informes PDF/Word</text>
-      <text x="40" y="34" font-family="Inter, sans-serif" font-size="13" fill="rgba(255,255,255,0.7)">Firmables en 1 clic</text>
-    </g>
-    
-    <!-- Bottom text -->
-    <text x="380" y="90" font-family="Inter, sans-serif" font-size="14" fill="rgba(255,255,255,0.6)" text-anchor="middle">
-      Para firmas auditoras paraguayas · Ley 6380/2019
-    </text>
-  </g>
-  
+
+  <!-- Decorative blobs -->
+  <circle cx="1100" cy="80" r="250" fill="rgba(0,166,81,0.06)"/>
+  <circle cx="100" cy="580" r="200" fill="rgba(30,203,115,0.05)"/>
+  <circle cx="600" cy="630" r="300" fill="rgba(21,97,225,0.06)"/>
+
   <!-- Badge -->
-  <g transform="translate(220, 170)">
-    <rect width="280" height="32" rx="16" fill="rgba(0,166,81,0.2)" stroke="rgba(0,166,81,0.4)" stroke-width="1"/>
-    <circle cx="18" cy="16" r="5" fill="#4ade80"/>
-    <text x="32" y="21" font-family="Inter, sans-serif" font-size="12" fill="#4ade80" font-weight="700" letter-spacing="0.5">
+  <g transform="translate(60, 50)">
+    <rect width="340" height="38" rx="19" fill="rgba(0,166,81,0.2)" stroke="rgba(0,166,81,0.5)" stroke-width="1"/>
+    <circle cx="22" cy="19" r="6" fill="#4ade80"/>
+    <text x="38" y="24" font-family="Inter, -apple-system, sans-serif" font-size="14" fill="#4ade80" font-weight="700" letter-spacing="1">
       SISTEMA SIN PRECEDENTES EN PARAGUAY
     </text>
   </g>
-  
-  <!-- Bottom bar -->
-  <rect x="0" y="580" width="1200" height="50" fill="rgba(0,0,0,0.3)"/>
-  <text x="100" y="610" font-family="Inter, sans-serif" font-size="14" fill="rgba(255,255,255,0.6)">
-    inteliaudit.com.py
+
+  <!-- Logo icon -->
+  <g transform="translate(60, 120)" filter="url(#glow)">
+    <rect width="100" height="100" rx="24" fill="url(#greenGrad)"/>
+    <circle cx="44" cy="46" r="20" stroke="white" stroke-width="4.5" fill="none"/>
+    <line x1="59" y1="61" x2="74" y2="76" stroke="white" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M34 46.5l7 7 12-12" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <circle cx="84" cy="16" r="9" fill="#4ade80"/>
+  </g>
+
+  <!-- Main title -->
+  <text x="190" y="185" font-family="Inter, -apple-system, sans-serif" font-weight="900" font-size="90" fill="white" letter-spacing="-3">
+    Inteliaudit
   </text>
-  <text x="1100" y="610" font-family="Inter, sans-serif" font-size="14" fill="rgba(255,255,255,0.6)" text-anchor="end">
+
+  <!-- Tagline -->
+  <text x="190" y="240" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="36" fill="rgba(255,255,255,0.9)">
+    Auditoría impositiva que se hace sola.
+  </text>
+
+  <!-- Features card -->
+  <g transform="translate(60, 290)">
+    <rect width="1080" height="140" rx="20" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" filter="url(#softShadow)"/>
+
+    <!-- Feature 1 -->
+    <g transform="translate(50, 28)">
+      <circle cx="18" cy="18" r="18" fill="rgba(0,166,81,0.3)" stroke="rgba(0,166,81,0.5)" stroke-width="1"/>
+      <text x="18" y="24" font-family="Inter, sans-serif" font-size="18" fill="#4ade80" text-anchor="middle" font-weight="700">✓</text>
+      <text x="48" y="15" font-family="Inter, sans-serif" font-size="22" fill="white" font-weight="700">Cruce automático</text>
+      <text x="48" y="42" font-family="Inter, sans-serif" font-size="16" fill="rgba(255,255,255,0.65)">RG90 × SIFEN × HECHAUKA</text>
+    </g>
+
+    <!-- Feature 2 -->
+    <g transform="translate(400, 28)">
+      <circle cx="18" cy="18" r="18" fill="rgba(0,166,81,0.3)" stroke="rgba(0,166,81,0.5)" stroke-width="1"/>
+      <text x="18" y="24" font-family="Inter, sans-serif" font-size="18" fill="#4ade80" text-anchor="middle" font-weight="700">✓</text>
+      <text x="48" y="15" font-family="Inter, sans-serif" font-size="22" fill="white" font-weight="700">IA integrada</text>
+      <text x="48" y="42" font-family="Inter, sans-serif" font-size="16" fill="rgba(255,255,255,0.65)">Narrativa con base legal</text>
+    </g>
+
+    <!-- Feature 3 -->
+    <g transform="translate(720, 28)">
+      <circle cx="18" cy="18" r="18" fill="rgba(0,166,81,0.3)" stroke="rgba(0,166,81,0.5)" stroke-width="1"/>
+      <text x="18" y="24" font-family="Inter, sans-serif" font-size="18" fill="#4ade80" text-anchor="middle" font-weight="700">✓</text>
+      <text x="48" y="15" font-family="Inter, sans-serif" font-size="22" fill="white" font-weight="700">Informes PDF/Word</text>
+      <text x="48" y="42" font-family="Inter, sans-serif" font-size="16" fill="rgba(255,255,255,0.65)">Firmables en 1 clic</text>
+    </g>
+
+    <!-- Divider -->
+    <line x1="50" y1="90" x2="1030" y2="90" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+
+    <!-- Bottom text -->
+    <text x="540" y="118" font-family="Inter, sans-serif" font-size="17" fill="rgba(255,255,255,0.5)" text-anchor="middle" letter-spacing="0.5">
+      Para firmas auditoras paraguayas · Ley 6380/2019 · IVA · IRE · Retenciones
+    </text>
+  </g>
+
+  <!-- Impuestos pills -->
+  <g transform="translate(60, 470)">
+    <rect width="90" height="36" rx="8" fill="rgba(46,132,240,0.2)" stroke="rgba(46,132,240,0.4)" stroke-width="1"/>
+    <text x="45" y="23" font-family="Inter, sans-serif" font-size="16" fill="#60A5FA" text-anchor="middle" font-weight="700">IVA</text>
+
+    <rect x="100" width="90" height="36" rx="8" fill="rgba(34,196,126,0.2)" stroke="rgba(34,196,126,0.4)" stroke-width="1"/>
+    <text x="145" y="23" font-family="Inter, sans-serif" font-size="16" fill="#4ADE80" text-anchor="middle" font-weight="700">IRE</text>
+
+    <rect x="200" width="150" height="36" rx="8" fill="rgba(217,119,6,0.2)" stroke="rgba(217,119,6,0.4)" stroke-width="1"/>
+    <text x="275" y="23" font-family="Inter, sans-serif" font-size="16" fill="#FBBF24" text-anchor="middle" font-weight="700">Retenciones</text>
+
+    <rect x="360" width="90" height="36" rx="8" fill="rgba(139,92,246,0.2)" stroke="rgba(139,92,246,0.4)" stroke-width="1"/>
+    <text x="405" y="23" font-family="Inter, sans-serif" font-size="16" fill="#A78BFA" text-anchor="middle" font-weight="700">IRP</text>
+
+    <rect x="460" width="90" height="36" rx="8" fill="rgba(236,72,153,0.2)" stroke="rgba(236,72,153,0.4)" stroke-width="1"/>
+    <text x="505" y="23" font-family="Inter, sans-serif" font-size="16" fill="#F472B6" text-anchor="middle" font-weight="700">IDU</text>
+  </g>
+
+  <!-- Bottom bar -->
+  <rect x="0" y="548" width="1200" height="82" fill="rgba(0,0,0,0.35)"/>
+  <line x1="0" y1="548" x2="1200" y2="548" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+
+  <!-- Bottom left: URL -->
+  <text x="60" y="598" font-family="Inter, sans-serif" font-size="20" fill="rgba(255,255,255,0.7)" font-weight="600">
+    inteliaudit.vercel.app
+  </text>
+
+  <!-- Bottom right: Company -->
+  <text x="1140" y="598" font-family="Inter, sans-serif" font-size="16" fill="rgba(255,255,255,0.45)" text-anchor="end">
     Desarrollado por Intellihouse Soluciones E.A.S.
   </text>
 </svg>
