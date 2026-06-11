@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Manual de Usuario — Inteliaudit v1.0</title>
   <meta name="description" content="Manual interactivo de Inteliaudit — la plataforma de auditoría impositiva automatizada para Paraguay">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --blue: #2E84F0; --blue-dark: #1558B0; --blue-light: #EFF6FF;
@@ -23,7 +27,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; scroll-padding-top: 80px; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
       background: var(--gray-light); color: #1a1a2e; line-height: 1.7;
       transition: background 0.3s, color 0.3s;
     }
@@ -334,6 +338,188 @@
       margin-top: 3px; accent-color: var(--blue); width: 16px; height: 16px; cursor: pointer;
     }
     .checklist li.done { text-decoration: line-through; opacity: 0.5; }
+
+    /* ─── Realistic App Mockup ─── */
+    .app-mockup {
+      background: #0B1929; border-radius: 12px; overflow: hidden; margin: 16px 0;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.06);
+      font-family: 'Inter', sans-serif; position: relative;
+    }
+    .app-mockup .browser-bar {
+      background: #0D2137; padding: 8px 14px; display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .app-mockup .browser-dots { display: flex; gap: 5px; }
+    .app-mockup .browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .app-mockup .browser-dots .dot-r { background: #E53E3E; }
+    .app-mockup .browser-dots .dot-y { background: #D97706; }
+    .app-mockup .browser-dots .dot-g { background: #22C47E; }
+    .app-mockup .browser-url {
+      flex: 1; background: rgba(255,255,255,0.06); border-radius: 6px; padding: 4px 10px;
+      font-size: 11px; color: #64748B; margin-left: 8px;
+    }
+    .app-mockup .app-body { display: flex; min-height: 260px; }
+    .app-mockup .app-sidebar {
+      width: 180px; background: #091624; padding: 12px 0; flex-shrink: 0;
+      border-right: 1px solid rgba(255,255,255,0.06);
+    }
+    .app-mockup .app-sidebar .sb-logo {
+      padding: 4px 14px 12px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px;
+      border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 8px;
+    }
+    .app-mockup .app-sidebar .sb-logo .blue { color: #2E84F0; }
+    .app-mockup .app-sidebar .sb-logo .green { color: #22C47E; }
+    .app-mockup .app-sidebar .sb-label {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.25);
+      padding: 8px 14px 2px; font-weight: 600;
+    }
+    .app-mockup .app-sidebar .sb-item {
+      padding: 5px 14px; font-size: 11px; color: rgba(255,255,255,0.5); display: flex;
+      align-items: center; gap: 6px; cursor: default; transition: all 0.15s;
+      border-left: 2px solid transparent;
+    }
+    .app-mockup .app-sidebar .sb-item.active {
+      color: white; background: rgba(255,255,255,0.06); border-left-color: #2E84F0;
+    }
+    .app-mockup .app-sidebar .sb-item .sb-icon { font-size: 12px; width: 16px; text-align: center; }
+    .app-mockup .app-content { flex: 1; padding: 16px 20px; overflow: hidden; }
+    .app-mockup .app-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+      padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .app-mockup .app-header .breadcrumb { font-size: 10px; color: #64748B; }
+    .app-mockup .app-header .breadcrumb strong { color: #94A3B8; }
+    .app-mockup .app-header .theme-toggle {
+      display: flex; gap: 4px; font-size: 9px; color: #64748B;
+    }
+    .app-mockup .app-header .theme-toggle span {
+      padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.05);
+    }
+    .app-mockup .kpi-row { display: flex; gap: 8px; margin-bottom: 14px; }
+    .app-mockup .kpi-card {
+      flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px; padding: 10px 12px; position: relative;
+    }
+    .app-mockup .kpi-card .kpi-label { font-size: 9px; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .app-mockup .kpi-card .kpi-value { font-size: 18px; font-weight: 700; color: white; }
+    .app-mockup .kpi-card .kpi-value.blue { color: #2E84F0; }
+    .app-mockup .kpi-card .kpi-value.green { color: #22C47E; }
+    .app-mockup .kpi-card .kpi-value.amber { color: #D97706; }
+    .app-mockup .kpi-card .kpi-value.red { color: #E53E3E; }
+    .app-mockup .pill { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 9px; font-weight: 600; }
+    .app-mockup .pill.blue { background: rgba(46,132,240,0.15); color: #60A5FA; }
+    .app-mockup .pill.green { background: rgba(34,196,126,0.15); color: #4ADE80; }
+    .app-mockup .pill.red { background: rgba(229,62,62,0.15); color: #FCA5A5; }
+    .app-mockup .pill.amber { background: rgba(217,119,6,0.15); color: #FBBF24; }
+    .app-mockup .pill.purple { background: rgba(139,92,246,0.15); color: #A78BFA; }
+    .app-mockup .app-table { width: 100%; font-size: 10px; border-collapse: collapse; }
+    .app-mockup .app-table th {
+      text-align: left; padding: 6px 8px; color: #64748B; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.5px; font-size: 9px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .app-mockup .app-table td {
+      padding: 6px 8px; color: #CBD5E1; border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .app-mockup .app-btn {
+      display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px;
+      border-radius: 6px; font-size: 10px; font-weight: 600; cursor: default;
+    }
+    .app-mockup .app-btn.primary { background: linear-gradient(135deg, #2E84F0, #1558B0); color: white; }
+    .app-mockup .app-btn.outline { border: 1px solid rgba(255,255,255,0.12); color: #94A3B8; }
+    .app-mockup .app-input {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px; padding: 6px 10px; color: #CBD5E1; font-size: 11px; width: 100%;
+    }
+    .app-mockup .audit-banner {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; display: flex;
+      align-items: center; justify-content: space-between;
+    }
+    .app-mockup .audit-banner .ab-info { flex: 1; }
+    .app-mockup .audit-banner .ab-title { font-size: 14px; font-weight: 700; color: white; margin-bottom: 2px; }
+    .app-mockup .audit-banner .ab-meta { font-size: 10px; color: #64748B; }
+    .app-mockup .audit-banner .ab-stats { display: flex; gap: 12px; }
+    .app-mockup .audit-banner .ab-stat { text-align: center; }
+    .app-mockup .audit-banner .ab-stat-label { font-size: 8px; color: #64748B; text-transform: uppercase; }
+    .app-mockup .audit-banner .ab-stat-value { font-size: 16px; font-weight: 700; }
+    .app-mockup .tab-bar {
+      display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 14px;
+    }
+    .app-mockup .tab-bar .tab {
+      padding: 6px 12px; font-size: 10px; color: #64748B; cursor: default;
+      border-bottom: 2px solid transparent; transition: all 0.15s;
+    }
+    .app-mockup .tab-bar .tab.active { color: #60A5FA; border-bottom-color: #2E84F0; }
+    .app-mockup .upload-zone {
+      border: 1px dashed rgba(255,255,255,0.15); border-radius: 8px; padding: 16px;
+      text-align: center; color: #64748B; font-size: 10px;
+    }
+    .app-mockup .upload-zone .upload-icon { font-size: 20px; margin-bottom: 4px; }
+    .app-mockup .progress-track {
+      background: rgba(255,255,255,0.06); border-radius: 4px; height: 6px; overflow: hidden;
+    }
+    .app-mockup .progress-track .progress-fill {
+      height: 100%; border-radius: 4px; transition: width 0.3s;
+    }
+    .app-mockup .progress-fill.green { background: linear-gradient(90deg, #22C47E, #169058); }
+    .app-mockup .progress-fill.blue { background: linear-gradient(90deg, #2E84F0, #1558B0); }
+
+    /* ─── Interactive Hotspots ─── */
+    .hotspot-container { position: relative; }
+    .hotspot {
+      position: absolute; cursor: pointer; z-index: 10;
+      border: 2px solid transparent; border-radius: 6px; transition: all 0.3s;
+    }
+    .hotspot::before {
+      content: attr(data-label); position: absolute; bottom: calc(100% + 6px); left: 50%;
+      transform: translateX(-50%) translateY(4px); background: #2E84F0; color: white;
+      padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600;
+      white-space: nowrap; opacity: 0; pointer-events: none; transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(46,132,240,0.3);
+    }
+    .hotspot::after {
+      content: ''; position: absolute; bottom: calc(100% + 2px); left: 50%;
+      transform: translateX(-50%); border: 5px solid transparent;
+      border-top-color: #2E84F0; opacity: 0; transition: opacity 0.2s;
+    }
+    .hotspot:hover {
+      border-color: rgba(46,132,240,0.5); background: rgba(46,132,240,0.08);
+      box-shadow: 0 0 0 3px rgba(46,132,240,0.15);
+    }
+    .hotspot:hover::before, .hotspot:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .hotspot:hover::after { transform: translateX(-50%); }
+
+    .hotspot-pulse {
+      position: absolute; width: 12px; height: 12px; z-index: 11; cursor: pointer;
+    }
+    .hotspot-pulse::before {
+      content: ''; position: absolute; inset: 0; background: #2E84F0; border-radius: 50%;
+      animation: pulse-ring 2s ease-out infinite;
+    }
+    .hotspot-pulse::after {
+      content: ''; position: absolute; inset: 2px; background: #2E84F0; border-radius: 50%;
+      box-shadow: 0 0 6px rgba(46,132,240,0.5);
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(1); opacity: 0.6; }
+      100% { transform: scale(2.5); opacity: 0; }
+    }
+
+    .mockup-caption {
+      text-align: center; font-size: 11px; color: #64748B; margin-top: 8px;
+      font-style: italic; letter-spacing: 0.2px;
+    }
+
+    @media (max-width: 900px) {
+      .app-mockup .app-sidebar { width: 140px; }
+      .app-mockup .kpi-row { flex-wrap: wrap; }
+      .app-mockup .kpi-card { min-width: calc(50% - 4px); }
+    }
+    @media (max-width: 600px) {
+      .app-mockup .app-sidebar { display: none; }
+      .app-mockup .kpi-row { flex-direction: column; }
+    }
   </style>
 </head>
 <body>
@@ -342,7 +528,23 @@
 
 <nav class="sidebar">
   <div class="sidebar-header">
-    <div class="logo"><span>Inteli</span><span>audit</span></div>
+    <div class="logo">
+      <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:36px;width:auto;">
+        <rect x="0" y="2" width="36" height="36" rx="10" fill="url(#sidebarGrad)"/>
+        <circle cx="16" cy="18" r="7" stroke="white" stroke-width="2.2"/>
+        <line x1="21.5" y1="23.5" x2="27" y2="29" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M13 18.2l2 2 3.5-3.5" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="30" cy="7" r="3.5" fill="#00a651"/>
+        <text x="44" y="26" font-family="Inter,sans-serif" font-weight="900" font-size="18" fill="#2E84F0">Inteli</text>
+        <text x="91" y="26" font-family="Inter,sans-serif" font-weight="300" font-size="18" fill="#22C47E">audit</text>
+        <defs>
+          <linearGradient id="sidebarGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#1561e1"/>
+            <stop offset="1" stop-color="#104c91"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
     <div class="version">Manual de Usuario · v1.0 · Junio 2026</div>
   </div>
   <div class="sidebar-search">
@@ -388,7 +590,7 @@
 <div class="main">
   <div class="progress-bar"><div class="fill" id="progressFill"></div></div>
   <div class="topbar">
-    <h1>📖 Manual de Usuario</h1>
+    <h1>Manual de Usuario</h1>
     <div class="topbar-actions">
       <button class="topbar-btn" onclick="window.print()" title="Imprimir">🖨️ Imprimir</button>
       <button class="topbar-btn" id="themeBtn" onclick="toggleTheme()" title="Modo oscuro/claro">🌙 Tema</button>
@@ -403,21 +605,56 @@
       <p><strong>Inteliaudit</strong> es una plataforma SaaS de automatización de auditoría impositiva diseñada específicamente para el mercado paraguayo. Automatiza el trabajo del auditor desde la descarga de datos en Marangatú (DNIT) hasta la generación de informes finales firmables.</p>
       <p>El sistema cruza automáticamente múltiples fuentes de datos —RG90, SIFEN, HECHAUKA, declaraciones juradas— y aplica más de <strong>12 procedimientos de auditoría</strong> basados en la normativa vigente (Ley 6380/2019, Ley 125/1991, Decreto 3107/2019, RG 90/2021).</p>
 
-      <div class="screenshot">
-        <div class="label">📸 Captura de pantalla</div>
-        <div class="desc">Vista general del Dashboard con KPIs, gráficos y actividad reciente</div>
-        <div class="mock-ui">
-          <div class="mock-header"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span></div>
-          <div class="mock-row">
-            <span class="mock-badge blue">12 Clientes</span>
-            <span class="mock-badge green">5 Activas</span>
-            <span class="mock-badge amber">23 Hallazgos</span>
-            <span class="mock-badge red">₲ 42.8M</span>
-          </div>
-          <div class="mock-line blue w80" style="margin-top:12px"></div>
-          <div class="mock-line gray w60"></div>
-          <div class="mock-line green w40"></div>
+      <div class="app-mockup hotspot-container">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/dashboard</div>
         </div>
+        <div class="app-body">
+          <div class="app-sidebar">
+            <div class="sb-logo"><span class="blue">Inteli</span><span class="green">audit</span></div>
+            <div class="sb-label">General</div>
+            <div class="sb-item active"><span class="sb-icon">📊</span> Dashboard</div>
+            <div class="sb-item"><span class="sb-icon">👥</span> Clientes</div>
+            <div class="sb-label">Auditorías</div>
+            <div class="sb-item"><span class="sb-icon">➕</span> Nueva auditoría</div>
+            <div class="sb-label">Informes</div>
+            <div class="sb-item"><span class="sb-icon">📄</span> Informes</div>
+          </div>
+          <div class="app-content">
+            <div class="app-header">
+              <div class="breadcrumb">Auditores Asociados SRL · <strong>INTELIAUDIT</strong></div>
+              <div class="theme-toggle"><span>Claro</span><span>Oscuro</span></div>
+            </div>
+            <div class="kpi-row" style="position:relative;">
+              <div class="kpi-card"><div class="kpi-label">Clientes</div><div class="kpi-value blue">3</div></div>
+              <div class="kpi-card"><div class="kpi-label">Auditorías activas</div><div class="kpi-value green">1</div></div>
+              <div class="kpi-card"><div class="kpi-label">Hallazgos</div><div class="kpi-value amber">8</div></div>
+              <div class="kpi-card"><div class="kpi-label">Contingencia</div><div class="kpi-value red">₲ 99.0M</div></div>
+              <div class="hotspot" data-label="KPIs en tiempo real" style="inset:0;"></div>
+            </div>
+            <div style="display:flex;gap:10px;">
+              <div style="flex:1;background:rgba(255,255,255,0.03);border-radius:8px;padding:10px;">
+                <div style="font-size:9px;color:#64748B;margin-bottom:6px;text-transform:uppercase;">Hallazgos por impuesto</div>
+                <div style="display:flex;align-items:flex-end;gap:6px;height:50px;">
+                  <div style="flex:1;background:linear-gradient(180deg,#2E84F0,#1558B0);border-radius:3px 3px 0 0;height:80%;"></div>
+                  <div style="flex:1;background:linear-gradient(180deg,#D97706,#92400E);border-radius:3px 3px 0 0;height:30%;"></div>
+                  <div style="flex:1;background:linear-gradient(180deg,#22C47E,#169058);border-radius:3px 3px 0 0;height:20%;"></div>
+                </div>
+                <div style="display:flex;gap:6px;margin-top:4px;font-size:8px;color:#64748B;">
+                  <span style="flex:1;text-align:center;">IVA</span><span style="flex:1;text-align:center;">IRE</span><span style="flex:1;text-align:center;">RET</span>
+                </div>
+              </div>
+              <div style="flex:1;background:rgba(255,255,255,0.03);border-radius:8px;padding:10px;">
+                <div style="font-size:9px;color:#64748B;margin-bottom:6px;text-transform:uppercase;">Top clientes</div>
+                <div style="font-size:10px;color:#CBD5E1;margin-bottom:4px;">Comercial Guaraní SA <span class="pill red" style="margin-left:4px;">₲99M</span></div>
+                <div style="font-size:10px;color:#CBD5E1;margin-bottom:4px;">Tech Solutions SRL <span class="pill amber" style="margin-left:4px;">₲0</span></div>
+                <div style="font-size:10px;color:#CBD5E1;">Distribuidora PJC SA <span class="pill green" style="margin-left:4px;">₲0</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mockup-caption">Vista real del Dashboard de Inteliaudit con datos de demostración</div>
       </div>
 
       <h3>¿Qué problema resuelve?</h3>
@@ -489,18 +726,37 @@
         <li><div class="step-text"><strong>Haz clic en "Ingresar"</strong></div></li>
       </ol>
 
-      <div class="screenshot">
-        <div class="label">📸 Captura de pantalla</div>
-        <div class="desc">Pantalla de login con campos RUC y Contraseña</div>
-        <div class="mock-ui">
-          <div class="mock-header"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span></div>
-          <div style="text-align:center; padding: 20px 0;">
-            <div class="mock-line blue w40" style="margin: 0 auto 16px; height: 16px;"></div>
-            <div class="mock-line gray w60" style="margin: 0 auto 8px; height: 32px; border-radius: 6px;"></div>
-            <div class="mock-line gray w60" style="margin: 0 auto 16px; height: 32px; border-radius: 6px;"></div>
-            <div class="mock-line blue w40" style="margin: 0 auto; height: 36px; border-radius: 6px;"></div>
+      <div class="app-mockup">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/login</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#091624,#0F2035);padding:30px;display:flex;align-items:center;justify-content:center;min-height:240px;">
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:28px 32px;width:320px;text-align:center;">
+            <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:32px;width:auto;margin-bottom:6px;">
+              <rect x="0" y="2" width="36" height="36" rx="10" fill="url(#loginGrad)"/>
+              <circle cx="16" cy="18" r="7" stroke="white" stroke-width="2.2"/>
+              <line x1="21.5" y1="23.5" x2="27" y2="29" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+              <path d="M13 18.2l2 2 3.5-3.5" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="30" cy="7" r="3.5" fill="#00a651"/>
+              <text x="44" y="26" font-family="Inter,sans-serif" font-weight="900" font-size="18" fill="#2E84F0">Inteli</text>
+              <text x="91" y="26" font-family="Inter,sans-serif" font-weight="300" font-size="18" fill="#22C47E">audit</text>
+              <defs><linearGradient id="loginGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse"><stop stop-color="#1561e1"/><stop offset="1" stop-color="#104c91"/></linearGradient></defs>
+            </svg>
+            <div style="font-size:10px;color:#64748B;margin-bottom:16px;">Auditoría impositiva automatizada</div>
+            <div style="text-align:left;margin-bottom:8px;">
+              <div style="font-size:10px;color:#94A3B8;margin-bottom:3px;">Email</div>
+              <div class="app-input" style="display:block;">admin@demo.com</div>
+            </div>
+            <div style="text-align:left;margin-bottom:14px;">
+              <div style="font-size:10px;color:#94A3B8;margin-bottom:3px;">Contraseña</div>
+              <div class="app-input" style="display:block;">••••••</div>
+            </div>
+            <div class="app-btn primary" style="width:100%;justify-content:center;padding:8px;font-size:12px;">Ingresar</div>
+            <div style="font-size:10px;color:#64748B;margin-top:10px;">¿No tenés cuenta? <span style="color:#2E84F0;">Registrate</span></div>
           </div>
         </div>
+        <div class="mockup-caption">Pantalla de inicio de sesión con email y contraseña</div>
       </div>
 
       <div class="tip"><span class="icon">💡</span><div><strong>Tip:</strong> Si marcas "Recordarme", tu sesión se mantendrá activa por más tiempo. No marques esta opción en computadoras compartidas.</div></div>
@@ -523,32 +779,79 @@
       <h2><span class="num">5</span> Panel de Control (Dashboard)</h2>
       <p>El Dashboard es la pantalla principal que ves al iniciar sesión. Te da una vista panorámica del estado de tu firma.</p>
 
-      <div class="screenshot">
-        <div class="label">📸 Captura de pantalla</div>
-        <div class="desc">Dashboard completo con 4 KPIs, 2 gráficos, top clientes y actividad reciente</div>
-        <div class="mock-ui">
-          <div class="mock-header"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span></div>
-          <div class="mock-row" style="gap:12px;">
-            <span class="mock-badge blue" style="padding:6px 12px;">📊 12 Clientes</span>
-            <span class="mock-badge green" style="padding:6px 12px;">📁 5 Activas</span>
-            <span class="mock-badge amber" style="padding:6px 12px;">⚠️ 23 Hallazgos</span>
-            <span class="mock-badge red" style="padding:6px 12px;">💰 ₲ 42.8M</span>
+      <div class="app-mockup hotspot-container">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/dashboard</div>
+        </div>
+        <div class="app-body">
+          <div class="app-sidebar">
+            <div class="sb-logo"><span class="blue">Inteli</span><span class="green">audit</span></div>
+            <div class="sb-label">General</div>
+            <div class="sb-item active"><span class="sb-icon">📊</span> Dashboard</div>
+            <div class="sb-item"><span class="sb-icon">👥</span> Clientes</div>
+            <div class="sb-label">Auditorías</div>
+            <div class="sb-item"><span class="sb-icon">➕</span> Nueva auditoría</div>
           </div>
-          <div style="display:flex; gap:12px; margin-top:12px;">
-            <div style="flex:1;">
-              <div class="mock-line gray w80" style="height:10px; margin-bottom:8px;"></div>
-              <div class="mock-line blue w60" style="height:8px; margin-bottom:4px;"></div>
-              <div class="mock-line green w40" style="height:8px; margin-bottom:4px;"></div>
-              <div class="mock-line amber w80" style="height:8px;"></div>
+          <div class="app-content">
+            <div class="kpi-row">
+              <div class="kpi-card" style="position:relative;">
+                <div class="kpi-label">Clientes activos</div>
+                <div class="kpi-value blue">3</div>
+                <div class="hotspot" data-label="Total de clientes registrados" style="inset:0;"></div>
+              </div>
+              <div class="kpi-card" style="position:relative;">
+                <div class="kpi-label">Auditorías en curso</div>
+                <div class="kpi-value green">1</div>
+                <div class="hotspot" data-label="Auditorías activas ahora" style="inset:0;"></div>
+              </div>
+              <div class="kpi-card" style="position:relative;">
+                <div class="kpi-label">Hallazgos activos</div>
+                <div class="kpi-value amber">8</div>
+                <div class="hotspot" data-label="Pendientes de revisión" style="inset:0;"></div>
+              </div>
+              <div class="kpi-card" style="position:relative;">
+                <div class="kpi-label">Contingencia total</div>
+                <div class="kpi-value red">₲ 99.0M</div>
+                <div class="hotspot" data-label="Suma de ajustes detectados" style="inset:0;"></div>
+              </div>
             </div>
-            <div style="flex:1;">
-              <div class="mock-line gray w60" style="height:10px; margin-bottom:8px;"></div>
-              <div class="mock-line blue w80" style="height:8px; margin-bottom:4px;"></div>
-              <div class="mock-line green w60" style="height:8px; margin-bottom:4px;"></div>
-              <div class="mock-line amber w40" style="height:8px;"></div>
+            <div style="display:flex;gap:10px;">
+              <div style="flex:1;background:rgba(255,255,255,0.03);border-radius:8px;padding:10px;position:relative;">
+                <div style="font-size:9px;color:#64748B;margin-bottom:8px;text-transform:uppercase;">Hallazgos por riesgo</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                  <span style="font-size:9px;color:#FCA5A5;width:30px;">Alto</span>
+                  <div style="flex:1;height:14px;background:rgba(229,62,62,0.2);border-radius:3px;overflow:hidden;"><div style="width:37%;height:100%;background:#E53E3E;border-radius:3px;"></div></div>
+                  <span style="font-size:10px;color:#FCA5A5;font-weight:600;">3</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                  <span style="font-size:9px;color:#FBBF24;width:30px;">Medio</span>
+                  <div style="flex:1;height:14px;background:rgba(217,119,6,0.2);border-radius:3px;overflow:hidden;"><div style="width:50%;height:100%;background:#D97706;border-radius:3px;"></div></div>
+                  <span style="font-size:10px;color:#FBBF24;font-weight:600;">4</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:9px;color:#4ADE80;width:30px;">Bajo</span>
+                  <div style="flex:1;height:14px;background:rgba(34,196,126,0.2);border-radius:3px;overflow:hidden;"><div style="width:12%;height:100%;background:#22C47E;border-radius:3px;"></div></div>
+                  <span style="font-size:10px;color:#4ADE80;font-weight:600;">1</span>
+                </div>
+                <div class="hotspot" data-label="Distribución de riesgo" style="inset:0;"></div>
+              </div>
+              <div style="flex:1;background:rgba(255,255,255,0.03);border-radius:8px;padding:10px;">
+                <div style="font-size:9px;color:#64748B;margin-bottom:6px;text-transform:uppercase;">Actividad reciente</div>
+                <div style="font-size:9px;color:#94A3B8;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,0.04);">
+                  <span style="color:#4ADE80;">crear_auditoria</span> · hace 2 horas
+                </div>
+                <div style="font-size:9px;color:#94A3B8;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,0.04);">
+                  <span style="color:#60A5FA;">importar_datos</span> · hace 3 horas
+                </div>
+                <div style="font-size:9px;color:#94A3B8;">
+                  <span style="color:#FBBF24;">ejecutar_analisis</span> · hace 5 horas
+                </div>
+              </div>
             </div>
           </div>
         </div>
+        <div class="mockup-caption">Pasa el cursor sobre los KPIs para ver qué representa cada indicador</div>
       </div>
 
       <h3>Indicadores clave (KPIs)</h3>
@@ -592,16 +895,50 @@
       <h2><span class="num">6</span> Gestión de Clientes</h2>
       <p>Accede desde el menú lateral en <strong>Clientes</strong>.</p>
 
-      <div class="screenshot">
-        <div class="label">📸 Captura de pantalla</div>
-        <div class="desc">Lista de clientes con búsqueda, badges de estado y botón "+ Nuevo Cliente"</div>
-        <div class="mock-ui">
-          <div class="mock-header"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span></div>
-          <div class="mock-line gray w60" style="height:32px; border-radius:6px; margin-bottom:12px;"></div>
-          <div class="mock-row"><span class="mock-badge blue">80144114-5</span><span class="mock-line gray w40" style="height:10px; margin:0;"></span><span class="mock-badge green">Activo</span></div>
-          <div class="mock-row" style="margin-top:4px;"><span class="mock-badge blue">80012345-6</span><span class="mock-line gray w60" style="height:10px; margin:0;"></span><span class="mock-badge green">Activo</span></div>
-          <div class="mock-row" style="margin-top:4px;"><span class="mock-badge blue">80098765-4</span><span class="mock-line gray w40" style="height:10px; margin:0;"></span><span class="mock-badge red">Inactivo</span></div>
+      <div class="app-mockup hotspot-container">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/clientes</div>
         </div>
+        <div class="app-body">
+          <div class="app-sidebar">
+            <div class="sb-logo"><span class="blue">Inteli</span><span class="green">audit</span></div>
+            <div class="sb-label">General</div>
+            <div class="sb-item"><span class="sb-icon">📊</span> Dashboard</div>
+            <div class="sb-item active"><span class="sb-icon">👥</span> Clientes</div>
+          </div>
+          <div class="app-content">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+              <div style="font-size:16px;font-weight:700;color:white;">Clientes</div>
+              <div class="app-btn primary" style="position:relative;">+ Nuevo Cliente
+                <div class="hotspot" data-label="Agregar un nuevo cliente" style="inset:-4px;"></div>
+              </div>
+            </div>
+            <div class="app-input" style="margin-bottom:12px;display:block;color:#64748B;">Buscar por nombre o RUC...</div>
+            <table class="app-table">
+              <tr><th>Cliente</th><th>RUC</th><th>Auditorías</th><th>Estado</th></tr>
+              <tr style="position:relative;">
+                <td style="font-weight:600;color:white;">Comercial Guaraní SA</td>
+                <td>80012345-6</td>
+                <td><span class="pill blue">1 activa</span></td>
+                <td><span class="pill green">Activo</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:white;">Tech Solutions SRL</td>
+                <td>80098765-4</td>
+                <td style="color:#64748B;">0</td>
+                <td><span class="pill green">Activo</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:white;">Distribuidora PJC SA</td>
+                <td>80056789-1</td>
+                <td style="color:#64748B;">0</td>
+                <td><span class="pill green">Activo</span></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <div class="mockup-caption">Lista de clientes con búsqueda y estado de auditorías</div>
       </div>
 
       <h3>Crear un nuevo cliente</h3>
@@ -635,21 +972,40 @@
       <h2><span class="num">7</span> Crear una Auditoría</h2>
       <p>Accede desde el menú lateral en <strong>Auditorías → Nueva auditoría</strong> o desde el botón <kbd>+ Nueva auditoría</kbd> en el header superior.</p>
 
-      <div class="screenshot">
-        <div class="label">📸 Captura de pantalla</div>
-        <div class="desc">Wizard de 4 pasos: Cliente → Impuestos → Período → Materialidad</div>
-        <div class="mock-ui">
-          <div class="mock-header"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span></div>
-          <div class="mock-row" style="gap:4px; margin-bottom:12px;">
-            <span class="mock-badge blue" style="padding:4px 10px;">① Cliente ✓</span>
-            <span class="mock-badge blue" style="padding:4px 10px;">② Impuestos</span>
-            <span class="mock-badge amber" style="padding:4px 10px;">③ Período</span>
-            <span class="mock-badge amber" style="padding:4px 10px;">④ Materialidad</span>
-          </div>
-          <div class="mock-line gray w80" style="height:32px; border-radius:6px; margin-bottom:8px;"></div>
-          <div class="mock-line gray w60" style="height:32px; border-radius:6px; margin-bottom:8px;"></div>
-          <div class="mock-line blue w40" style="height:36px; border-radius:6px;"></div>
+      <div class="app-mockup hotspot-container">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/auditorias/nueva</div>
         </div>
+        <div class="app-body">
+          <div class="app-sidebar">
+            <div class="sb-logo"><span class="blue">Inteli</span><span class="green">audit</span></div>
+            <div class="sb-label">Auditorías</div>
+            <div class="sb-item active"><span class="sb-icon">➕</span> Nueva auditoría</div>
+          </div>
+          <div class="app-content">
+            <div style="font-size:16px;font-weight:700;color:white;margin-bottom:14px;">Nueva Auditoría</div>
+            <div style="display:flex;gap:4px;margin-bottom:18px;position:relative;">
+              <div style="flex:1;text-align:center;padding:6px;border-radius:6px;background:rgba(46,132,240,0.15);border:1px solid rgba(46,132,240,0.3);font-size:10px;color:#60A5FA;font-weight:600;">1. Cliente ✓</div>
+              <div style="flex:1;text-align:center;padding:6px;border-radius:6px;background:rgba(46,132,240,0.15);border:1px solid rgba(46,132,240,0.3);font-size:10px;color:#60A5FA;font-weight:600;">2. Impuestos</div>
+              <div style="flex:1;text-align:center;padding:6px;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);font-size:10px;color:#64748B;">3. Período</div>
+              <div style="flex:1;text-align:center;padding:6px;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);font-size:10px;color:#64748B;">4. Materialidad</div>
+              <div class="hotspot" data-label="Wizard de 4 pasos" style="inset:0;"></div>
+            </div>
+            <div style="font-size:11px;color:#94A3B8;margin-bottom:6px;">Selecciona los impuestos a auditar:</div>
+            <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+              <div style="padding:8px 14px;border-radius:8px;background:rgba(46,132,240,0.15);border:1px solid rgba(46,132,240,0.4);font-size:11px;color:#60A5FA;font-weight:600;cursor:default;">IVA ✓</div>
+              <div style="padding:8px 14px;border-radius:8px;background:rgba(34,196,126,0.15);border:1px solid rgba(34,196,126,0.4);font-size:11px;color:#4ADE80;font-weight:600;cursor:default;">IRE ✓</div>
+              <div style="padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);font-size:11px;color:#64748B;cursor:default;">IRP</div>
+              <div style="padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);font-size:11px;color:#64748B;cursor:default;">Retenciones</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <div class="app-btn outline">Anterior</div>
+              <div class="app-btn primary">Siguiente</div>
+            </div>
+          </div>
+        </div>
+        <div class="mockup-caption">Wizard de creación de auditoría — Paso 2: Selección de impuestos</div>
       </div>
 
       <h3>Paso 1: Seleccionar Cliente</h3>
@@ -691,27 +1047,53 @@
       <h2><span class="num">8</span> Importar Datos</h2>
       <p>Antes de ejecutar el análisis, necesitas cargar los datos del cliente. La pestaña <strong>Archivos</strong> te permite importar toda la información necesaria.</p>
 
-      <div class="screenshot">
-        <div class="label">📸 Captura de pantalla</div>
-        <div class="desc">Pestaña Archivos con 3 zonas de upload: RG90, HECHAUKA, DJ + validación SIFEN</div>
-        <div class="mock-ui">
-          <div class="mock-header"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span></div>
-          <div style="display:flex; gap:12px; margin-bottom:8px;">
-            <div style="flex:1; border:1px dashed var(--gray-border); border-radius:8px; padding:12px; text-align:center;">
-              <div class="mock-badge blue" style="margin-bottom:6px;">RG90 Compras</div>
-              <div class="mock-line gray w60" style="height:8px; margin:0 auto;"></div>
+      <div class="app-mockup">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/auditorias/.../archivos</div>
+        </div>
+        <div class="app-body" style="min-height:auto;">
+          <div class="app-content" style="padding:16px;">
+            <div class="audit-banner">
+              <div class="ab-info">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                  <span class="pill green">En progreso</span>
+                  <span class="pill amber">8 pendientes</span>
+                </div>
+                <div class="ab-title">Comercial Guaraní SA</div>
+                <div class="ab-meta">80012345-6 · ene. 2024 — dic. 2024</div>
+              </div>
             </div>
-            <div style="flex:1; border:1px dashed var(--gray-border); border-radius:8px; padding:12px; text-align:center;">
-              <div class="mock-badge green" style="margin-bottom:6px;">HECHAUKA</div>
-              <div class="mock-line gray w60" style="height:8px; margin:0 auto;"></div>
+            <div class="tab-bar">
+              <div class="tab">Resumen</div><div class="tab">Hallazgos</div><div class="tab">Análisis</div>
+              <div class="tab">Plan de Trabajo</div><div class="tab active">Archivos</div>
+              <div class="tab">Automatización</div><div class="tab">Informes</div>
             </div>
-            <div style="flex:1; border:1px dashed var(--gray-border); border-radius:8px; padding:12px; text-align:center;">
-              <div class="mock-badge amber" style="margin-bottom:6px;">DJ PDF</div>
-              <div class="mock-line gray w60" style="height:8px; margin:0 auto;"></div>
+            <div style="display:flex;gap:12px;">
+              <div style="flex:1;">
+                <div style="font-size:12px;font-weight:700;color:white;margin-bottom:4px;">RG90</div>
+                <div style="font-size:9px;color:#64748B;margin-bottom:8px;">Detalle de comprobantes IVA</div>
+                <div style="display:flex;gap:6px;margin-bottom:8px;">
+                  <span class="pill blue">Compras</span><span class="pill green">Ventas</span>
+                </div>
+                <div class="upload-zone">
+                  <div class="upload-icon">📤</div>
+                  <div>Arrastra el XLSX o haz clic</div>
+                </div>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:12px;font-weight:700;color:white;margin-bottom:4px;">HECHAUKA</div>
+                <div style="font-size:9px;color:#64748B;margin-bottom:8px;">Información de terceros</div>
+                <div style="height:18px;"></div>
+                <div class="upload-zone">
+                  <div class="upload-icon">📤</div>
+                  <div>Arrastra el XLSX o haz clic</div>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="mock-line blue w40" style="height:32px; border-radius:6px; margin-top:8px;"></div>
         </div>
+        <div class="mockup-caption">Pestaña Archivos — Zonas de carga para RG90 y HECHAUKA por período</div>
       </div>
 
       <h3>Importar RG90 (Detalle de Comprobantes IVA)</h3>
@@ -746,18 +1128,59 @@
       <h2><span class="num">9</span> Automatización DNIT</h2>
       <p>En lugar de descargar manualmente los archivos de Marangatú, puedes automatizar todo el proceso. La pestaña <strong>Automatización</strong> te permite encolar trabajos de scraping.</p>
 
-      <div class="screenshot">
-        <div class="label">📸 Captura de pantalla</div>
-        <div class="desc">Formulario de encolamiento + lista de jobs con barras de progreso en tiempo real</div>
-        <div class="mock-ui">
-          <div class="mock-header"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span></div>
-          <div class="mock-line gray w60" style="height:32px; border-radius:6px; margin-bottom:8px;"></div>
-          <div class="mock-line gray w40" style="height:32px; border-radius:6px; margin-bottom:12px;"></div>
-          <div class="mock-line blue w40" style="height:36px; border-radius:6px; margin-bottom:16px;"></div>
-          <div class="mock-row"><span class="mock-badge green">Completado</span><span class="mock-line green w80" style="height:6px; margin:0;"></span></div>
-          <div class="mock-row" style="margin-top:4px;"><span class="mock-badge blue">En progreso</span><span class="mock-line blue w60" style="height:6px; margin:0;"></span></div>
-          <div class="mock-row" style="margin-top:4px;"><span class="mock-badge amber">Pendiente</span><span class="mock-line gray w20" style="height:6px; margin:0;"></span></div>
+      <div class="app-mockup">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/auditorias/.../automatizacion</div>
         </div>
+        <div class="app-body" style="min-height:auto;">
+          <div class="app-content" style="padding:16px;">
+            <div class="tab-bar">
+              <div class="tab">Resumen</div><div class="tab">Hallazgos</div><div class="tab">Análisis</div>
+              <div class="tab">Archivos</div><div class="tab active">Automatización</div><div class="tab">Informes</div>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:white;margin-bottom:10px;">Descargar de Marangatú</div>
+            <div style="display:flex;gap:10px;margin-bottom:14px;">
+              <div style="flex:1;">
+                <div style="font-size:9px;color:#94A3B8;margin-bottom:3px;">Tipo de descarga</div>
+                <div class="app-input" style="display:block;">RG90 (Comprobantes IVA)</div>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:9px;color:#94A3B8;margin-bottom:3px;">Cliente</div>
+                <div class="app-input" style="display:block;">80012345-6</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-bottom:12px;">
+              <div style="flex:1;">
+                <div style="font-size:9px;color:#94A3B8;margin-bottom:3px;">Período desde</div>
+                <div class="app-input" style="display:block;">enero de 2024</div>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:9px;color:#94A3B8;margin-bottom:3px;">Período hasta</div>
+                <div class="app-input" style="display:block;">diciembre de 2024</div>
+              </div>
+            </div>
+            <div class="app-btn primary" style="margin-bottom:14px;">Encolar Trabajo</div>
+            <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <span class="pill green">Completado</span>
+                <span style="font-size:10px;color:#CBD5E1;flex:1;">RG90 Compras · ene-dic 2024</span>
+                <div class="progress-track" style="width:80px;"><div class="progress-fill green" style="width:100%;"></div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <span class="pill blue">En progreso</span>
+                <span style="font-size:10px;color:#CBD5E1;flex:1;">RG90 Ventas · ene-dic 2024</span>
+                <div class="progress-track" style="width:80px;"><div class="progress-fill blue" style="width:65%;"></div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="pill amber">Pendiente</span>
+                <span style="font-size:10px;color:#CBD5E1;flex:1;">HECHAUKA · ene-dic 2024</span>
+                <div class="progress-track" style="width:80px;"><div class="progress-fill blue" style="width:0%;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mockup-caption">Automatización — Descarga de datos de Marangatú con seguimiento en vivo</div>
       </div>
 
       <h3>Requisito previo</h3>
@@ -787,24 +1210,37 @@
       <h2><span class="num">10</span> Análisis Automático</h2>
       <p>Una vez que tienes los datos importados (manualmente o por automatización), la pestaña <strong>Análisis</strong> ejecuta el motor de auditoría.</p>
 
-      <div class="screenshot">
-        <div class="label">📸 Captura de pantalla</div>
-        <div class="desc">Panel de análisis con selector de impuesto, botón ejecutar, barra de progreso y resultados</div>
-        <div class="mock-ui">
-          <div class="mock-header"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span></div>
-          <div class="mock-row" style="gap:8px; margin-bottom:12px;">
-            <span class="mock-badge blue">IVA</span>
-            <span class="mock-badge green">IRE</span>
-            <span class="mock-badge amber">Retenciones</span>
-          </div>
-          <div class="mock-line blue w40" style="height:36px; border-radius:6px; margin-bottom:12px;"></div>
-          <div class="mock-line green w80" style="height:8px; border-radius:4px; margin-bottom:8px;"></div>
-          <div class="mock-row" style="gap:12px; margin-top:12px;">
-            <span class="mock-badge red">23 hallazgos</span>
-            <span class="mock-badge amber">₲ 42.8M</span>
-            <span class="mock-badge green">6 alto</span>
+      <div class="app-mockup hotspot-container">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/auditorias/.../analisis</div>
+        </div>
+        <div class="app-body" style="min-height:auto;">
+          <div class="app-content" style="padding:16px;">
+            <div class="tab-bar">
+              <div class="tab">Resumen</div><div class="tab">Hallazgos</div><div class="tab active">Análisis</div>
+              <div class="tab">Plan de Trabajo</div><div class="tab">Archivos</div><div class="tab">Informes</div>
+            </div>
+            <div style="font-size:11px;color:#64748B;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Datos disponibles</div>
+            <div class="kpi-row" style="position:relative;">
+              <div class="kpi-card"><div class="kpi-label">RG90 Compras</div><div class="kpi-value blue" style="font-size:16px;">360</div></div>
+              <div class="kpi-card"><div class="kpi-label">RG90 Ventas</div><div class="kpi-value blue" style="font-size:16px;">240</div></div>
+              <div class="kpi-card"><div class="kpi-label">Crédito fiscal</div><div class="kpi-value green" style="font-size:13px;">₲ 984.1M</div></div>
+              <div class="kpi-card"><div class="kpi-label">Débito fiscal</div><div class="kpi-value amber" style="font-size:13px;">₲ 1.058M</div></div>
+              <div class="hotspot" data-label="Datos importados del período" style="inset:0;"></div>
+            </div>
+            <div style="font-size:11px;color:#64748B;text-transform:uppercase;letter-spacing:0.5px;margin:12px 0 8px;">Configurar análisis</div>
+            <div style="font-size:10px;color:#94A3B8;margin-bottom:6px;">Impuestos a analizar</div>
+            <div style="display:flex;gap:6px;margin-bottom:12px;">
+              <span class="pill blue" style="padding:4px 10px;">IVA</span>
+              <span class="pill green" style="padding:4px 10px;">IRE</span>
+            </div>
+            <div class="app-btn primary" style="position:relative;">Ejecutar Análisis
+              <div class="hotspot" data-label="Inicia el motor de auditoría" style="inset:-4px;"></div>
+            </div>
           </div>
         </div>
+        <div class="mockup-caption">Panel de análisis con datos disponibles y configuración de impuestos</div>
       </div>
 
       <h3>Ejecutar el análisis</h3>
@@ -850,25 +1286,54 @@
       <h2><span class="num">11</span> Gestión de Hallazgos</h2>
       <p>La pestaña <strong>Hallazgos</strong> es donde revisas, clasificas y gestionas cada irregularidad detectada.</p>
 
-      <div class="screenshot">
-        <div class="label">📸 Captura de pantalla</div>
-        <div class="desc">Tabla de hallazgos con filtros + panel lateral de detalle</div>
-        <div class="mock-ui">
-          <div class="mock-header"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span></div>
-          <div class="mock-row" style="gap:6px; margin-bottom:8px;">
-            <span class="mock-badge blue">IVA</span>
-            <span class="mock-badge amber">Alto</span>
-            <span class="mock-badge green">Pendiente</span>
-          </div>
-          <div class="mock-row"><span class="mock-line gray w80" style="height:8px; margin:0;"></span><span class="mock-badge red">₲ 18.4M</span></div>
-          <div class="mock-row" style="margin-top:4px;"><span class="mock-line gray w60" style="height:8px; margin:0;"></span><span class="mock-badge red">₲ 9.2M</span></div>
-          <div class="mock-row" style="margin-top:4px;"><span class="mock-line gray w40" style="height:8px; margin:0;"></span><span class="mock-badge amber">₲ 6.1M</span></div>
-          <div style="border-left:2px solid var(--gray-border); padding-left:12px; margin-top:12px;">
-            <div class="mock-line blue w80" style="height:10px; margin-bottom:4px;"></div>
-            <div class="mock-line gray w60" style="height:8px; margin-bottom:4px;"></div>
-            <div class="mock-line green w40" style="height:8px;"></div>
+      <div class="app-mockup hotspot-container">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/auditorias/.../hallazgos</div>
+        </div>
+        <div class="app-body" style="min-height:auto;">
+          <div class="app-content" style="padding:16px;">
+            <div class="tab-bar">
+              <div class="tab">Resumen</div><div class="tab active">Hallazgos <span class="pill blue" style="margin-left:2px;">8</span></div>
+              <div class="tab">Análisis</div><div class="tab">Plan de Trabajo</div><div class="tab">Informes</div>
+            </div>
+            <div style="display:flex;gap:6px;margin-bottom:12px;">
+              <span class="pill blue" style="padding:3px 8px;">Todos (8)</span>
+              <span class="pill red" style="padding:3px 8px;">Alto (3)</span>
+              <span class="pill amber" style="padding:3px 8px;">Medio (4)</span>
+              <span class="pill green" style="padding:3px 8px;">Bajo (1)</span>
+            </div>
+            <table class="app-table">
+              <tr><th>Hallazgo</th><th>Impuesto</th><th>Riesgo</th><th>Contingencia</th></tr>
+              <tr style="position:relative;">
+                <td style="color:white;font-weight:500;font-size:10px;">Crédito fiscal con RUC inactivo</td>
+                <td><span class="pill blue">IVA</span></td>
+                <td><span class="pill red">Alto</span></td>
+                <td style="color:#FCA5A5;font-weight:600;">₲ 24.0M</td>
+              </tr>
+              <tr>
+                <td style="color:white;font-weight:500;font-size:10px;">CDC no encontrado en SIFEN</td>
+                <td><span class="pill blue">IVA</span></td>
+                <td><span class="pill red">Alto</span></td>
+                <td style="color:#FCA5A5;font-weight:600;">₲ 18.0M</td>
+              </tr>
+              <tr>
+                <td style="color:white;font-weight:500;font-size:10px;">Diferencia RG90 vs Form. 120</td>
+                <td><span class="pill blue">IVA</span></td>
+                <td><span class="pill amber">Medio</span></td>
+                <td style="color:#FBBF24;font-weight:600;">₲ 12.8M</td>
+              </tr>
+              <tr>
+                <td style="color:white;font-weight:500;font-size:10px;">Depreciación excesiva vehículos</td>
+                <td><span class="pill green">IRE</span></td>
+                <td><span class="pill amber">Medio</span></td>
+                <td style="color:#FBBF24;font-weight:600;">₲ 9.6M</td>
+              </tr>
+            </table>
+            <div style="text-align:right;margin-top:6px;font-size:9px;color:#64748B;">Mostrando 4 de 8 hallazgos</div>
           </div>
         </div>
+        <div class="mockup-caption">Tabla de hallazgos con filtros por riesgo y detalle de contingencia</div>
       </div>
 
       <h3>Ciclo de vida de un hallazgo</h3>
@@ -906,17 +1371,36 @@
       <h2><span class="num">12</span> Plan de Trabajo</h2>
       <p>La pestaña <strong>Plan de Trabajo</strong> te ayuda a organizar las tareas y aprovechar las sugerencias de IA.</p>
 
-      <div class="screenshot">
-        <div class="label">📸 Captura de pantalla</div>
-        <div class="desc">Barra de progreso general + checklist de tareas + sugerencias de IA</div>
-        <div class="mock-ui">
-          <div class="mock-header"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span></div>
-          <div class="mock-line green w80" style="height:8px; border-radius:4px; margin-bottom:12px;"></div>
-          <div class="mock-row"><span class="mock-badge green">✓</span><span class="mock-line gray w60" style="height:8px; margin:0;"></span></div>
-          <div class="mock-row" style="margin-top:4px;"><span class="mock-badge green">✓</span><span class="mock-line gray w40" style="height:8px; margin:0;"></span></div>
-          <div class="mock-row" style="margin-top:4px;"><span class="mock-badge blue">○</span><span class="mock-line gray w80" style="height:8px; margin:0;"></span></div>
-          <div class="mock-row" style="margin-top:4px;"><span class="mock-badge amber">!</span><span class="mock-line amber w60" style="height:8px; margin:0;"></span></div>
+      <div class="app-mockup">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/auditorias/.../plan-de-trabajo</div>
         </div>
+        <div class="app-body" style="min-height:auto;">
+          <div class="app-content" style="padding:16px;">
+            <div class="tab-bar">
+              <div class="tab">Resumen</div><div class="tab">Hallazgos</div><div class="tab">Análisis</div>
+              <div class="tab active">Plan de Trabajo</div><div class="tab">Archivos</div><div class="tab">Informes</div>
+            </div>
+            <div style="font-size:11px;color:#64748B;text-transform:uppercase;margin-bottom:6px;">Progreso del encargo</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+              <div style="font-size:10px;color:#94A3B8;">0 de 0 tareas completadas</div>
+              <div class="progress-track" style="flex:1;"><div class="progress-fill green" style="width:0%;"></div></div>
+              <div style="font-size:14px;font-weight:700;color:#E53E3E;">0%</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:12px;margin-bottom:10px;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <span style="font-size:14px;">✨</span>
+                <span style="font-size:12px;font-weight:700;color:white;flex:1;">Sugerencias de IA</span>
+                <span class="app-btn outline" style="font-size:9px;padding:3px 8px;">Actualizar</span>
+              </div>
+              <div style="font-size:10px;color:#94A3B8;text-align:center;padding:8px 0;">
+                Sin sugerencias. Haz clic en "Actualizar" para analizar los datos.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mockup-caption">Plan de Trabajo con barra de progreso y sugerencias de IA</div>
       </div>
 
       <h3>Checklist de tareas</h3>
@@ -953,24 +1437,44 @@
       <h2><span class="num">13</span> Informes</h2>
       <p>La pestaña <strong>Informes</strong> dentro de cada auditoría te permite generar documentos profesionales con un solo clic. La página global <strong>/informes</strong> muestra todos los informes generados por la firma.</p>
 
-      <div class="screenshot">
-        <div class="label">📸 Captura de pantalla</div>
-        <div class="desc">Selector de tipo de informe + formato + botón generar + lista de informes previos</div>
-        <div class="mock-ui">
-          <div class="mock-header"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span></div>
-          <div class="mock-row" style="gap:8px; margin-bottom:8px;">
-            <span class="mock-badge blue">Completo</span>
-            <span class="mock-badge green">Carta</span>
-            <span class="mock-badge amber">Resumen</span>
-          </div>
-          <div class="mock-row" style="gap:8px; margin-bottom:12px;">
-            <span class="mock-badge blue">Word + PDF</span>
-            <span class="mock-badge green">Solo Word</span>
-            <span class="mock-badge amber">Solo PDF</span>
-          </div>
-          <div class="mock-line blue w40" style="height:36px; border-radius:6px; margin-bottom:12px;"></div>
-          <div class="mock-row"><span class="mock-badge green">✓</span><span class="mock-line gray w60" style="height:8px; margin:0;"></span><span class="mock-badge blue">DOCX</span><span class="mock-badge red">PDF</span></div>
+      <div class="app-mockup hotspot-container">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/auditorias/.../informes</div>
         </div>
+        <div class="app-body" style="min-height:auto;">
+          <div class="app-content" style="padding:16px;">
+            <div class="tab-bar">
+              <div class="tab">Resumen</div><div class="tab">Hallazgos</div><div class="tab">Análisis</div>
+              <div class="tab">Plan de Trabajo</div><div class="tab">Archivos</div><div class="tab active">Informes</div>
+            </div>
+            <div style="font-size:11px;color:#64748B;text-transform:uppercase;margin-bottom:8px;">Generar informe</div>
+            <div style="font-size:10px;color:#94A3B8;margin-bottom:6px;">Tipo de informe</div>
+            <div style="display:flex;gap:8px;margin-bottom:12px;position:relative;">
+              <div style="flex:1;padding:10px;border-radius:8px;background:rgba(46,132,240,0.1);border:1px solid rgba(46,132,240,0.3);cursor:default;">
+                <div style="font-size:11px;font-weight:600;color:#60A5FA;">Auditoría completa</div>
+                <div style="font-size:9px;color:#64748B;margin-top:2px;">Informe técnico con todos los hallazgos</div>
+              </div>
+              <div style="flex:1;padding:10px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);cursor:default;">
+                <div style="font-size:11px;font-weight:600;color:#CBD5E1;">Carta a la gerencia</div>
+                <div style="font-size:9px;color:#64748B;margin-top:2px;">Resumen ejecutivo para directorio</div>
+              </div>
+              <div style="flex:1;padding:10px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);cursor:default;">
+                <div style="font-size:11px;font-weight:600;color:#CBD5E1;">Resumen ejecutivo</div>
+                <div style="font-size:9px;color:#64748B;margin-top:2px;">Una página con KPIs principales</div>
+              </div>
+              <div class="hotspot" data-label="3 tipos de informe disponibles" style="inset:0;"></div>
+            </div>
+            <div style="font-size:10px;color:#94A3B8;margin-bottom:6px;">Formato</div>
+            <div style="display:flex;gap:6px;margin-bottom:12px;">
+              <div style="padding:6px 14px;border-radius:6px;background:rgba(46,132,240,0.15);border:1px solid rgba(46,132,240,0.3);font-size:10px;color:#60A5FA;font-weight:600;">Word + PDF</div>
+              <div style="padding:6px 14px;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);font-size:10px;color:#64748B;">Solo Word</div>
+              <div style="padding:6px 14px;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);font-size:10px;color:#64748B;">Solo PDF</div>
+            </div>
+            <div class="app-btn primary">Generar Informe</div>
+          </div>
+        </div>
+        <div class="mockup-caption">Generación de informes — Tipo, formato y descarga con un clic</div>
       </div>
 
       <h3>Tipos de informe</h3>
@@ -1006,26 +1510,50 @@
       <h2><span class="num">14</span> Explorador de Evidencia</h2>
       <p>Herramienta avanzada con vista de panel dividido para revisar hallazgos y evidencia. Accede desde el botón <strong>"Explorar Evidencia"</strong> dentro de una auditoría.</p>
 
-      <div class="screenshot">
-        <div class="label">📸 Captura de pantalla</div>
-        <div class="desc">Panel dividido: lista de hallazgos a la izquierda, detalle completo a la derecha</div>
-        <div class="mock-ui">
-          <div class="mock-header"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span></div>
-          <div style="display:flex; gap:12px;">
-            <div style="flex:1; border-right:1px solid var(--gray-border); padding-right:12px;">
-              <div class="mock-line gray w80" style="height:8px; margin-bottom:4px;"></div>
-              <div class="mock-line gray w60" style="height:8px; margin-bottom:4px;"></div>
-              <div class="mock-line blue w40" style="height:8px; margin-bottom:4px;"></div>
-              <div class="mock-line gray w80" style="height:8px;"></div>
+      <div class="app-mockup">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/auditorias/.../evidencia</div>
+        </div>
+        <div class="app-body" style="min-height:220px;">
+          <div style="width:200px;background:rgba(255,255,255,0.02);border-right:1px solid rgba(255,255,255,0.06);padding:12px;overflow:hidden;">
+            <div style="font-size:10px;color:#64748B;text-transform:uppercase;margin-bottom:8px;">Hallazgos</div>
+            <div style="padding:6px 8px;border-radius:6px;background:rgba(46,132,240,0.1);border-left:2px solid #2E84F0;margin-bottom:4px;cursor:default;">
+              <div style="font-size:10px;color:white;font-weight:500;">Crédito fiscal RUC inactivo</div>
+              <div style="font-size:8px;color:#64748B;margin-top:2px;"><span class="pill red" style="font-size:8px;">Alto</span> ₲ 24.0M</div>
             </div>
-            <div style="flex:2;">
-              <div class="mock-line blue w80" style="height:10px; margin-bottom:6px;"></div>
-              <div class="mock-line gray w60" style="height:8px; margin-bottom:4px;"></div>
-              <div class="mock-line green w40" style="height:8px; margin-bottom:4px;"></div>
-              <div class="mock-line amber w60" style="height:8px;"></div>
+            <div style="padding:6px 8px;border-radius:6px;margin-bottom:4px;cursor:default;">
+              <div style="font-size:10px;color:#94A3B8;">CDC no encontrado SIFEN</div>
+              <div style="font-size:8px;color:#64748B;margin-top:2px;"><span class="pill red" style="font-size:8px;">Alto</span> ₲ 18.0M</div>
+            </div>
+            <div style="padding:6px 8px;border-radius:6px;margin-bottom:4px;cursor:default;">
+              <div style="font-size:10px;color:#94A3B8;">Diferencia RG90 vs 120</div>
+              <div style="font-size:8px;color:#64748B;margin-top:2px;"><span class="pill amber" style="font-size:8px;">Medio</span> ₲ 12.8M</div>
+            </div>
+            <div style="padding:6px 8px;border-radius:6px;cursor:default;">
+              <div style="font-size:10px;color:#94A3B8;">Depreciación excesiva</div>
+              <div style="font-size:8px;color:#64748B;margin-top:2px;"><span class="pill amber" style="font-size:8px;">Medio</span> ₲ 9.6M</div>
+            </div>
+          </div>
+          <div class="app-content" style="padding:14px;">
+            <div style="font-size:14px;font-weight:700;color:white;margin-bottom:4px;">Crédito fiscal con RUC inactivo</div>
+            <div style="display:flex;gap:6px;margin-bottom:10px;">
+              <span class="pill red">Alto riesgo</span><span class="pill blue">IVA</span><span class="pill amber">Pendiente</span>
+            </div>
+            <div style="font-size:10px;color:#94A3B8;margin-bottom:8px;">Se detectaron 12 comprobantes con crédito fiscal de proveedores cuyo RUC se encuentra inactivo o cancelado en la base de datos de la DNIT.</div>
+            <div style="display:flex;gap:12px;">
+              <div style="flex:1;">
+                <div style="font-size:9px;color:#64748B;margin-bottom:2px;">Base legal</div>
+                <div style="font-size:10px;color:#CBD5E1;">Art. 86 Ley 125/1991</div>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:9px;color:#64748B;margin-bottom:2px;">Contingencia</div>
+                <div style="font-size:12px;font-weight:700;color:#FCA5A5;">₲ 24.000.000</div>
+              </div>
             </div>
           </div>
         </div>
+        <div class="mockup-caption">Explorador de Evidencia — Panel dividido con lista y detalle completo</div>
       </div>
 
       <h3>Funcionalidades</h3>
