@@ -10,8 +10,9 @@ if (!fs.existsSync(dest)) {
 
 const files = fs.readdirSync(src);
 for (const file of files) {
-  if (file.endsWith('.html')) {
+  const ext = path.extname(file).toLowerCase();
+  if (['.html', '.png', '.svg', '.jpg', '.jpeg', '.ico', '.webp'].includes(ext)) {
     fs.copyFileSync(path.join(src, file), path.join(dest, file));
   }
 }
-console.log('Landing pages copied to dist/landing');
+console.log('Landing files copied to dist/landing');
