@@ -44,6 +44,12 @@ const NAV_GROUPS = [
       { path: '/admin/trail', icon: <Shield size={17} />, label: 'Audit Trail', roles: ['super_admin', 'admin'] },
     ],
   },
+  {
+    title: 'Super Admin',
+    items: [
+      { path: '/superadmin/dashboard', icon: <Shield size={17} />, label: 'Consola SaaS', roles: ['super_admin'] },
+    ],
+  },
 ]
 
 const THEME_OPTS = [

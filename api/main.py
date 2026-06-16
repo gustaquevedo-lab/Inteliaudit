@@ -283,6 +283,7 @@ from api.routers.portal import router as portal_router
 from api.routers.importacion import router as importacion_router
 from api.routers.suscripciones import router as suscripciones_router
 from api.routers.jobs import router as jobs_router
+from api.routers.superadmin import router as superadmin_router
 
 api = APIRouter(prefix="/api")
 
@@ -298,6 +299,7 @@ api.include_router(importacion_router)
 api.include_router(informes_v2_router)
 api.include_router(suscripciones_router)
 api.include_router(jobs_router)
+api.include_router(superadmin_router)
 
 
 # ============================================================

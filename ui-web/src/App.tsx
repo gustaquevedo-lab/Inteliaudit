@@ -17,6 +17,7 @@ import AuditTrail from './pages/admin/AuditTrail'
 import PortalCliente from './pages/PortalCliente'
 import Planes from './pages/Planes'
 import Registro from './pages/Registro'
+import SuperAdminDashboard from './pages/admin/SuperAdminDashboard'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -56,6 +57,7 @@ function AppRoutes() {
         <Route path="planes" element={<Planes />} />
         <Route path="admin/configuracion" element={<Configuracion />} />
         <Route path="admin/trail" element={<AuditTrail />} />
+        <Route path="superadmin/dashboard" element={<SuperAdminDashboard />} />
       </Route>
       {/* Portal público — sin auth */}
       <Route path="/portal/:token" element={<PortalCliente />} />
