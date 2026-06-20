@@ -232,6 +232,24 @@ async def sifen_comprobantes(db_session: AsyncSession, firma: Firma, auditoria: 
 
 
 @pytest_asyncio.fixture
+async def sifen_recibida_omitida(db_session: AsyncSession, firma: Firma, auditoria: Auditoria, cliente: Cliente):
+    """SIFEN recibida que NO tiene correspondiente en RG90 compras — crédito omitido."""
+    s3 = SifenComprobante(
+        id=_uuid(), firma_id=firma.id, auditoria_id=auditoria.id,
+        cdc="77777777777777777777777777777777777777777777", tipo_de="1",
+        ruc_emisor="80022222-8", nombre_emisor="Proveedor No Declarado SA",
+        ruc_receptor=cliente.ruc, nombre_receptor=cliente.razon_social,
+        fecha_emision="2024-03-22T09:00:00",
+        base_gravada_10=8000000, base_gravada_5=0, monto_exento=0,
+        iva_total=800000, total_comprobante=8800000,
+        estado_sifen="aprobado",
+    )
+    db_session.add(s3)
+    await db_session.flush()
+    return s3
+
+
+@pytest_asyncio.fixture
 async def hechauka_registros(db_session: AsyncSession, firma: Firma, cliente: Cliente, auditoria: Auditoria):
     registros = []
     registros.append(Hechauka(

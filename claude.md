@@ -8,7 +8,7 @@ de datos en Marangatú hasta la generación de informes finales firmables.
 
 **Principio de diseño central:**
 Marangatú es la única fuente de verdad. Todo análisis parte de lo efectivamente presentado ante la SET.
-Las demás fuentes (SIFEN, HECHAUKA, contabilidad, banco) se usan solo para contrastar.
+Las demás fuentes (SIFEN, Talón de Presentación, contabilidad, banco) se usan solo para contrastar.
 
 ---
 
@@ -42,10 +42,38 @@ rich                → output de terminal
 
 ### Resoluciones Generales SET clave
 - **RG 24/2014** — Comprobantes de venta autorizados (pre-electrónicos)
+- **RG 48/2014** — HECHAUKA (Sistema Integrado de Recopilación de Información) — **DEROGADO parcialmente por RG 90/2021**
+- **RG 55/2020** — Calendario HECHAUKA (ya no aplica para libros de compras/ventas)
 - **RG 69/2020** — Implementación factura electrónica (e-Kuatia)
 - **RG 80/2021** — Obligatoriedad e-Kuatia por tramos
-- **RG 90/2021** — Detalle de comprobantes en declaración IVA (el "libro digital de IVA")
-- **RG 108/2021** — Calendario de obligados a e-Kuatia
+- **RG 90/2021** — **REGULACIÓN CLAVE**: Implementa Registro Electrónico de Comprobantes en Marangatú. **Deroga RG 48/2014 (HECHAUKA) para libros de compras y ventas a partir del 01/01/2022**. Crea el "Talón de Presentación" (Form. 241) y "Talón Resumen" (Form. 242).
+- **RG 105/2021** — Designación de facturadores electrónicos obligatorios
+- **RG 01/2024** — Modifica RG 105/2021 (nuevos contribuyentes solo electrónicos desde 01/04/2025)
+- **RG 06/2024** — Reglamenta E-Kuatia'i para pequeños contribuyentes
+- **RG 19/2024** — Adhesión voluntaria E-Kuatia'i para pequeños contribuyentes
+- **RG 21/2024** — Designa facturadores electrónicos (Medianos y Grandes) + calendario obligatorio
+- **RG 41/2025** — Obligatoriedad SIFEN para proveedores del Estado (desde 02/01/2026)
+
+### Estado de HECHAUKA (actualizado junio 2026)
+
+**HECHAUKA fue reemplazado por el "Talón de Presentación" en Marangatú.**
+
+| Período | Sistema vigente |
+|---------|----------------|
+| Antes de 2022 | HECHAUKA (RG 48/2014) |
+| Desde 01/01/2022 | Talón de Presentación en Marangatú (RG 90/2021) |
+
+**Artículo 16 RG 90/2021:** "A partir del 01 de enero de 2022... quedarán derogadas las disposiciones contenidas en la Resolución General N° 48/2014, con excepción de lo dispuesto en el inciso c) del artículo 3° y el artículo 6° de la misma."
+
+**Excepciones que siguen usando HECHAUKA:**
+- Estados financieros (inciso c) art. 3 RG 48/2014)
+- DJI Ajuste de Precios (transfer pricing)
+
+**Sistema actual para registro de comprobantes (RG 90/2021):**
+1. El contribuyente registra comprobantes en Marangatú (carga manual, importación, o automático vía SIFEN)
+2. Confirma la presentación → se genera **Talón de Presentación (Form. 241)**
+3. Se genera **Talón Resumen de Operaciones (Form. 242)** con totales por tipo
+4. Obligación 955 = registro mensual / Obligación 956 = registro anual
 
 ### Calendario tributario (vencimientos habituales)
 - IVA (Form. 120): vence el mes siguiente según último dígito RUC

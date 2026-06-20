@@ -270,6 +270,24 @@ async def get_sifen_por_cdc(
     return result.scalar_one_or_none()
 
 
+async def get_sifen_recibidas(
+    db: AsyncSession,
+    firma_id: str,
+    ruc_receptor: str,
+    periodo: str,
+) -> list[SifenComprobante]:
+    """Obtiene comprobantes SIFEN recibidos por un RUC en un período (YYYY-MM)."""
+    anio_mes = periodo[:7]  # "2024-03"
+    result = await db.execute(
+        select(SifenComprobante).where(
+            SifenComprobante.firma_id == firma_id,
+            SifenComprobante.ruc_receptor == ruc_receptor,
+            SifenComprobante.fecha_emision.like(f"{anio_mes}%"),
+        )
+    )
+    return list(result.scalars().all())
+
+
 async def marcar_validacion_rg90(
     db: AsyncSession,
     rg90_id: str,

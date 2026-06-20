@@ -189,6 +189,12 @@ def _validate_config():
 async def lifespan(app: FastAPI):
     init_posthog()
     _validate_config()
+    # OpenTelemetry
+    try:
+        from telemetry import setup_telemetry
+        setup_telemetry(app)
+    except Exception:
+        pass
     if not settings.is_sqlite:
         subprocess.run(["alembic", "upgrade", "head"], check=False)
     yield
@@ -449,6 +455,24 @@ async def save_roadmap_state(body: dict):
 
 
 app.include_router(api)
+
+
+# ============================================================
+#  WebSocket — progreso en tiempo real
+# ============================================================
+
+@app.websocket("/ws/{firma_id}")
+async def websocket_endpoint(websocket, firma_id: str):
+    from websocket_manager import ws_manager
+    await ws_manager.connect(websocket, firma_id)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            # Keepalive / commands from client
+    except Exception:
+        pass
+    finally:
+        await ws_manager.disconnect(websocket, firma_id)
 
 
 @app.get("/", include_in_schema=False)

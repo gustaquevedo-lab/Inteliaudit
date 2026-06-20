@@ -15,6 +15,31 @@ console = Console()
 
 
 # ============================================================
+#  Helpers multi-tenant para CLI
+# ============================================================
+
+async def _get_cli_firma_id(db) -> str:
+    """Obtiene o crea la firma 'CLI' para uso desde terminal."""
+    from sqlalchemy import select
+    from db.models import Firma
+    result = await db.execute(select(Firma).where(Firma.nombre == "CLI"))
+    firma = result.scalar_one_or_none()
+    if firma:
+        return firma.id
+    from db.base import init_db
+    await init_db()
+    result = await db.execute(select(Firma).where(Firma.nombre == "CLI"))
+    firma = result.scalar_one_or_none()
+    if firma:
+        return firma.id
+    # Crear firma CLI manualmente
+    firma = Firma(nombre="CLI", plan="enterprise")
+    db.add(firma)
+    await db.flush()
+    return firma.id
+
+
+# ============================================================
 #  Entry point
 # ============================================================
 
@@ -62,9 +87,11 @@ def cliente_crear(ruc: str, razon_social: str, regimen: str, actividad: Optional
         from db.base import AsyncSessionLocal
         from db import db as crud
         async with AsyncSessionLocal() as db:
+            firma_id = await _get_cli_firma_id(db)
             try:
                 c = await crud.crear_cliente(
                     db,
+                    firma_id=firma_id,
                     ruc=ruc,
                     razon_social=razon_social,
                     regimen=regimen,
@@ -84,7 +111,8 @@ def cliente_listar():
         from db.base import AsyncSessionLocal
         from db import db as crud
         async with AsyncSessionLocal() as db:
-            clientes = await crud.listar_clientes(db)
+            firma_id = await _get_cli_firma_id(db)
+            clientes = await crud.listar_clientes(db, firma_id)
         if not clientes:
             console.print("[dim]Sin clientes registrados.[/]")
             return
@@ -95,7 +123,7 @@ def cliente_listar():
         tabla.add_column("Régimen")
         tabla.add_column("Estado SET")
         for c in clientes:
-            tabla.add_row(c.ruc, c.razon_social, c.regimen, c.estado_set)
+            tabla.add_row(c.ruc, c.razon_social, c.regimen, c.estado_dnit)
         console.print(tabla)
     asyncio.run(_run())
 
@@ -124,20 +152,21 @@ def auditoria_nueva(ruc: str, desde: str, hasta: str, impuestos: str, materialid
         from db import db as crud
         impuestos_list = [i.strip().upper() for i in impuestos.split(",")]
         async with AsyncSessionLocal() as db:
-            cliente = await crud.get_cliente(db, ruc)
+            firma_id = await _get_cli_firma_id(db)
+            cliente = await crud.get_cliente(db, firma_id, ruc=ruc)
             if not cliente:
                 console.print(f"[red]✗[/] Cliente {ruc} no encontrado.")
                 return
             a = await crud.crear_auditoria(
                 db,
-                cliente_ruc=ruc,
+                firma_id=firma_id,
+                cliente_id=cliente.id,
                 periodo_desde=desde,
                 periodo_hasta=hasta,
                 impuestos=impuestos_list,
                 materialidad=materialidad,
                 auditor=auditor,
             )
-            await db.commit()
             console.print(Panel(
                 f"[bold]Auditoría creada[/bold]\n"
                 f"ID: {a.id}\n"
@@ -158,18 +187,24 @@ def auditoria_listar(ruc: Optional[str]):
         from db.base import AsyncSessionLocal
         from db import db as crud
         async with AsyncSessionLocal() as db:
-            auditorias = await crud.listar_auditorias(db, ruc)
+            firma_id = await _get_cli_firma_id(db)
+            if ruc:
+                cliente = await crud.get_cliente(db, firma_id, ruc=ruc)
+                cliente_id = cliente.id if cliente else None
+            else:
+                cliente_id = None
+            auditorias = await crud.listar_auditorias(db, firma_id, cliente_id)
         if not auditorias:
             console.print("[dim]Sin auditorías.[/]")
             return
         from rich.table import Table
         tabla = Table(title="Auditorías")
         tabla.add_column("ID", style="dim")
-        tabla.add_column("Cliente")
+        tabla.add_column("Cliente ID")
         tabla.add_column("Período")
         tabla.add_column("Estado")
         for a in auditorias:
-            tabla.add_row(a.id[:8] + "...", a.cliente_ruc, f"{a.periodo_desde} → {a.periodo_hasta}", a.estado)
+            tabla.add_row(a.id[:8] + "...", a.cliente_id[:8] + "...", f"{a.periodo_desde} → {a.periodo_hasta}", a.estado)
         console.print(tabla)
     asyncio.run(_run())
 
@@ -196,9 +231,14 @@ def ingestar_rg90(archivo: Path, ruc: str, periodo: str, auditoria_id: Optional[
         from db.base import AsyncSessionLocal
         from db import db as crud
 
-        registros = parsear_rg90(archivo, ruc, periodo, auditoria_id)
         async with AsyncSessionLocal() as db:
-            n = await crud.guardar_rg90_batch(db, registros)
+            firma_id = await _get_cli_firma_id(db)
+            cliente = await crud.get_cliente(db, firma_id, ruc=ruc)
+            if not cliente:
+                console.print(f"[red]✗[/] Cliente {ruc} no encontrado.")
+                return
+            registros = parsear_rg90(archivo, cliente.id, periodo, auditoria_id)
+            n = await crud.guardar_rg90_batch(db, firma_id, registros)
             await db.commit()
         console.print(f"[green]✓[/] {n} comprobantes RG90 importados.")
     asyncio.run(_run())
@@ -241,14 +281,15 @@ def analizar_iva(auditoria_id: str):
         from ingesta.marangatu import _generar_periodos
 
         async with AsyncSessionLocal() as db:
-            auditoria = await crud.get_auditoria(db, auditoria_id)
+            firma_id = await _get_cli_firma_id(db)
+            auditoria = await crud.get_auditoria(db, firma_id, auditoria_id)
             if not auditoria:
                 console.print(f"[red]✗[/] Auditoría {auditoria_id} no encontrada.")
                 return
 
             periodos = _generar_periodos(auditoria.periodo_desde, auditoria.periodo_hasta)
-            auditor = AuditoriaIVA(db, auditoria_id, auditoria.materialidad)
-            resultados = await auditor.ejecutar_auditoria_completa(auditoria.cliente_ruc, periodos)
+            auditor = AuditoriaIVA(db, firma_id, auditoria_id, auditoria.materialidad)
+            resultados = await auditor.ejecutar_auditoria_completa(auditoria.cliente_id, periodos)
             await db.commit()
 
         total_hallazgos = sum(r.hallazgos_generados for r in resultados)

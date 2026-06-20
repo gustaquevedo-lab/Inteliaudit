@@ -20,7 +20,7 @@ ARTICULOS = {
     "IVA_CREDITO_SIN_CDC":            "Art. 95 Ley 6380/2019 + RG 80/2021 — CDC obligatorio",
     "IVA_COMPROBANTE_NO_DECLARADO":   "Art. 97 Ley 6380/2019 — Obligación declaración",
     "IVA_DIFERENCIA_RG90_DJ":         "Art. 97 Ley 6380/2019 — Consistencia DJ",
-    "IVA_DEBITO_OMITIDO_HECHAUKA":    "Art. 93 Ley 6380/2019 — Débito fiscal omitido",
+    "IVA_DEBITO_OMITIDO_HECHAUKA":    "Art. 93 Ley 6380/2019 — Débito fiscal omitido + Art. 16 RG 90/2021",
     "IVA_NOTA_CREDITO_NO_APLICADA":   "Art. 95 Ley 6380/2019 — NC reduce crédito",
 }
 
@@ -206,10 +206,107 @@ class AuditoriaIVA:
 
     async def cruce_sifen_vs_rg90(self, cliente_id: str, periodo: str) -> ResultadoCruceIVA:
         """
-        Detecta facturas electrónicas recibidas en SIFEN que NO están en RG90.
+        Cruce 3: Detecta facturas electrónicas recibidas en SIFEN que NO están en RG90.
+        Crédito fiscal declarado puede estar subdeclarado si hay comprobantes recibidos
+        en SIFEN que el contribuyente no incluyó en su RG90 compras.
         """
         resultado = ResultadoCruceIVA(periodo=periodo, cruce="SIFEN recibidas vs RG90")
-        resultado.errores.append("Cruce SIFEN→RG90 requiere descarga de comprobantes recibidos desde Marangatú")
+
+        # Obtener RUC del cliente para buscar en SIFEN
+        cliente = await crud.get_cliente(self.db, self.firma_id, id=cliente_id)
+        if not cliente:
+            resultado.errores.append(f"Cliente {cliente_id} no encontrado")
+            return resultado
+
+        sifen_recibidas = await crud.get_sifen_recibidas(
+            self.db, self.firma_id, cliente.ruc, periodo
+        )
+        compras_rg90 = await crud.get_rg90(
+            self.db, self.firma_id, cliente_id, periodo, "compra"
+        )
+
+        if not sifen_recibidas:
+            resultado.errores.append(
+                f"No hay comprobantes SIFEN recibidos para {periodo}. "
+                "Ejecutar validación CDC desde Marangatú primero."
+            )
+            return resultado
+
+        # Indexar RG90 compras por CDC y por (ruc_emisor, nro_comprobante)
+        rg90_por_cdc = {}
+        rg90_por_ruc_nro = {}
+        for compra in compras_rg90:
+            if compra.cdc:
+                rg90_por_cdc[compra.cdc] = compra
+            clave = f"{compra.ruc_contraparte}_{compra.nro_comprobante}"
+            rg90_por_ruc_nro[clave] = compra
+
+        omitidos = []
+        for sifen in sifen_recibidas:
+            # Solo facturas tipo DE (documento electrónico) y autofacturas
+            if sifen.tipo_de not in ("1", "4"):  # 1=Factura, 4=Autofactura
+                continue
+
+            # Buscar por CDC
+            encontrado = sifen.cdc in rg90_por_cdc if sifen.cdc else False
+
+            # Buscar por RUC + número si no encontrado por CDC
+            if not encontrado and sifen.ruc_emisor and sifen.nro_comprobante:
+                clave = f"{sifen.ruc_emisor}_{sifen.nro_comprobante}"
+                encontrado = clave in rg90_por_ruc_nro
+
+            if not encontrado and sifen.iva_total > 0:
+                omitidos.append(sifen)
+
+        total_omitido = sum(s.iva_total for s in omitidos)
+
+        if total_omitido > self.materialidad:
+            cont = calcular_contingencia(total_omitido, f"{periodo}-20")
+            evidencias = [
+                {
+                    "tipo": "sifen",
+                    "cdc": s.cdc,
+                    "ruc_emisor": s.ruc_emisor,
+                    "nombre_emisor": s.nombre_emisor,
+                    "nro_comprobante": s.nro_comprobante,
+                    "fecha_emision": s.fecha_emision,
+                    "iva_total": s.iva_total,
+                }
+                for s in omitidos[:20]
+            ]
+            await crud.crear_hallazgo(
+                self.db,
+                firma_id=self.firma_id,
+                auditoria_id=self.auditoria_id,
+                impuesto="IVA",
+                periodo=periodo,
+                tipo_hallazgo="IVA_COMPROBANTE_NO_DECLARADO",
+                descripcion=(
+                    f"SIFEN reporta {len(omitidos)} comprobante(s) recibido(s) por "
+                    f"Gs. {total_omitido:,} de IVA que no fueron declarados en RG90 compras. "
+                    f"Crédito fiscal subdeclarado estimado: Gs. {total_omitido:,}"
+                ),
+                articulo_legal=ARTICULOS["IVA_COMPROBANTE_NO_DECLARADO"],
+                base_ajuste=total_omitido * 10,
+                impuesto_omitido=total_omitido,
+                multa_estimada=cont["multa_estimada"],
+                intereses_estimados=cont["intereses_estimados"],
+                nivel_riesgo=clasificar_riesgo(cont["total_contingencia"], self.materialidad),
+                evidencias=evidencias,
+            )
+            resultado.hallazgos_generados += 1
+            resultado.monto_ajuste += total_omitido
+            resultado.detalles = [
+                {
+                    "ruc_emisor": s.ruc_emisor,
+                    "nombre_emisor": s.nombre_emisor,
+                    "nro_comprobante": s.nro_comprobante,
+                    "fecha_emision": s.fecha_emision,
+                    "iva_total": s.iva_total,
+                }
+                for s in omitidos
+            ]
+
         return resultado
 
     # --------------------------------------------------------
@@ -218,17 +315,41 @@ class AuditoriaIVA:
 
     async def cruce_rg90_vs_hechauka(self, cliente_id: str, periodo: str) -> ResultadoCruceIVA:
         """
-        Compara ventas declaradas en RG90 con lo que los compradores informaron en HECHAUKA.
-        Ventas en HECHAUKA no en RG90 → hallazgo IVA_DEBITO_OMITIDO_HECHAUKA.
+        Cruce 4: RG90 ventas vs sistema de información de terceros.
+        
+        ANTES de 2022: cruza contra HECHAUKA (Software, RG 48/2014).
+        DESDE 01/01/2022: cruza contra Talón de Presentación (RG 90/2021).
+        
+        Art. 16 RG 90/2021: "A partir del 01 de enero de 2022... quedarán derogadas 
+        las disposiciones contenidas en la RG N° 48/2014, con excepción de lo dispuesto 
+        en el inciso c) del artículo 3° y el artículo 6° de la misma."
+        
+        Ventas en Talón/HECHAUKA no en RG90 → hallazgo IVA_DEBITO_OMITIDO.
         """
-        resultado = ResultadoCruceIVA(periodo=periodo, cruce="RG90 ventas vs HECHAUKA")
+        resultado = ResultadoCruceIVA(periodo=periodo, cruce="RG90 ventas vs información terceros")
 
+        es_post_2022 = periodo >= "2022-01"
+        fuente = "Talón de Presentación (RG 90/2021)" if es_post_2022 else "HECHAUKA (RG 48/2014)"
+        
         ventas_rg90 = await crud.get_rg90(self.db, self.firma_id, cliente_id, periodo, "venta")
-        hechauka = await crud.get_hechauka(self.db, self.firma_id, cliente_id, periodo)
 
-        if not hechauka:
-            resultado.errores.append(f"No hay datos HECHAUKA para {periodo}. Importar XLSX desde Marangatú.")
-            return resultado
+        if es_post_2022:
+            # Para períodos desde 2022, usar datos del Talón de Presentación
+            hechauka = await crud.get_hechauka(self.db, self.firma_id, cliente_id, periodo)
+            if not hechauka:
+                resultado.errores.append(
+                    f"No hay datos de {fuente} para {periodo}. "
+                    "Descargar Talón de Presentación desde Marangatú."
+                )
+                return resultado
+        else:
+            # Para períodos anteriores a 2022, usar HECHAUKA legacy
+            hechauka = await crud.get_hechauka(self.db, self.firma_id, cliente_id, periodo)
+            if not hechauka:
+                resultado.errores.append(
+                    f"No hay datos HECHAUKA para {periodo}. Importar XLSX desde Marangatú."
+                )
+                return resultado
 
         # Set de comprobantes declarados en RG90 ventas
         nros_declarados = {
@@ -246,6 +367,7 @@ class AuditoriaIVA:
                     "nombre_informante": reg.nombre_informante,
                     "nro_comprobante": reg.nro_comprobante,
                     "iva_omitido": reg.iva_operacion,
+                    "fuente": fuente,
                 })
 
         if total_omitido > self.materialidad:
@@ -257,8 +379,16 @@ class AuditoriaIVA:
                 impuesto="IVA",
                 periodo=periodo,
                 tipo_hallazgo="IVA_DEBITO_OMITIDO_HECHAUKA",
-                descripcion=f"HECHAUKA reporta {len(resultado.detalles)} comprobante(s) de venta no declarados en RG90. Débito fiscal omitido estimado: Gs. {total_omitido:,}",
-                articulo_legal=ARTICULOS["IVA_DEBITO_OMITIDO_HECHAUKA"],
+                descripcion=(
+                    f"{fuente} reporta {len(resultado.detalles)} comprobante(s) de venta "
+                    f"no declarados en RG90. Débito fiscal omitido estimado: Gs. {total_omitido:,}"
+                ),
+                articulo_legal=(
+                    "Art. 93 Ley 6380/2019 — Débito fiscal omitido + "
+                    "Art. 16 RG 90/2021 — Registro obligatorio de comprobantes"
+                    if es_post_2022 else
+                    "Art. 93 Ley 6380/2019 — Débito fiscal omitido"
+                ),
                 base_ajuste=total_omitido * 10,
                 impuesto_omitido=total_omitido,
                 multa_estimada=cont["multa_estimada"],

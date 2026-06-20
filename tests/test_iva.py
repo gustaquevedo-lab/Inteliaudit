@@ -59,7 +59,17 @@ class TestCruceSIFENvsRG90:
     """Cruce 3: SIFEN recibidas vs RG90 — credito omitido."""
 
     @pytest.mark.asyncio
-    async def test_requiere_descarga_marangatu(self, db_session, firma, cliente, auditoria):
+    async def test_credito_omitido(
+        self, db_session, firma, cliente, auditoria,
+        rg90_compras, sifen_comprobantes, sifen_recibida_omitida
+    ):
+        auditor = AuditoriaIVA(db_session, firma.id, auditoria.id, materialidad=0)
+        r = await auditor.cruce_sifen_vs_rg90(cliente.id, "2024-03")
+        assert r.hallazgos_generados >= 1
+        assert r.monto_ajuste > 0
+
+    @pytest.mark.asyncio
+    async def test_sin_sifen_recibidas(self, db_session, firma, cliente, auditoria, rg90_compras):
         auditor = AuditoriaIVA(db_session, firma.id, auditoria.id)
         r = await auditor.cruce_sifen_vs_rg90(cliente.id, "2024-03")
         assert len(r.errores) > 0

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe de Auditoría Impositiva — {{ cliente.razon_social }}</title>
+<style>
+  @page {
+    size: A4;
+    margin: 2cm 2.5cm;
+    @top-right { content: "Inteliaudit — Confidencial"; font-size: 8pt; color: #A8B4C8; }
+    @bottom-center { content: "Página " counter(page) " de " counter(pages); font-size: 8pt; color: #A8B4C8; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: #091624;
+    font-size: 10.5pt;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+  }
+  h1 { color: #2E84F0; font-size: 22pt; margin: 0 0 8px 0; }
+  h2 { color: #1558B0; font-size: 14pt; border-bottom: 2px solid #2E84F0; padding-bottom: 4px; margin-top: 28px; }
+  h3 { color: #091624; font-size: 11pt; margin-top: 16px; }
+  .cover {
+    text-align: center;
+    padding-top: 120px;
+    page-break-after: always;
+  }
+  .cover h1 { font-size: 28pt; margin-bottom: 4px; }
+  .cover .subtitle { color: #1558B0; font-size: 14pt; margin-bottom: 40px; }
+  .cover .meta { font-size: 11pt; color: #555; margin-top: 60px; line-height: 2; }
+  .cover .logo { font-size: 32pt; font-weight: 700; margin-bottom: 20px; }
+  .cover .logo .inteli { color: #2E84F0; }
+  .cover .logo .audit { color: #22C47E; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 10pt; }
+  th { background: #2E84F0; color: white; padding: 8px 10px; text-align: left; font-weight: 600; }
+  td { padding: 7px 10px; border-bottom: 1px solid #E4EAF4; }
+  tr:nth-child(even) { background: #F5F7FB; }
+  .total { font-weight: 700; color: #E53E3E; }
+  .riesgo-alto { color: #E53E3E; font-weight: 700; }
+  .riesgo-medio { color: #D97706; font-weight: 700; }
+  .riesgo-bajo { color: #22C47E; font-weight: 700; }
+  .resumen-box {
+    background: #F5F7FB;
+    border: 1px solid #E4EAF4;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .resumen-box .big-number {
+    font-size: 20pt;
+    font-weight: 700;
+    color: #E53E3E;
+  }
+  .resumen-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin: 12px 0;
+  }
+  .resumen-card {
+    background: white;
+    border: 1px solid #E4EAF4;
+    border-radius: 6px;
+    padding: 12px;
+    text-align: center;
+  }
+  .resumen-card .label { font-size: 9pt; color: #A8B4C8; text-transform: uppercase; }
+  .resumen-card .value { font-size: 14pt; font-weight: 700; color: #091624; }
+  .hallazgo-card {
+    border-left: 4px solid #E53E3E;
+    background: #FFF5F5;
+    padding: 12px 16px;
+    margin: 12px 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .hallazgo-card.medio { border-left-color: #D97706; background: #FFFBEB; }
+  .hallazgo-card.bajo { border-left-color: #22C47E; background: #F0FFF4; }
+  .legal-ref { font-size: 9pt; color: #1558B0; font-style: italic; }
+  .footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid #E4EAF4;
+    font-size: 9pt;
+    color: #A8B4C8;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<div class="cover">
+  <div class="logo"><span class="inteli">Inteli</span><span class="audit">audit</span></div>
+  <h1>INFORME DE AUDITORÍA IMPOSITIVA</h1>
+  <div class="subtitle">{{ cliente.razon_social }}</div>
+  <div class="meta">
+    <p><strong>RUC:</strong> {{ cliente.ruc }}</p>
+    <p><strong>Período auditado:</strong> {{ auditoria.periodo_desde }} — {{ auditoria.periodo_hasta }}</p>
+    <p><strong>Impuestos en alcance:</strong> {{ auditoria.impuestos | join(', ') }}</p>
+    <p><strong>Auditor responsable:</strong> {{ auditoria.auditor }}</p>
+    <p><strong>Fecha del informe:</strong> {{ fecha_informe }}</p>
+  </div>
+</div>
+
+<!-- RESUMEN EJECUTIVO -->
+<h2>1. Resumen Ejecutivo</h2>
+
+<div class="resumen-box">
+  <p style="margin:0 0 8px 0;">Contingencia total estimada:</p>
+  <div class="big-number">Gs. {{ resumen.total_contingencia | pyg }}</div>
+</div>
+
+<div class="resumen-grid">
+  <div class="resumen-card">
+    <div class="label">Impuesto omitido</div>
+    <div class="value">Gs. {{ resumen.total_impuesto | pyg }}</div>
+  </div>
+  <div class="resumen-card">
+    <div class="label">Multas estimadas</div>
+    <div class="value">Gs. {{ resumen.total_multa | pyg }}</div>
+  </div>
+  <div class="resumen-card">
+    <div class="label">Intereses estimados</div>
+    <div class="value">Gs. {{ resumen.total_intereses | pyg }}</div>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Nivel de riesgo</th>
+      <th style="text-align:right">Cantidad</th>
+      <th style="text-align:right">Contingencia (Gs.)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for nivel in ['alto', 'medio', 'bajo'] %}
+    {% if resumen.por_nivel[nivel] %}
+    <tr>
+      <td><span class="riesgo-{{ nivel }}">{{ nivel | upper }}</span></td>
+      <td style="text-align:right">{{ resumen.por_nivel[nivel].cantidad }}</td>
+      <td style="text-align:right">{{ resumen.por_nivel[nivel].total | pyg }}</td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- HALLAZGOS -->
+<h2>2. Hallazgos Identificados</h2>
+
+{% for h in hallazgos %}
+{% if h.estado != 'descartado' %}
+<div class="hallazgo-card {{ h.nivel_riesgo }}">
+  <h3>{{ h.tipo_hallazgo }} — Período {{ h.periodo }}</h3>
+  <p>{{ h.descripcion }}</p>
+  <p class="legal-ref">{{ h.articulo_legal }}</p>
+  <table>
+    <tr>
+      <td><strong>Base de ajuste:</strong> Gs. {{ h.base_ajuste | pyg }}</td>
+      <td><strong>Impuesto omitido:</strong> Gs. {{ h.impuesto_omitido | pyg }}</td>
+      <td><strong>Contingencia total:</strong> <span class="riesgo-{{ h.nivel_riesgo }}">Gs. {{ h.total_contingencia | pyg }}</span></td>
+    </tr>
+  </table>
+</div>
+{% endif %}
+{% endfor %}
+
+{% if not hallazgos or hallazgos | selectattr('estado', 'ne', 'descartado') | list | length == 0 %}
+<div class="resumen-box">
+  <p style="margin:0; color:#22C47E; font-weight:600;">No se identificaron hallazgos por encima de la materialidad definida.</p>
+</div>
+{% endif %}
+
+<!-- ALCANCE Y METODOLOGÍA -->
+<h2>3. Alcance y Metodología</h2>
+<p>La auditoría fue realizada conforme a las Normas Internacionales de Auditoría (NIA) aplicables en Paraguay, con enfoque en los siguientes procedimientos:</p>
+<ul>
+  <li><strong>Cruce RG90 vs Form.120:</strong> Consistencia entre el detalle de comprobantes declarados y la declaración jurada IVA.</li>
+  <li><strong>Cruce RG90 vs SIFEN:</strong> Validación de CDC de comprobantes electrónicos en el sistema de facturación electrónica.</li>
+  <li><strong>Cruce SIFEN recibidas vs RG90:</strong> Detección de comprobantes recibidos no declarados (crédito fiscal omitido).</li>
+  <li><strong>Cruce RG90 vs HECHAUKA:</strong> Verificación de ventas declaradas contra lo informado por terceros.</li>
+  <li><strong>Validación RUC proveedores:</strong> Estado de actividad de proveedores ante el SET.</li>
+</ul>
+<p>Se utilizó un enfoque basado en riesgo, con materialidad definida en Gs. {{ auditoria.materialidad | pyg }}.</p>
+
+<!-- NOTA LEGAL -->
+<h2>4. Nota Legal</h2>
+<p>Este informe ha sido preparado exclusivamente para uso de {{ cliente.razon_social }} (RUC {{ cliente.ruc }}) con fines de cumplimiento tributario ante la Administración Tributaria (SET) del Paraguay.</p>
+<p>Los montos están expresados en Guaraníes (PYG). Los cálculos de multas e intereses se basan en las tasas vigentes según la Ley 125/1991 y sus modificaciones.</p>
+
+<div class="footer">
+  <p><span class="inteli" style="color:#2E84F0; font-weight:700;">Inteli</span><span class="audit" style="color:#22C47E; font-weight:700;">audit</span> — Auditoría impositiva inteligente para Paraguay</p>
+  <p>{{ fecha_informe }} — Documento confidencial</p>
+</div>
+
+</body>
+</html>

@@ -46,7 +46,7 @@ class RenderInforme:
         if not auditoria:
             raise ValueError(f"Auditoría {auditoria_id} no encontrada")
 
-        cliente = await crud.get_cliente(self.db, auditoria.cliente_ruc)
+        cliente = await crud.get_cliente(self.db, auditoria.firma_id, id=auditoria.cliente_id)
         hallazgos = await crud.get_hallazgos(self.db, auditoria_id)
         hallazgos_data = _serializar_hallazgos(hallazgos)
         resumen = resumir_contingencias(hallazgos_data)
@@ -86,6 +86,7 @@ class RenderInforme:
         # Registrar en DB
         from db.models import Informe
         informe = Informe(
+            firma_id=auditoria.firma_id,
             auditoria_id=auditoria_id,
             tipo="auditoria_impositiva",
             archivo_docx=str(paths["docx"]),
