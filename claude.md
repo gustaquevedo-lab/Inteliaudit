@@ -307,6 +307,14 @@ inteliaudit/
 │   ├── ire.py                   ← Procedimientos IRE (conciliación contable-fiscal)
 │   ├── retenciones.py           ← Procedimientos retenciones (cruce HECHAUKA)
 │   ├── riesgo.py                ← Scoring, cuantificación ajustes, multas e intereses
+│   ├── bancario.py              ← Conciliación bancaria (ingresos vs ventas, egresos vs compras, gastos personales)
+│   ├── analiticos.py            ← Procedimientos analíticos (ratios, benchmarks, tendencias, anomalías)
+│   ├── conciliacion_fiscal.py   ← Conciliación contable→fiscal IRE (gastos no deducibles, Art.16)
+│   ├── plazos.py                ← Gestión plazos y prescripción (3yr fiscalización, 5yr cobro)
+│   ├── idu.py                   ← IDU — Impuesto a Dividendos (Form.530)
+│   ├── irp.py                   ← IRP — Impuesto Renta Personal (Form.510)
+│   ├── irnr.py                  ← IRNR — Impuesto Renta No Residentes (Form.520)
+│   ├── copilot.py               ← AI Copilot para análisis de hallazgos
 │   └── claude_analisis.py       ← Análisis inteligente vía Claude API
 ├── papeles/
 │   ├── cedulas.py               ← Generador cédulas analíticas
@@ -395,6 +403,54 @@ def calcular_contingencia(impuesto_omitido, fecha_omision, fecha_calculo):
         "intereses": intereses,
         "total_contingencia": impuesto_omitido + multa + intereses
     }
+```
+
+### Conciliación bancaria (analisis/bancario.py)
+```
+Cruce de extractos bancarios contra lo declarado:
+1. Ingresos bancarios vs Ventas declaradas RG90 → detecta ingresos omitidos
+2. Egresos bancarios vs Compras declaradas RG90 → detecta compras no registradas
+3. Pagos a proveedores sin retención (Art. 76 Ley 6380)
+4. Detección de gastos personales del titular/socios (Art. 16 Ley 6380 — no deducibles)
+   Patrones: supermercado, farmacia, hospital, educación, retiro ATM, viajes, etc.
+```
+
+### Procedimientos analíticos (analisis/analiticos.py)
+```
+Análisis de ratios financieros e impositivos con benchmarks por industria:
+1. Margen bruto/neto vs benchmarks (comercio, servicios, industria)
+2. Ratio compras/ventas
+3. Concentración de clientes/proveedores
+4. Excedente crédito fiscal
+5. Detección de anomalías: IVA anormalmente bajo, margen insostenible, CF excesivo
+6. Análisis de tendencias período a período (variaciones > 30%)
+```
+
+### Conciliación contable → fiscal IRE (analisis/conciliacion_fiscal.py)
+```
+Reconciliación entre resultado contable y base imponible IRE:
+1. Identificación gastos no deducibles (Art. 16 Ley 6380):
+   - Multas/recargos a SET
+   - Intereses moratorios
+   - Gastos personales del dueño/socios
+   - Retiros de socios
+   - Donaciones > 1% renta bruta
+   - Gastos representación > 1% ingresos brutos
+2. Verificación comprobantes con RUC proveedor inactivo
+3. Tasas depreciación máximas (Decreto 3107/2019):
+   Inmuebles 2.5%, Maquinaria 10%, Vehículos 20%, Informática 33.3%
+4. Cálculo renta neta imponible = resultado contable + ajustes - exenciones
+5. IRE esperado (10%) vs IRE declarado
+```
+
+### Gestión de plazos y prescripción (analisis/plazos.py)
+```
+Control de ventanas fiscales y prescripción:
+- Prescripción fiscalizadora: 3 años (Art. 219 Ley 125/1991)
+- Prescripción de cobro: 5 años (Art. 218 Ley 125/1991)
+- Alertas automáticas para períodos con prescripción próxima
+- Cálculo de días restantes por período
+- Verificación de obligaciones pendientes vs presentadas
 ```
 
 ---
