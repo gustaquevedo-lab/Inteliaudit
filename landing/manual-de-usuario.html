@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manual de Usuario — Inteliaudit v1.0</title>
+  <title>Manual de Usuario — Inteliaudit v1.1</title>
   <meta name="description" content="Manual interactivo de Inteliaudit — la plataforma de auditoría impositiva automatizada para Paraguay">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -545,7 +545,7 @@
         </defs>
       </svg>
     </div>
-    <div class="version">Manual de Usuario · v1.0 · Junio 2026</div>
+    <div class="version">Manual de Usuario · v1.1 · Junio 2026</div>
   </div>
   <div class="sidebar-search">
     <span class="search-icon">🔍</span>
@@ -565,6 +565,10 @@
     <a href="#archivos"><span class="icon">📁</span> Importar Datos</a>
     <a href="#automatizacion"><span class="icon">🤖</span> Automatización DNIT</a>
     <a href="#analisis"><span class="icon">⚡</span> Análisis Automático</a>
+    <a href="#bancario"><span class="icon">🏦</span> Conciliación Bancaria</a>
+    <a href="#analiticos"><span class="icon">📊</span> Procedimientos Analíticos</a>
+    <a href="#conciliacion-fiscal"><span class="icon">🔄</span> Conciliación Fiscal</a>
+    <a href="#plazos"><span class="icon">⏰</span> Gestión de Plazos</a>
     <a href="#hallazgos"><span class="icon">🔍</span> Hallazgos</a>
     <a href="#plan-trabajo"><span class="icon">✅</span> Plan de Trabajo</a>
     <a href="#informes"><span class="icon">📄</span> Informes</a>
@@ -1261,24 +1265,361 @@
 
       <h3>Procedimientos incluidos</h3>
       <details class="collapsible">
-        <summary>📋 Ver los 12+ procedimientos de auditoría</summary>
+        <summary>📋 Ver los 16+ procedimientos de auditoría</summary>
         <div class="collapsible-body">
+          <h4>Procedimientos de IVA</h4>
           <ul>
             <li><strong>Cruce RG90 vs Form. 120:</strong> Verifica que los totales de la RG90 cuadren con lo declarado en el Formulario 120</li>
             <li><strong>Validación CDCs en SIFEN:</strong> Cada comprobante electrónico con CDC es validado contra el portal SIFEN</li>
             <li><strong>Verificación RUC activos:</strong> Detecta créditos fiscales con comprobantes de RUC inactivo o cancelado</li>
             <li><strong>RG90 compras vs SIFEN:</strong> Compara los comprobantes declarados en RG90 con los registrados en SIFEN</li>
             <li><strong>SIFEN recibidas vs RG90:</strong> Detecta facturas electrónicas recibidas que NO están en RG90 (crédito omitido)</li>
-            <li><strong>RG90 ventas vs HECHAUKA:</strong> Compara lo que los compradores declararon con las ventas del contribuyente</li>
+            <li><strong>RG90 ventas vs Talón de Presentación/HECHAUKA:</strong> Compara lo que los compradores declararon con las ventas del contribuyente</li>
             <li><strong>Proporcionalidad crédito fiscal:</strong> Calcula el crédito fiscal admisible si hay operaciones gravadas y exentas</li>
-            <li><strong>Depreciaciones IRE:</strong> Verifica que las depreciaciones no superen las tasas máximas reglamentarias</li>
-            <li><strong>Gastos no deducibles:</strong> Detecta gastos que no son deducibles según Ley 6380 Art. 16</li>
+          </ul>
+          <h4>Procedimientos de IRE</h4>
+          <ul>
+            <li><strong>Conciliación contable → fiscal:</strong> Reconcilia resultado contable con base imponible del IRE (Art. 16 Ley 6380)</li>
+            <li><strong>Gastos no deducibles:</strong> Detecta multas, intereses moratorios, gastos personales, retiros y donaciones excesivas</li>
+            <li><strong>Depreciaciones IRE:</strong> Verifica que las depreciaciones no superen las tasas máximas reglamentarias (Decreto 3107/2019)</li>
+            <li><strong>Operaciones con vinculadas:</strong> Detecta operaciones con partes vinculadas sin precio de mercado (Art. 35 Ley 6380)</li>
+          </ul>
+          <h4>Procedimientos de Retenciones</h4>
+          <ul>
             <li><strong>Retenciones no practicadas:</strong> Compara HECHAUKA con las retenciones declaradas</li>
             <li><strong>Notas de crédito:</strong> Verifica que las notas de crédito recibidas se hayan descontado del crédito fiscal</li>
-            <li><strong>Prescripción:</strong> Detecta créditos fiscales de períodos anteriores fuera del plazo de 5 años</li>
+          </ul>
+          <h4>Procedimientos Transversales</h4>
+          <ul>
+            <li><strong>Conciliación bancaria:</strong> Cruza extractos bancarios contra lo declarado (ingresos vs ventas, egresos vs compras)</li>
+            <li><strong>Procedimientos analíticos:</strong> Ratios financieros, benchmarks por industria, tendencias y anomalías estadísticas</li>
+            <li><strong>Gestión de plazos:</strong> Control de ventanas de fiscalización (3 años) y prescripción de cobro (5 años)</li>
+            <li><strong>IDU, IRP, IRNR:</strong> Análisis específicos para dividendos, renta personal y no residentes</li>
           </ul>
         </div>
       </details>
+    </div>
+
+    <!-- 10B. CONCILIACION BANCARIA -->
+    <div class="section" id="bancario">
+      <h2><span class="num">🏦</span> Conciliación Bancaria</h2>
+      <p>La conciliación bancaria cruza los extractos bancarios del cliente contra lo declarado en sus DJ IVA e IRE. Es uno de los procedimientos más poderosos para detectar ingresos omitidos, compras no registradas y gastos personales del titular.</p>
+
+      <div class="app-mockup hotspot-container">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/auditorias/.../analisis</div>
+        </div>
+        <div class="app-body" style="min-height:auto;">
+          <div class="app-content" style="padding:16px;">
+            <div class="tab-bar">
+              <div class="tab">Resumen</div><div class="tab">Hallazgos</div><div class="tab active">Análisis</div>
+              <div class="tab">Plan de Trabajo</div><div class="tab">Archivos</div><div class="tab">Informes</div>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:white;margin-bottom:10px;">🏦 Conciliación Bancaria</div>
+            <div style="display:flex;gap:10px;margin-bottom:14px;">
+              <div class="kpi-card" style="flex:1;">
+                <div class="kpi-label">Ingresos Banco</div>
+                <div class="kpi-value green" style="font-size:14px;">₲ 38.500.000</div>
+              </div>
+              <div class="kpi-card" style="flex:1;">
+                <div class="kpi-label">Ventas RG90</div>
+                <div class="kpi-value blue" style="font-size:14px;">₲ 38.500.000</div>
+              </div>
+              <div class="kpi-card" style="flex:1;">
+                <div class="kpi-label">Diferencia</div>
+                <div class="kpi-value green" style="font-size:14px;">₲ 0</div>
+              </div>
+            </div>
+            <div style="font-size:10px;color:#94A3B8;margin-bottom:6px;">Gastos personales detectados</div>
+            <div style="display:flex;gap:6px;margin-bottom:10px;">
+              <span class="pill red">Retiro ATM ₲ 2.000.000</span>
+              <span class="pill red">Supermercado ₲ 500.000</span>
+              <span class="pill amber">Farmacia ₲ 150.000</span>
+            </div>
+            <div class="app-btn primary">Ejecutar Conciliación Bancaria</div>
+          </div>
+        </div>
+        <div class="mockup-caption">Panel de Conciliación Bancaria con detección de gastos personales</div>
+      </div>
+
+      <h3>¿Qué detecta?</h3>
+      <table>
+        <tr><th>Cruce</th><th>¿Qué compara?</th><th>Hallazgo posible</th></tr>
+        <tr><td><strong>Ingresos vs Ventas</strong></td><td>Total ingresos bancarios vs ventas declaradas RG90</td><td>Ingresos omitidos (Art. 93 Ley 6380)</td></tr>
+        <tr><td><strong>Egresos vs Compras</strong></td><td>Total egresos bancarios vs compras declaradas RG90</td><td>Compras no registradas</td></tr>
+        <tr><td><strong>Pagos sin retención</strong></td><td>Egresos a proveedores vs retenciones declaradas</td><td>Retención omitida (Art. 76 Ley 6380)</td></tr>
+        <tr><td><strong>Gastos personales</strong></td><td>Patrones en descripciones de egresos</td><td>Gastos no deducibles (Art. 16 Ley 6380)</td></tr>
+      </table>
+
+      <h3>Patrones de gastos personales detectados</h3>
+      <p>El sistema busca automáticamente estas palabras clave en las descripciones de los extractos bancarios:</p>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;">
+        <span class="pill amber">retiro atm</span>
+        <span class="pill amber">cajero</span>
+        <span class="pill amber">supermercado</span>
+        <span class="pill amber">farmacia</span>
+        <span class="pill amber">hospital</span>
+        <span class="pill amber">clínica</span>
+        <span class="pill amber">educación</span>
+        <span class="pill amber">colegio</span>
+        <span class="pill amber">universidad</span>
+        <span class="pill amber">seguro personal</span>
+        <span class="pill amber">préstamo personal</span>
+        <span class="pill amber">tarjeta personal</span>
+        <span class="pill amber">viaje personal</span>
+        <span class="pill amber">vacaciones</span>
+        <span class="pill amber">entretenimiento</span>
+      </div>
+
+      <h3>Cómo usarla</h3>
+      <ol class="step-list">
+        <li><div class="step-text"><strong>Importá el extracto bancario</strong> — Subí el XLSX o CSV del extracto del cliente en la pestaña Archivos</div></li>
+        <li><div class="step-text"><strong>Asegurate de tener RG90 importada</strong> — La conciliación cruza contra las ventas y compras declaradas</div></li>
+        <li><div class="step-text"><strong>Ejecutá el análisis</strong> — Andá a la pestaña Análisis y hac clic en "Ejecutar Conciliación Bancaria"</div></li>
+        <li><div class="step-text"><strong>Revisá los hallazgos</strong> — El sistema genera automáticamente hallazgos con contingencia calculada</div></li>
+      </ol>
+
+      <div class="tip"><span class="icon">💡</span><div><strong>Tip:</strong> Cuanto más completo esté el extracto bancario, mejor será la conciliación. Pedile al cliente el extracto completo del período auditado, no solo un resumen.</div></div>
+
+      <h3>Ejemplo real</h3>
+      <details class="collapsible">
+        <summary>📋 Caso: Comercial Guaraní SA — Enero 2024</summary>
+        <div class="collapsible-body">
+          <p><strong>Datos del extracto bancario:</strong></p>
+          <ul>
+            <li>Ingresos totales: Gs. 38.500.000 (2 depósitos de clientes)</li>
+            <li>Egresos totales: Gs. 13.500.000 (1 proveedor + 2 personales)</li>
+          </ul>
+          <p><strong>RG90 declarada:</strong></p>
+          <ul>
+            <li>Ventas: Gs. 38.500.000 (2 comprobantes)</li>
+            <li>Compras: Gs. 11.000.000 (1 proveedor)</li>
+          </ul>
+          <p><strong>Hallazgos generados:</strong></p>
+          <ul>
+            <li>✅ Ingresos banco vs ventas RG90: Sin diferencia (Gs. 0)</li>
+            <li>⚠️ Egresos banco (Gs. 13.5M) vs compras RG90 (Gs. 11M): Diferencia de Gs. 2.5M</li>
+            <li>🔴 Gastos personales detectados: Retiro ATM (Gs. 2M) + Supermercado (Gs. 500K) = Gs. 2.5M</li>
+          </ul>
+          <p><strong>Conclusión:</strong> La diferencia de Gs. 2.5M se explica completamente por gastos personales del titular. Se genera hallazgo por Gs. 2.5M de gastos no deducibles (Art. 16 Ley 6380).</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- 10C. PROCEDIMIENTOS ANALITICOS -->
+    <div class="section" id="analiticos">
+      <h2><span class="num">📊</span> Procedimientos Analíticos</h2>
+      <p>Los procedimientos analíticos comparan los ratios financieros e impositivos del cliente con benchmarks de su industria, detectando anomalías estadísticas que pueden indicar irregularidades.</p>
+
+      <div class="app-mockup">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/auditorias/.../analisis</div>
+        </div>
+        <div class="app-body" style="min-height:auto;">
+          <div class="app-content" style="padding:16px;">
+            <div style="font-size:13px;font-weight:700;color:white;margin-bottom:10px;">📊 Procedimientos Analíticos</div>
+            <div style="display:flex;gap:10px;margin-bottom:14px;">
+              <div class="kpi-card" style="flex:1;">
+                <div class="kpi-label">Margen Bruto</div>
+                <div class="kpi-value green" style="font-size:14px;">48.6%</div>
+                <div style="font-size:8px;color:#4ADE80;margin-top:2px;">Benchmark: 10-35%</div>
+              </div>
+              <div class="kpi-card" style="flex:1;">
+                <div class="kpi-label">Ratio Compras/Ventas</div>
+                <div class="kpi-value blue" style="font-size:14px;">0.51x</div>
+              </div>
+              <div class="kpi-card" style="flex:1;">
+                <div class="kpi-label">Excedente CF</div>
+                <div class="kpi-value amber" style="font-size:14px;">₲ 0</div>
+              </div>
+            </div>
+            <div style="font-size:10px;color:#FCA5A5;margin-bottom:6px;">⚠️ Anomalías detectadas: 2</div>
+            <div style="font-size:10px;color:#94A3B8;">Margen bruto fuera de rango para comercio · IVA anormalmente bajo</div>
+          </div>
+        </div>
+        <div class="mockup-caption">Resultados de procedimientos analíticos con benchmarks por industria</div>
+      </div>
+
+      <h3>Ratios calculados automáticamente</h3>
+      <table>
+        <tr><th>Ratio</th><th>Fórmula</th><th>¿Qué indica?</th></tr>
+        <tr><td><strong>Margen Bruto</strong></td><td>(Ventas - Compras) / Ventas × 100</td><td> rentabilidad bruta. Si es muy bajo vs benchmark, posible compra excesiva o venta subdeclarada</td></tr>
+        <tr><td><strong>Participación IVA</strong></td><td>IVA pagado / Ventas gravadas × 100</td><td>Debería ser ~10% para ventas al 10%. Si es menor, posible IVA omitido</td></tr>
+        <tr><td><strong>Ratio Compras/Ventas</strong></td><td>Compras totales / Ventas totales</td><td>Si supera 0.95, margen insostenible (posible compras ficticias)</td></tr>
+        <tr><td><strong>Excedente Crédito Fiscal</strong></td><td>CF compras - DF ventas</td><td>Si CF > DF × 1.5, crédito fiscal excesivo (posible proveedores inexistentes)</td></tr>
+        <tr><td><strong>Clientes Únicos</strong></td><td>Count(RUC distintos en ventas)</td><td>Concentración de cartera</td></tr>
+        <tr><td><strong>Proveedores Únicos</strong></td><td>Count(RUC distintos en compras)</td><td>Concentración de proveedores</td></tr>
+      </table>
+
+      <h3>Benchmarks por industria</h3>
+      <p>El sistema compara automáticamente los ratios con rangos esperados para la actividad económica del cliente:</p>
+      <table>
+        <tr><th>Industria</th><th>Margen Bruto</th><th>Margen Neto</th><th>Razón Corriente</th></tr>
+        <tr><td><strong>Comercio</strong></td><td>10% - 35%</td><td>2% - 12%</td><td>1.0 - 3.0</td></tr>
+        <tr><td><strong>Servicios</strong></td><td>30% - 70%</td><td>5% - 25%</td><td>1.0 - 4.0</td></tr>
+        <tr><td><strong>Industria</strong></td><td>15% - 45%</td><td>3% - 15%</td><td>1.0 - 2.5</td></tr>
+      </table>
+
+      <h3>Anomalías que detecta</h3>
+      <ul>
+        <li><strong>IVA anormalmente bajo:</strong> IVA pagado es menos del 3% de las ventas (debería ser ~10%)</li>
+        <li><strong>Margen insostenible:</strong> Compras superan el 95% de las ventas (margen cero o negativo)</li>
+        <li><strong>CF excesivo:</strong> Crédito fiscal supera 1.5 veces el débito fiscal</li>
+        <li><strong>Variaciones significativas:</strong> Cambios mayores al 30% entre períodos consecutivos</li>
+      </ul>
+
+      <h3>Cómo ejecutar</h3>
+      <ol class="step-list">
+        <li><div class="step-text"><strong>Importá RG90</strong> de al menos un período (idealmente dos para comparar tendencias)</div></li>
+        <li><div class="step-text"><strong>Andá a la pestaña Análisis</strong></div></li>
+        <li><div class="step-text"><strong>Seleccioná "Procedimientos Analíticos"</strong></div></li>
+        <li><div class="step-text"><strong>Ejecutá</strong> — El sistema calcula ratios, compara con benchmarks y detecta anomalías</div></li>
+      </ol>
+
+      <div class="note"><span class="icon">ℹ️</span><div><strong>Nota:</strong> Los benchmarks son orientativos y están basados en promedios de industria paraguaya. Un margen fuera de rango no es automáticamente un hallazgo, pero justifica una investigación más profunda.</div></div>
+    </div>
+
+    <!-- 10D. CONCILIACION FISCAL -->
+    <div class="section" id="conciliacion-fiscal">
+      <h2><span class="num">🔄</span> Conciliación Contable → Fiscal (IRE)</h2>
+      <p>Este procedimiento reconcilia el resultado contable del cliente con la base imponible del IRE, identificando gastos no deducibles, ajustes extracontables y diferencias entre el IRE esperado y el declarado.</p>
+
+      <div class="app-mockup">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/auditorias/.../analisis</div>
+        </div>
+        <div class="app-body" style="min-height:auto;">
+          <div class="app-content" style="padding:16px;">
+            <div style="font-size:13px;font-weight:700;color:white;margin-bottom:10px;">🔄 Conciliación Contable → Fiscal</div>
+            <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:12px;margin-bottom:10px;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                <span style="font-size:10px;color:#94A3B8;">Resultado contable</span>
+                <span style="font-size:11px;color:white;font-weight:600;">₲ 100.000.000</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                <span style="font-size:10px;color:#FCA5A5;">+ Gastos no deducibles</span>
+                <span style="font-size:11px;color:#FCA5A5;font-weight:600;">₲ 11.500.000</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;border-top:1px solid rgba(255,255,255,0.06);padding-top:6px;">
+                <span style="font-size:10px;color:#60A5FA;font-weight:600;">= Renta neta imponible</span>
+                <span style="font-size:11px;color:#60A5FA;font-weight:700;">₲ 111.500.000</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                <span style="font-size:10px;color:#94A3B8;">IRE esperado (10%)</span>
+                <span style="font-size:11px;color:white;font-weight:600;">₲ 11.150.000</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;">
+                <span style="font-size:10px;color:#94A3B8;">IRE declarado</span>
+                <span style="font-size:11px;color:white;font-weight:600;">₲ 0</span>
+              </div>
+            </div>
+            <div style="background:rgba(229,62,62,0.1);border:1px solid rgba(229,62,62,0.3);border-radius:8px;padding:10px;font-size:11px;color:#FCA5A5;">
+              <strong>Diferencia: Gs. 11.150.000</strong> — Posible IRE omitido
+            </div>
+          </div>
+        </div>
+        <div class="mockup-caption">Conciliación contable → fiscal con desglose de ajustes</div>
+      </div>
+
+      <h3>Gastos no deducibles que detecta (Art. 16 Ley 6380)</h3>
+      <table>
+        <tr><th>Categoría</th><th>Ejemplo</th><th>¿Por qué no es deducible?</th></tr>
+        <tr><td><strong>Multas y recargos</strong></td><td>Multas pagadas a la SET</td><td>Gasto sin beneficio económico para la empresa</td></tr>
+        <tr><td><strong>Intereses moratorios</strong></td><td>Intereses por mora en pagos a SET</td><td>Consecuencia de incumplimiento, no gasto operativo</td></tr>
+        <tr><td><strong>Gastos personales</strong></td><td>Gastos del dueño/socios cargados como empresa</td><td>No son gastos de la empresa</td></tr>
+        <tr><td><strong>Retiros de socios</strong></td><td>Retiros de efectivo del titular</td><td>No son gastos operativos</td></tr>
+        <tr><td><strong>Donaciones excesivas</strong></td><td>Donaciones > 1% de renta bruta</td><td>Solo el 1% es deducible</td></tr>
+        <tr><td><strong>Gastos representación excesivos</strong></td><td>Gastos de representación > 1% ingresos brutos</td><td>Límite legal</td></tr>
+      </table>
+
+      <h3>Tasas de depreciación máximas (Decreto 3107/2019)</h3>
+      <table>
+        <tr><th>Activo</th><th>Tasa anual</th><th>Vida útil</th></tr>
+        <tr><td>Inmuebles</td><td>2.5%</td><td>40 años</td></tr>
+        <tr><td>Maquinaria</td><td>10%</td><td>10 años</td></tr>
+        <tr><td>Vehículos</td><td>20%</td><td>5 años</td></tr>
+        <tr><td>Equipos informáticos</td><td>33.3%</td><td>3 años</td></tr>
+        <tr><td>Muebles y útiles</td><td>10%</td><td>10 años</td></tr>
+        <tr><td>Instalaciones</td><td>10%</td><td>10 años</td></tr>
+      </table>
+
+      <h3>Cómo ejecutar</h3>
+      <ol class="step-list">
+        <li><div class="step-text"><strong>Importá el resultado contable</strong> — Cargá el balance de resultados del período</div></li>
+        <li><div class="step-text"><strong>Desglosá los gastos</strong> — Indicá las categorías de gastos (multas, intereses, personales, etc.)</div></li>
+        <li><div class="step-text"><strong>Ejecutá la conciliación</strong> — El sistema calcula la renta neta imponible y el IRE esperado</div></li>
+        <li><div class="step-text"><strong>Compará con lo declarado</strong> — Si hay diferencia, se genera hallazgo con contingencia</div></li>
+      </ol>
+
+      <div class="warn"><span class="icon">⚠️</span><div><strong>Importante:</strong> La conciliación fiscal es un procedimiento clave del IRE. Si el cliente no tiene resultado contable disponible, este procedimiento no puede ejecutarse correctamente.</div></div>
+    </div>
+
+    <!-- 10E. GESTION DE PLAZOS -->
+    <div class="section" id="plazos">
+      <h2><span class="num">⏰</span> Gestión de Plazos y Prescripción</h2>
+      <p>Este módulo controla las ventanas de fiscalización y prescripción tributaria, generando alertas automáticas para períodos con prescripción próxima o vencida.</p>
+
+      <div class="app-mockup">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/auditorias/.../analisis</div>
+        </div>
+        <div class="app-body" style="min-height:auto;">
+          <div class="app-content" style="padding:16px;">
+            <div style="font-size:13px;font-weight:700;color:white;margin-bottom:10px;">⏰ Gestión de Plazos</div>
+            <div style="display:flex;gap:10px;margin-bottom:14px;">
+              <div class="kpi-card" style="flex:1;">
+                <div class="kpi-label">Períodos abiertos</div>
+                <div class="kpi-value green" style="font-size:14px;">18</div>
+              </div>
+              <div class="kpi-card" style="flex:1;">
+                <div class="kpi-label">Próximos a prescribir</div>
+                <div class="kpi-value amber" style="font-size:14px;">3</div>
+              </div>
+              <div class="kpi-card" style="flex:1;">
+                <div class="kpi-label">Prescritos</div>
+                <div class="kpi-value red" style="font-size:14px;">6</div>
+              </div>
+            </div>
+            <div style="background:rgba(217,119,6,0.1);border:1px solid rgba(217,119,6,0.3);border-radius:8px;padding:10px;margin-bottom:8px;">
+              <div style="font-size:10px;color:#FBBF24;font-weight:600;">⚠️ ALERTA: Período 2021-06 prescribirá en 45 días</div>
+              <div style="font-size:9px;color:#94A3B8;margin-top:2px;">Prescripción fiscalizadora: 28/06/2024</div>
+            </div>
+            <div style="background:rgba(229,62,62,0.1);border:1px solid rgba(229,62,62,0.3);border-radius:8px;padding:10px;">
+              <div style="font-size:10px;color:#FCA5A5;font-weight:600;">🔴 Período 2020-01 prescrito (fiscalización)</div>
+              <div style="font-size:9px;color:#94A3B8;margin-top:2px;">Prescribió el 28/01/2023 — obligación pendiente no fiscalizable</div>
+            </div>
+          </div>
+        </div>
+        <div class="mockup-caption">Panel de gestión de plazos con alertas de prescripción</div>
+      </div>
+
+      <h3>Tipos de prescripción</h3>
+      <table>
+        <tr><th>Tipo</th><th>Plazo</th><th>Base legal</th><th>¿Qué implica?</th></tr>
+        <tr><td><strong>Fiscalización</strong></td><td>3 años</td><td>Art. 219 Ley 125/1991</td><td>La SET no puede fiscalizar períodos con más de 3 años</td></tr>
+        <tr><td><strong>Cobro</strong></td><td>5 años</td><td>Art. 218 Ley 125/1991</td><td>La SET no puede cobrar deudas con más de 5 años</td></tr>
+      </table>
+
+      <h3>¿Qué genera alertas?</h3>
+      <ul>
+        <li><strong>Prescripción próxima:</strong> Períodos donde la prescripción fiscalizadora vence en menos de 180 días</li>
+        <li><strong>Prescripción crítica:</strong> Períodos donde la prescripción vence en menos de 90 días</li>
+        <li><strong>Obligaciones prescritas no presentadas:</strong> Períodos prescritos que nunca fueron presentados</li>
+        <li><strong>Obligaciones pendientes:</strong> DJ que debieron presentarse pero no lo fueron</li>
+      </ul>
+
+      <h3>Cómo usarlo</h3>
+      <ol class="step-list">
+        <li><div class="step-text"><strong>Ejecutá el análisis de plazos</strong> — Seleccioná "Gestión de Plazos" en la pestaña Análisis</div></li>
+        <li><div class="step-text"><strong>Revisá las alertas</strong> — Priorizá los períodos con prescripción más próxima</div></li>
+        <li><div class="step-text"><strong>Actuá según la alerta</strong> — Si la prescripción es próxima, considerá presentar DJ rectificativa o iniciar fiscalización</div></li>
+      </ol>
+
+      <div class="tip"><span class="icon">💡</span><div><strong>Tip:</strong> La gestión de plazos es especialmente útil al inicio de una auditoría anual. Ejecutala primero para identificar qué períodos requieren atención urgente.</div></div>
     </div>
 
     <!-- 11. HALLAZGOS -->
@@ -1707,7 +2048,35 @@
       <details class="collapsible">
         <summary>¿Qué impuestos cubre el análisis?</summary>
         <div class="collapsible-body">
-          <p>IVA (Form. 120 + RG90), IRE (Form. 500), IRP (Form. 510), IDU (Form. 530) y Retenciones (Forms. 800-830). Podés elegir qué impuestos incluir en cada auditoría.</p>
+          <p>IVA (Form. 120 + RG90), IRE (Form. 500), IRP (Form. 510), IDU (Form. 530), IRNR (Form. 520) y Retenciones (Forms. 800-830). Podés elegir qué impuestos incluir en cada auditoría.</p>
+        </div>
+      </details>
+
+      <details class="collapsible">
+        <summary>¿Qué es la conciliación bancaria y por qué es importante?</summary>
+        <div class="collapsible-body">
+          <p>La conciliación bancaria cruza los extractos bancarios del cliente contra lo declarado en sus DJ. Detecta ingresos omitidos (cuando los depósitos bancarios superan las ventas declaradas), compras no registradas y gastos personales del titular que no son deducibles. Es uno de los procedimientos más efectivos para encontrar irregularidades.</p>
+        </div>
+      </details>
+
+      <details class="collapsible">
+        <summary>¿Cómo funciona la conciliación contable → fiscal?</summary>
+        <div class="collapsible-body">
+          <p>Este procedimiento toma el resultado contable del cliente y lo ajusta para obtener la base imponible del IRE. Identifica gastos no deducibles (multas, intereses moratorios, gastos personales, retiros de socios, donaciones excesivas) y los suma de nuevo. También verifica que las depreciaciones no superen las tasas máximas del Decreto 3107/2019. Finalmente, compara el IRE esperado (10% de renta neta) con lo declarado.</p>
+        </div>
+      </details>
+
+      <details class="collapsible">
+        <summary>¿Qué son los procedimientos analíticos?</summary>
+        <div class="collapsible-body">
+          <p>Son análisis de ratios financieros e impositivos que comparan los datos del cliente con benchmarks de su industria (comercio, servicios, industria). Detectan anomalías como IVA anormalmente bajo, márgenes insostenibles o crédito fiscal excesivo. No son hallazgos automáticos, pero identifican áreas que requieren investigación más profunda.</p>
+        </div>
+      </details>
+
+      <details class="collapsible">
+        <summary>¿Qué es la prescripción tributaria?</summary>
+        <div class="collapsible-body">
+          <p>La prescripción es el plazo máximo que tiene la SET para fiscalizar o cobrar. Hay dos tipos: prescripción de fiscalización (3 años, Art. 219 Ley 125/1991) y prescripción de cobro (5 años, Art. 218 Ley 125/1991). Una vez prescrito un período, la SET ya no puede fiscalizarlo ni cobrarlo. El sistema genera alertas automáticas para períodos con prescripción próxima.</p>
         </div>
       </details>
 
@@ -1733,7 +2102,8 @@
         <tr><th>Término</th><th>Definición</th></tr>
         <tr><td><strong>Marangatú</strong></td><td>Portal de la DNIT donde los contribuyentes presentan sus declaraciones juradas y acceden a su información tributaria</td></tr>
         <tr><td><strong>SIFEN</strong></td><td>Sistema de Facturación Electrónica de la DNIT. Valida los CDCs de comprobantes electrónicos</td></tr>
-        <tr><td><strong>HECHAUKA</strong></td><td>Información que terceros declararon sobre un contribuyente en Marangatú</td></tr>
+        <tr><td><strong>HECHAUKA</strong></td><td>Información que terceros declararon sobre un contribuyente en Marangatú (para períodos anteriores a 2022)</td></tr>
+        <tr><td><strong>Talón de Presentación</strong></td><td>Registro electrónico de comprobantes en Marangatú que reemplazó a HECHAUKA desde 01/01/2022 (RG 90/2021)</td></tr>
         <tr><td><strong>RG90</strong></td><td>Detalle de comprobantes de IVA declarado por el contribuyente (libro digital de IVA)</td></tr>
         <tr><td><strong>CDC</strong></td><td>Código de Control — hash SHA256 de 44 dígitos que identifica cada comprobante electrónico</td></tr>
         <tr><td><strong>DJ</strong></td><td>Declaración Jurada</td></tr>
@@ -1741,6 +2111,16 @@
         <tr><td><strong>Materialidad</strong></td><td>Umbral mínimo para considerar un hallazgo como relevante</td></tr>
         <tr><td><strong>Brain AI Auditor™</strong></td><td>Módulo de IA que genera narrativas técnicas y sugiere procedimientos</td></tr>
         <tr><td><strong>RUC</strong></td><td>Registro Único de Contribuyentes de la DNIT</td></tr>
+        <tr><td><strong>Crédito Fiscal (CF)</strong></td><td>IVA pagado en compras que puede descontarse del IVA a pagar</td></tr>
+        <tr><td><strong>Débito Fiscal (DF)</strong></td><td>IVA cobrado en ventas que debe pagarse a la SET</td></tr>
+        <tr><td><strong>Proporcionalidad</strong></td><td>Regla que limita el crédito fiscal cuando hay operaciones gravadas y exentas</td></tr>
+        <tr><td><strong>Gasto no deducible</strong></td><td>Gasto que no puede restarse del resultado contable para calcular la base imponible (Art. 16 Ley 6380)</td></tr>
+        <tr><td><strong>Renta neta imponible</strong></td><td>Resultado contable + ajustes extracontables = base para calcular el IRE (10%)</td></tr>
+        <tr><td><strong>Prescripción fiscalizadora</strong></td><td>Plazo de 3 años para que la SET inicie una fiscalización (Art. 219 Ley 125/1991)</td></tr>
+        <tr><td><strong>Prescripción de cobro</strong></td><td>Plazo de 5 años para que la SET cobre deudas tributarias (Art. 218 Ley 125/1991)</td></tr>
+        <tr><td><strong>Benchmark</strong></td><td>Valor de referencia o promedio de industria para comparar ratios financieros</td></tr>
+        <tr><td><strong>Margen bruto</strong></td><td>(Ventas - Compras) / Ventas × 100. Indicador de rentabilidad antes de gastos operativos</td></tr>
+        <tr><td><strong>Partes vinculadas</strong></td><td>Empresas o personas relacionadas que deben transar a precios de mercado (Art. 35 Ley 6380)</td></tr>
       </table>
     </div>
 
