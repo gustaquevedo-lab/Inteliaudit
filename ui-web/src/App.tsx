@@ -8,9 +8,12 @@ import Dashboard from './pages/Dashboard'
 import EvidenceExplorer from './pages/EvidenceExplorer'
 import ClientesList from './pages/clientes/ClientesList'
 import ClienteDetail from './pages/clientes/ClienteDetail'
+import AuditoriasList from './pages/auditorias/AuditoriasList'
 import NuevaAuditoria from './pages/auditorias/NuevaAuditoria'
 import AuditoriaDetail from './pages/auditorias/AuditoriaDetail'
+import HallazgosGlobal from './pages/auditorias/HallazgosGlobal'
 import Usuarios from './pages/admin/Usuarios'
+import JobsMonitor from './pages/admin/JobsMonitor'
 import InformesList from './pages/informes/InformesList'
 import Configuracion from './pages/admin/Configuracion'
 import AuditTrail from './pages/admin/AuditTrail'
@@ -49,10 +52,13 @@ function AppRoutes() {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="clientes" element={<ClientesList />} />
         <Route path="clientes/:ruc" element={<ClienteDetail />} />
+        <Route path="auditorias" element={<AuditoriasList />} />
         <Route path="auditorias/nueva" element={<NuevaAuditoria />} />
         <Route path="auditorias/:id/*" element={<AuditoriaDetail />} />
         <Route path="auditorias/:id/evidencia" element={<EvidenceExplorer />} />
+        <Route path="hallazgos" element={<HallazgosGlobal />} />
         <Route path="admin/usuarios" element={<Usuarios />} />
+        <Route path="admin/jobs" element={<JobsMonitor />} />
         <Route path="informes" element={<InformesList />} />
         <Route path="planes" element={<Planes />} />
         <Route path="admin/configuracion" element={<Configuracion />} />

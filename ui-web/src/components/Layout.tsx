@@ -3,7 +3,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Users, FolderSearch, FileText, Settings,
   Shield, Sun, Moon, Monitor, LogOut, Menu, X,
-  Building2, ChevronRight, Search, Bell,
+  Building2, ChevronRight, Search, Bell, Activity, Zap, FolderOpen
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
@@ -27,7 +27,9 @@ const NAV_GROUPS = [
   {
     title: 'Auditorías',
     items: [
+      { path: '/auditorias', icon: <FolderOpen size={17} />, label: 'Listado de auditorías', roles: ['super_admin', 'admin', 'auditor_senior', 'auditor'] },
       { path: '/auditorias/nueva', icon: <FolderSearch size={17} />, label: 'Nueva auditoría', roles: ['super_admin', 'admin', 'auditor_senior'] },
+      { path: '/hallazgos', icon: <FileText size={17} />, label: 'Hallazgos globales', roles: ['super_admin', 'admin', 'auditor_senior', 'auditor'] },
     ],
   },
   {
@@ -40,6 +42,8 @@ const NAV_GROUPS = [
     title: 'Administración',
     items: [
       { path: '/admin/usuarios', icon: <Users size={17} />, label: 'Usuarios', roles: ['super_admin', 'admin'] },
+      { path: '/admin/jobs', icon: <Activity size={17} />, label: 'Cola de tareas', roles: ['super_admin', 'admin'] },
+      { path: '/planes', icon: <Zap size={17} />, label: 'Planes y suscripción', roles: ['super_admin', 'admin'] },
       { path: '/admin/configuracion', icon: <Settings size={17} />, label: 'Configuración', roles: ['super_admin', 'admin'] },
       { path: '/admin/trail', icon: <Shield size={17} />, label: 'Audit Trail', roles: ['super_admin', 'admin'] },
     ],

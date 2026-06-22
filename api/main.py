@@ -280,6 +280,7 @@ async def trial_middleware(request: Request, call_next):
 from api.routers.auth import router as auth_router
 from api.routers.archivos import router as archivos_router
 from api.routers.hallazgos import router as hallazgos_router
+from api.routers.hallazgos import global_router as global_hallazgos_router
 from api.routers.informes import router as informes_router
 from api.routers.informes import _informes_router_v2 as informes_v2_router
 from api.routers.clientes import router as clientes_router
@@ -296,6 +297,7 @@ api = APIRouter(prefix="/api")
 api.include_router(auth_router)
 api.include_router(archivos_router)
 api.include_router(hallazgos_router)
+api.include_router(global_hallazgos_router)
 api.include_router(informes_router)
 api.include_router(clientes_router)
 api.include_router(auditorias_router)

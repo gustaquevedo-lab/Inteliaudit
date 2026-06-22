@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intelipresupuesto — Inteliaudit Premium</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #104c91;
+      --primary-dark: #0a356b;
+      --primary-light: #256ebf;
+      --primary-gradient: linear-gradient(135deg, #1561e1 0%, #104c91 100%);
+      --secondary: #00a651;
+      --secondary-dark: #00823e;
+      --secondary-light: #1ecb73;
+      --secondary-gradient: linear-gradient(135deg, #1ecb73 0%, #00a651 100%);
+      --dark-navy: #091624;
+      --card-dark: #122238;
+      --accent: #3AAFA9;
+      --body-bg: #0f172a;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      
+      /* Print dimensions */
+      --a4-width: 210mm;
+      --a4-height: 297mm;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--body-bg);
+      color: #f1f5f9;
+      display: flex;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Layout Wrapper */
+    .app-container {
+      display: flex;
+      width: 100%;
+      height: 100vh;
+    }
+
+    /* Left Panel - Configurator (WOW Dark Mode Theme) */
+    .configurator {
+      width: 460px;
+      background: linear-gradient(135deg, var(--dark-navy) 0%, #0d1e33 100%);
+      border-right: 1px solid #1e293b;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+      z-index: 10;
+      flex-shrink: 0;
+    }
+
+    .configurator::-webkit-scrollbar {
+      width: 6px;
+    }
+    .configurator::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+
+    .config-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 12px;
+    }
+
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #38bdf8 0%, #1561e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+    }
+
+    .form-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 14px;
+      border-radius: 12px;
+    }
+
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 12.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .input-group label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+
+    .input-group input, .input-group select {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1.5px solid #1e293b;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-family: inherit;
+      font-size: 12.5px;
+      color: white;
+      transition: all 0.25s;
+    }
+
+    .input-group input:focus, .input-group select:focus {
+      outline: none;
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    /* Plan Option Cards styling */
+    .plan-selector-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .plan-option {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1.5px solid #1e293b;
+      border-radius: 8px;
+      padding: 8px 4px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .plan-option:hover {
+      border-color: #38bdf8;
+      background: rgba(56, 189, 248, 0.05);
+    }
+
+    .plan-option.active {
+      border-color: #104c91;
+      background: linear-gradient(135deg, rgba(16, 76, 145, 0.2) 0%, rgba(37, 110, 191, 0.1) 100%);
+      box-shadow: inset 0 0 8px rgba(56, 189, 248, 0.2), 0 0 12px rgba(16, 76, 145, 0.2);
+    }
+
+    .plan-option .plan-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      color: white;
+    }
+
+    .plan-option .plan-price {
+      font-size: 9.5px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    /* Cycle Selector Toggles */
+    .cycle-selector {
+      display: flex;
+      background: rgba(15, 23, 42, 0.9);
+      padding: 4px;
+      border-radius: 8px;
+      gap: 4px;
+      border: 1px solid #1e293b;
+    }
+
+    .cycle-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 6px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .cycle-btn.active {
+      background: var(--primary-gradient);
+      color: white;
+      box-shadow: 0 4px 10px rgba(21, 97, 225, 0.3);
+    }
+
+    /* Features List */
+    .checkbox-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 120px;
+      overflow-y: auto;
+      border: 1px solid #1e293b;
+      padding: 8px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.6);
+    }
+
+    .checkbox-list::-webkit-scrollbar {
+      width: 4px;
+    }
+    .checkbox-list::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 2px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 11px;
+      cursor: pointer;
+      color: #cbd5e1;
+    }
+
+    .checkbox-item input {
+      margin-top: 2px;
+      cursor: pointer;
+    }
+
+    /* Custom services manually added */
+    .add-service-box {
+      border: 1px dashed #334155;
+      border-radius: 8px;
+      padding: 10px;
+      background: rgba(15, 23, 42, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .add-service-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .add-service-row input[type="text"] {
+      flex: 2;
+    }
+    .add-service-row input[type="number"] {
+      flex: 1;
+    }
+
+    /* Actions Panel */
+    .btn-action {
+      background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.25s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(0, 166, 81, 0.3);
+    }
+
+    .btn-action:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(0, 166, 81, 0.5);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      border: 1px solid #1e293b;
+      box-shadow: none;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: none;
+      transform: translateY(-1px);
+    }
+
+    /* Guide Drawer */
+    .guide-drawer {
+      background: rgba(16, 76, 145, 0.1);
+      border: 1.5px solid rgba(56, 189, 248, 0.2);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 11px;
+    }
+
+    .guide-drawer h4 {
+      color: #38bdf8;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .guide-list {
+      list-style-type: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      color: #93c5fd;
+    }
+
+    .guide-list li {
+      position: relative;
+      padding-left: 10px;
+    }
+
+    .guide-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #38bdf8;
+    }
+
+    /* Right Panel - Preview Area */
+    .preview-canvas {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+      background: #0b1320;
+      overflow-y: auto;
+      height: 100vh;
+    }
+
+    /* The A4 Page container simulator (CLEAN PRINT DESIGN) */
+    .a4-page {
+      width: var(--a4-width);
+      height: var(--a4-height);
+      background: white;
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6);
+      border-radius: 6px;
+      padding: 14mm 16mm 12mm; /* Perfectly proportioned margins for printing */
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-sizing: border-box;
+      position: relative;
+      color: var(--text-dark);
+      overflow: hidden;
+    }
+
+    /* Watermark for absolute premium styling */
+    .a4-page::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      height: 300px;
+      background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="17" cy="17" r="7" stroke="%23104c91" stroke-width="1.5" fill="none" opacity="0.04"/><line x1="22" y1="22" x2="29" y2="29" stroke="%23104c91" stroke-width="1.5" stroke-linecap="round" opacity="0.04"/></svg>') no-repeat center;
+      background-size: contain;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Top decorative border */
+    .top-accent-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #104c91 0%, #00a651 100%);
+    }
+
+    /* Header styling with logos at the top */
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 12px;
+      z-index: 1;
+    }
+
+    /* Left logo details */
+    .brand-logo-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-logo-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+
+    /* Right brand details */
+    .brand-details-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-align: right;
+    }
+
+    .preview-brand-info {
+      font-size: 9.5px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .preview-brand-info strong {
+      color: var(--text-dark);
+      font-size: 11px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      display: block;
+      margin-bottom: 1px;
+    }
+
+    /* Client/Proposal meta layout */
+    .proposal-meta {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 16px;
+      margin-top: 14px;
+      font-size: 10.5px;
+      z-index: 1;
+    }
+
+    .client-details {
+      background: #f8fafc;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .client-details h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+      margin-bottom: 4px;
+      font-weight: 800;
+    }
+
+    .client-details p {
+      line-height: 1.4;
+      color: #334155;
+    }
+
+    .client-details strong {
+      color: var(--text-dark);
+    }
+
+    .proposal-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: right;
+      padding: 4px 0;
+    }
+
+    .proposal-title-box h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--primary-dark);
+      letter-spacing: -0.02em;
+    }
+
+    .proposal-date-ruc {
+      font-size: 10px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Intro letters */
+    .proposal-pitch {
+      margin-top: 12px;
+      font-size: 10.5px;
+      line-height: 1.5;
+      color: #334155;
+      text-align: justify;
+      z-index: 1;
+    }
+
+    /* Highlights KPI Cards */
+    .highlights-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+      z-index: 1;
+    }
+
+    .highlight-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 6px 10px;
+      text-align: center;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+
+    .highlight-label {
+      font-size: 8px;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+
+    .highlight-val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-top: 2px;
+    }
+
+    /* Premium Table styling */
+    .proposal-table-wrapper {
+      margin-top: 14px;
+      flex-grow: 1;
+      max-height: 260px;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .proposal-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10.5px;
+    }
+
+    .proposal-table th {
+      text-align: left;
+      padding: 6px 8px;
+      background: #f1f5f9;
+      color: var(--primary-dark);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 9px;
+      letter-spacing: 0.04em;
+      border-bottom: 1.5px solid var(--border);
+    }
+
+    .proposal-table th:last-child {
+      text-align: right;
+    }
+
+    .proposal-table td {
+      padding: 8px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #334155;
+      vertical-align: middle;
+    }
+
+    .proposal-table td:last-child {
+      text-align: right;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .feature-tags-inline {
+      font-size: 8px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      line-height: 1.2;
+    }
+
+    .feature-tag-item {
+      background: #f1f5f9;
+      padding: 1px 4px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    /* Totals Box */
+    .proposal-totals {
+      margin-top: 12px;
+      border-top: 2px solid var(--text-dark);
+      padding-top: 8px;
+      display: flex;
+      justify-content: flex-end;
+      z-index: 1;
+    }
+
+    .totals-grid {
+      width: 290px;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      row-gap: 5px;
+      font-size: 10.5px;
+    }
+
+    .totals-label {
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+    }
+
+    .totals-val {
+      text-align: right;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .totals-val.grand-total {
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--primary);
+    }
+
+    .totals-label.grand-total-label {
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    /* Footer terms & signatures */
+    .proposal-footer {
+      margin-top: 14px;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      font-size: 9px;
+      z-index: 1;
+    }
+
+    .terms-box {
+      width: 44%;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    .terms-box strong {
+      color: var(--text-dark);
+      font-family: 'Outfit', sans-serif;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .signature-area {
+      width: 53%;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 12px;
+    }
+
+    .seal-box {
+      flex-shrink: 0;
+      margin-bottom: 2px;
+    }
+
+    .sig-line-wrapper {
+      width: 42%;
+      text-align: center;
+    }
+
+    .signature-line {
+      width: 100%;
+      border-top: 1px solid var(--text-dark);
+      margin-bottom: 4px;
+    }
+
+    .signature-line + strong {
+      display: block;
+      font-size: 8px;
+    }
+
+    /* Configurator-only elements logic */
+    .configurator-only {
+      display: inline;
+    }
+
+    /* Print Overrides */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+      body {
+        background: white;
+        color: black;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      svg, rect, circle, path, linearGradient, div, span, table, th, td {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .configurator {
+        display: none !important;
+      }
+      .preview-canvas {
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        height: var(--a4-height) !important;
+        width: var(--a4-width) !important;
+        display: block !important;
+        overflow: hidden !important;
+      }
+      .a4-page {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        width: var(--a4-width) !important;
+        height: var(--a4-height) !important;
+        margin: 0 !important;
+        padding: 14mm 16mm 12mm !important;
+        page-break-inside: avoid !important;
+        page-break-after: always !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+      }
+      .configurator-only {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Configurator Control Panel -->
+    <aside class="configurator">
+      <div class="config-header">
+        <h2 class="brand-title">INTELIPRESUPUESTO</h2>
+        
+        <!-- Clean Square logo of the system -->
+        <svg width="34" height="34" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="panelGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#38bdf8"/>
+              <stop offset="1" stop-color="#104c91"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="36" height="36" rx="10" fill="url(#panelGrad)"/>
+          <circle cx="18" cy="20" r="7" stroke="white" stroke-width="2.2" fill="none"/>
+          <line x1="23.5" y1="25.5" x2="29" y2="31" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M15 20.2l2 2 3.5-3.5" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <circle cx="31" cy="9" r="3.5" fill="#00a651"/>
+        </svg>
+      </div>
+
+      <!-- Guide Drawer / Cost Reference -->
+      <div class="guide-drawer">
+        <h4>💡 Guía de Cobro de Implementación</h4>
+        <p style="margin-bottom: 4px; color: #93c5fd; font-weight: 500;">
+          Recomendación de cobro de implementación comercial:
+        </p>
+        <ul class="guide-list">
+          <li><strong>Starter:</strong> Gs. 1.500.000. Configuración + 1h capacitación.</li>
+          <li><strong>Pro:</strong> Gs. 3.000.000. Onboarding de 15 clientes + 2h taller.</li>
+          <li><strong>Enterprise:</strong> Gs. 5.000.000+. Integración corporativa total.</li>
+        </ul>
+      </div>
+
+      <!-- Client Details Form -->
+      <div class="form-section">
+        <h3 class="section-title">👤 Datos del Cliente</h3>
+        <div class="input-group">
+          <label for="clientName">Empresa / Razón Social</label>
+          <input type="text" id="clientName" value="Estudio Contable & Auditores Asociados" oninput="updatePreview()">
+        </div>
+        <div class="input-group">
+          <label for="clientRuc">RUC</label>
+          <input type="text" id="clientRuc" value="80012345-6" oninput="updatePreview()">
+        </div>
+        <div class="input-group">
+          <label for="clientContact">Contacto / Correo</label>
+          <input type="text" id="clientContact" value="Lic. María Gómez · maria.gomez@estudio.com.py" oninput="updatePreview()">
+        </div>
+      </div>
+
+      <!-- Seller Details & Comments Form -->
+      <div class="form-section">
+        <h3 class="section-title">🤝 Presentación del Vendedor</h3>
+        <div class="input-group">
+          <label for="sellerName">Nombre del Vendedor</label>
+          <input type="text" id="sellerName" value="Gustavo Quevedo" oninput="updatePreview()">
+        </div>
+        <div class="input-group">
+          <label for="sellerRole">Cargo / Rol</label>
+          <input type="text" id="sellerRole" value="Consultor de Tecnología Impositiva" oninput="updatePreview()">
+        </div>
+        <div class="input-group">
+          <label for="sellerPhone">Teléfono del Vendedor</label>
+          <input type="text" id="sellerPhone" value="+595 994 516 360" oninput="updatePreview()">
+        </div>
+        <div class="input-group">
+          <label for="proposalPitchText">Comentarios / Nota Comercial</label>
+          <textarea id="proposalPitchText" rows="3" style="background: rgba(15, 23, 42, 0.6); border: 1.5px solid #1e293b; border-radius: 8px; padding: 6px 10px; font-family: inherit; font-size: 11.5px; color: white; resize: none; transition: all 0.25s;" oninput="updatePreview()">Nos complace presentar la propuesta para Inteliaudit. Estamos convencidos de que transformará la eficiencia de su firma contable, erradicando los cruces manuales en Excel y garantizando la precisión del 100% en sus auditorías ante la DNIT.</textarea>
+        </div>
+      </div>
+
+      <!-- Plan Selector -->
+      <div class="form-section">
+        <h3 class="section-title">🚀 Plan de Suscripción</h3>
+        <div class="plan-selector-grid">
+          <div class="plan-option" id="plan-starter" onclick="selectPlan('starter')">
+            <div class="plan-name">Starter</div>
+            <div class="plan-price">5 Clientes</div>
+          </div>
+          <div class="plan-option active" id="plan-pro" onclick="selectPlan('pro')">
+            <div class="plan-name">Pro</div>
+            <div class="plan-price">15 Clientes</div>
+          </div>
+          <div class="plan-option" id="plan-enterprise" onclick="selectPlan('enterprise')">
+            <div class="plan-name">Enterprise</div>
+            <div class="plan-price">Ilimitado</div>
+          </div>
+        </div>
+
+        <div class="cycle-selector">
+          <button class="cycle-btn active" id="cycle-monthly" onclick="selectCycle('monthly')">Mensual</button>
+          <button class="cycle-btn" id="cycle-annual" onclick="selectCycle('annual')">Anual (15% Desc.)</button>
+        </div>
+
+        <div class="input-group" style="margin-top: 6px;">
+          <label for="planMonthlyPriceInput">Precio Mensual Plan Seleccionado (Gs.)</label>
+          <input type="number" id="planMonthlyPriceInput" oninput="updatePlanPrice('monthly')" step="10000">
+        </div>
+        <div class="input-group">
+          <label for="planAnnualPriceInput">Precio Anual Total Plan Seleccionado (Gs.)</label>
+          <input type="number" id="planAnnualPriceInput" oninput="updatePlanPrice('annual')" step="50000">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+          <input type="checkbox" id="bonusFirstMonth" onchange="updatePreview()" style="cursor: pointer; width: 16px; height: 16px;">
+          <label for="bonusFirstMonth" style="font-size: 11px; font-weight: 700; color: #38bdf8; cursor: pointer;">🎁 Bonificar 1° Mes (Gratis, cobro desde el 2° mes)</label>
+        </div>
+      </div>
+
+      <!-- Features Toggles -->
+      <div class="form-section">
+        <h3 class="section-title">⚙️ Características Incluidas</h3>
+        <div class="checkbox-list" id="features-container">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Implementation & Additional Services -->
+      <div class="form-section">
+        <h3 class="section-title">💸 Costos Adicionales</h3>
+        <div class="input-group">
+          <label for="implementationCost">Costo de Implementación (Gs.)</label>
+          <input type="number" id="implementationCost" value="3000000" step="50000" oninput="updatePreview()">
+        </div>
+        
+        <div class="add-service-box">
+          <label style="font-size: 10px; font-weight: 700; color: #94a3b8;">Agregar Servicio Conexo Manualmente</label>
+          <div class="add-service-row">
+            <input type="text" id="customServiceName" placeholder="Ej. Soporte Onsite" style="padding: 8px; border: 1.5px solid #1e293b; border-radius: 6px; font-size: 12px; background: rgba(0,0,0,0.3); color: white;">
+            <input type="number" id="customServicePrice" placeholder="Gs." style="padding: 8px; border: 1.5px solid #1e293b; border-radius: 6px; font-size: 12px; background: rgba(0,0,0,0.3); color: white;">
+          </div>
+          <button class="btn-action btn-secondary" onclick="addCustomService()" style="padding: 8px; font-size: 12px;">+ Agregar Servicio</button>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="action-panel-footer">
+        <button class="btn-action" onclick="printProposal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9"/>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+          </svg>
+          Exportar a PDF / Imprimir A4
+        </button>
+      </div>
+    </aside>
+
+    <!-- Interactive Live Preview Canvas -->
+    <main class="preview-canvas">
+      <div class="a4-page" id="proposal-page">
+        
+        <!-- Top decorative border -->
+        <div class="top-accent-bar"></div>
+
+        <!-- Header (LOGO ARRIBA COMO EN LA PRIMERA VERSION) -->
+        <div class="preview-header">
+          <!-- Logo Isotipo + Wordmark (Clean render without black fill bugs) -->
+          <div class="brand-logo-area" style="display: flex; align-items: center; gap: 10px;">
+            <svg width="44" height="44" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="logoGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#1561e1"/>
+                  <stop offset="100%" stop-color="#104c91"/>
+                </linearGradient>
+              </defs>
+              <rect width="40" height="40" rx="10" fill="url(#logoGrad)"/>
+              <circle cx="17" cy="17" r="7" stroke="white" stroke-width="2.5" fill="none"/>
+              <line x1="22" y1="22" x2="29" y2="29" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="29" cy="13" r="6" fill="#00a651"/>
+              <polyline points="26,13 28.5,15.5 32,11" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <div style="display: flex; flex-direction: column; line-height: 1;">
+              <span style="font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 950; letter-spacing: -0.03em; color: #104c91;">Inteli<span style="color: #00a651; font-weight: 400;">audit</span></span>
+              <span style="font-size: 7.5px; font-weight: 800; color: #64748b; letter-spacing: 0.12em; margin-top: 2px; text-transform: uppercase;">Auditoría Impositiva Inteligente</span>
+            </div>
+          </div>
+
+          <!-- Intellihouse details & Smart logo on the right -->
+          <div class="brand-details-area">
+            <div class="preview-brand-info">
+              <strong>Intellihouse Soluciones E.A.S.</strong>
+              RUC: 80144114-5 · intelligousepy@gmail.com<br>
+              Contacto comercial: +595 994 516 360<br>
+              Asunción, Paraguay
+            </div>
+            <!-- Mini smart house logo -->
+            <svg width="34" height="34" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="houseGrad" x1="15" y1="12" x2="85" y2="92" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#104c91"/>
+                  <stop offset="1" stop-color="#0a1e33"/>
+                </linearGradient>
+              </defs>
+              <path d="M50 12L85 32V72L50 92L15 72V32L50 12Z" fill="url(#houseGrad)" />
+              <path d="M50 12L85 32L50 52L15 32L50 12Z" fill="rgba(255,255,255,0.15)" />
+              <path d="M50 52V92" stroke="rgba(255,255,255,0.25)" stroke-width="2" />
+              <line x1="50" y1="32" x2="30" y2="52" stroke="white" stroke-width="1.5" />
+              <line x1="50" y1="32" x2="70" y2="52" stroke="white" stroke-width="1.5" />
+              <line x1="30" y1="52" x2="50" y2="72" stroke="white" stroke-width="1.5" />
+              <line x1="70" y1="52" x2="50" y2="72" stroke="white" stroke-width="1.5" />
+              <circle cx="50" cy="32" r="4.5" fill="#1ecb73" />
+              <circle cx="30" cy="52" r="4.5" fill="#38bdf8" />
+              <circle cx="70" cy="52" r="4.5" fill="#38bdf8" />
+              <circle cx="50" cy="72" r="4.5" fill="#1ecb73" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Meta section -->
+        <div class="proposal-meta">
+          <div class="client-details">
+            <h3>Preparado para:</h3>
+            <p><strong id="preview-client-name">Estudio Contable & Auditores Asociados</strong></p>
+            <p>RUC: <span id="preview-client-ruc">80012345-6</span></p>
+            <p id="preview-client-contact" style="color: var(--text-muted); margin-top: 2px;">Lic. María Gómez</p>
+          </div>
+          
+          <div class="proposal-info">
+            <div class="proposal-title-box">
+              <h1>Propuesta Comercial</h1>
+              <p style="font-size: 9px; font-weight: 800; color: var(--secondary); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 1px;">SaaS de Auditoría Impositiva</p>
+            </div>
+            <div class="proposal-date-ruc">
+              <strong>Fecha:</strong> <span id="preview-date">18/06/2026</span><br>
+              <strong>Validez:</strong> 30 días corridos
+            </div>
+          </div>
+        </div>
+
+        <!-- Pitch -->
+        <div class="proposal-pitch">
+          <p id="preview-pitch">
+            Nos complace presentar la propuesta para Inteliaudit. Estamos convencidos de que transformará la eficiencia de su firma contable, erradicando los cruces manuales en Excel y garantizando la precisión del 100% en sus auditorías ante la DNIT.
+          </p>
+        </div>
+
+        <!-- Highlights KPI Cards -->
+        <div class="highlights-grid">
+          <div class="highlight-card">
+            <div class="highlight-label">Licencia Seleccionada</div>
+            <div class="highlight-val" id="kpi-plan">Pro (15 Clientes)</div>
+          </div>
+          <div class="highlight-card">
+            <div class="highlight-label">Actualizaciones DNIT</div>
+            <div class="highlight-val" style="color: var(--secondary-dark); font-weight: 800;">✓ Incluidas</div>
+          </div>
+          <div class="highlight-card">
+            <div class="highlight-label">Ciclo de Contrato</div>
+            <div class="highlight-val" id="kpi-ciclo">Mensual</div>
+          </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="proposal-table-wrapper">
+          <table class="proposal-table">
+            <thead>
+              <tr>
+                <th style="width: 62%;">Concepto / Servicio</th>
+                <th style="width: 18%; text-align: center;">Ciclo / Frecuencia</th>
+                <th style="width: 20%; text-align: right;">Costo (Gs.)</th>
+              </tr>
+            </thead>
+            <tbody id="proposal-table-body">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Valor Agregado / Garantías y Soporte (Enterprise Value Props) -->
+        <div class="value-props-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; border-top: 1.5px solid var(--border); padding-top: 8px; z-index: 1;">
+          <div class="value-prop-card" style="font-size: 8.5px; line-height: 1.35; color: #475569;">
+            <strong style="color: var(--primary); font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 4px; font-size: 9.5px; margin-bottom: 2px;">
+              🛡️ Seguridad de Datos (AES-256)
+            </strong>
+            Credenciales de Marangatú cifradas localmente en base de datos. Estricto cumplimiento del secreto profesional y confidencialidad.
+          </div>
+          <div class="value-prop-card" style="font-size: 8.5px; line-height: 1.35; color: #475569;">
+            <strong style="color: var(--primary); font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 4px; font-size: 9.5px; margin-bottom: 2px;">
+              🔄 Actualizaciones DNIT
+            </strong>
+            Sincronización inmediata y sin costo adicional ante nuevas resoluciones generales tributarias de la DNIT y cambios en SIFEN.
+          </div>
+          <div class="value-prop-card" style="font-size: 8.5px; line-height: 1.35; color: #475569;">
+            <strong style="color: var(--primary); font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 4px; font-size: 9.5px; margin-bottom: 2px;">
+              📞 Soporte & SLA prioritario
+            </strong>
+            Atención prioritaria 24/7 vía WhatsApp y acompañamiento profesional para resolver discrepancias en los cruces mensuales.
+          </div>
+        </div>
+
+        <!-- Totals -->
+        <div class="proposal-totals" style="margin-top: 10px; border-top: 1.5px solid var(--text-dark); padding-top: 6px;">
+          <div class="totals-grid">
+            <div class="totals-label">Costo de Implementación:</div>
+            <div class="totals-val" id="total-implementation">Gs. 3.000.000</div>
+
+            <div class="totals-label" id="cycle-total-label">Suscripción Mensual:</div>
+            <div class="totals-val" id="total-subscription">Gs. 890.000</div>
+
+            <div class="totals-label grand-total-label">Inversión Inicial Total:</div>
+            <div class="totals-val grand-total" id="total-grand">Gs. 3.890.000</div>
+          </div>
+        </div>
+
+        <!-- Footer / Acceptance Terms -->
+        <div class="proposal-footer">
+          <div class="terms-box">
+            <strong>Términos & Condiciones Generales</strong>
+            La facturación del software se rige bajo la modalidad seleccionada. Los valores no incluyen el IVA. El servicio contempla soporte prioritario 24/7 y planes adaptables a cambios legislativos oficiales sin costo adicional.
+          </div>
+          
+          <div class="signature-area">
+            <div class="sig-line-wrapper" style="text-align: left;">
+              <div style="font-size: 8px; color: var(--text-muted); margin-bottom: 22px;">Preparado por:</div>
+              <div class="signature-line"></div>
+              <strong id="preview-seller-name" style="font-size: 8.5px; display: block; color: var(--text-dark); white-space: nowrap;">Gustavo Quevedo</strong>
+              <span id="preview-seller-role" style="color: var(--text-muted); font-size: 7px; display: block; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Consultor</span>
+              <span id="preview-seller-phone" style="color: var(--text-muted); font-size: 7px; display: block;">+595 994 516 360</span>
+            </div>
+            
+            <!-- Quality Seal -->
+            <div class="seal-box">
+              <svg width="34" height="34" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#00a651" stroke-width="2" stroke-dasharray="4,2"/>
+                <circle cx="50" cy="50" r="40" fill="#f0fdf4" stroke="#00a651" stroke-width="1.5"/>
+                <path d="M35 50L45 60L65 40" stroke="#00a651" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                <text x="50" y="80" font-family="'Outfit', sans-serif" font-weight="900" font-size="8" fill="#00823e" text-anchor="middle">INTELIAUDIT</text>
+                <text x="50" y="26" font-family="'Outfit', sans-serif" font-weight="700" font-size="7" fill="#00823e" text-anchor="middle">GARANTÍA</text>
+              </svg>
+            </div>
+
+            <div class="sig-line-wrapper" style="text-align: right;">
+              <div style="font-size: 8px; color: var(--text-muted); margin-bottom: 22px;">Aceptado por:</div>
+              <div class="signature-line"></div>
+              <strong style="font-size: 8.5px; display: block; color: var(--text-dark);">Firma Autorizada</strong>
+              <span style="color: var(--text-muted); font-size: 7px; display: block; white-space: nowrap;">Sello de la Firma</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // System Plans Specs
+    const plans = {
+      starter: {
+        name: 'Starter',
+        monthlyPrice: 490000,
+        annualPrice: 416500,
+        annualTotal: 4998000,
+        clients: 'Hasta 5 clientes activos',
+        features: [
+          { text: 'Cruce automático RG90 vs SIFEN vs HECHAUKA', checked: true },
+          { text: 'Análisis automatizado de IVA + IRE + Retenciones', checked: true },
+          { text: 'Generación ilimitada de informes en Word y PDF', checked: true },
+          { text: 'Panel multi-usuario para hasta 3 auditores', checked: true },
+          { text: 'Audit trail completo e inmutable (trazabilidad)', checked: true },
+          { text: 'Soporte vía correo electrónico calificado', checked: true },
+          { text: 'Brain AI Auditor™ (Análisis avanzado)', checked: false },
+          { text: 'Redacción de narrativas técnicas con base legal', checked: false }
+        ]
+      },
+      pro: {
+        name: 'Pro',
+        monthlyPrice: 890000,
+        annualPrice: 756500,
+        annualTotal: 9078000,
+        clients: 'Hasta 15 clientes activos',
+        features: [
+          { text: 'Cruce automático RG90 vs SIFEN vs HECHAUKA', checked: true },
+          { text: 'Análisis automatizado de IVA + IRE + Retenciones', checked: true },
+          { text: 'Generación ilimitada de informes en Word y PDF', checked: true },
+          { text: 'Panel multi-usuario para hasta 8 auditores', checked: true },
+          { text: 'Audit trail completo e inmutable (trazabilidad)', checked: true },
+          { text: 'Soporte prioritario 24/7 vía WhatsApp local', checked: true },
+          { text: 'Brain AI Auditor™ (Análisis automatizado con IA)', checked: true },
+          { text: 'Redacción de narrativas técnicas con base legal', checked: true },
+          { text: 'Credenciales de Marangatú cifradas con AES-256', checked: true },
+          { text: 'Plan de trabajo checklist interactivo', checked: true }
+        ]
+      },
+      enterprise: {
+        name: 'Enterprise',
+        monthlyPrice: 1790000,
+        annualPrice: 1521500,
+        annualTotal: 18258000,
+        clients: 'Clientes y usuarios ilimitados',
+        features: [
+          { text: 'Cruce automático RG90 vs SIFEN vs HECHAUKA', checked: true },
+          { text: 'Análisis automatizado de IVA + IRE + Retenciones', checked: true },
+          { text: 'Generación ilimitada de informes en Word y PDF', checked: true },
+          { text: 'Panel multi-usuario y multi-firma ilimitado', checked: true },
+          { text: 'Audit trail completo e inmutable (trazabilidad)', checked: true },
+          { text: 'Soporte dedicado con SLA garantizado por contrato', checked: true },
+          { text: 'Brain AI Auditor™ (Análisis neuronal avanzado)', checked: true },
+          { text: 'Redacción de narrativas técnicas con base legal', checked: true },
+          { text: 'Credenciales de Marangatú cifradas con AES-256', checked: true },
+          { text: 'Personalización de informes con logo de la firma', checked: true },
+          { text: 'Portal del cliente para compartir discrepancias', checked: true },
+          { text: 'Onboarding prioritario y capacitación del equipo', checked: true }
+        ]
+      }
+    };
+
+    // State Variables
+    let selectedPlanKey = 'pro';
+    let selectedCycle = 'monthly';
+    let customServices = [];
+
+    // Initialize Page
+    document.addEventListener("DOMContentLoaded", () => {
+      // Set Date
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, '0');
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const yyyy = today.getFullYear();
+      document.getElementById('preview-date').innerText = `${dd}/${mm}/${yyyy}`;
+
+      syncPlanPriceInputs();
+      renderFeaturesConfigurator();
+      updatePreview();
+    });
+
+    function syncPlanPriceInputs() {
+      const plan = plans[selectedPlanKey];
+      document.getElementById('planMonthlyPriceInput').value = plan.monthlyPrice;
+      document.getElementById('planAnnualPriceInput').value = plan.annualTotal;
+    }
+
+    function updatePlanPrice(type) {
+      const plan = plans[selectedPlanKey];
+      if (type === 'monthly') {
+        const val = parseFloat(document.getElementById('planMonthlyPriceInput').value) || 0;
+        plan.monthlyPrice = val;
+      } else {
+        const val = parseFloat(document.getElementById('planAnnualPriceInput').value) || 0;
+        plan.annualTotal = val;
+        plan.annualPrice = Math.round(val / 12);
+      }
+      updatePreview();
+    }
+
+    function selectPlan(planKey) {
+      selectedPlanKey = planKey;
+      
+      // Update UI active class
+      document.querySelectorAll('.plan-option').forEach(el => el.classList.remove('active'));
+      document.getElementById(`plan-${planKey}`).classList.add('active');
+
+      syncPlanPriceInputs();
+      renderFeaturesConfigurator();
+      updatePreview();
+    }
+
+    function selectCycle(cycle) {
+      selectedCycle = cycle;
+      
+      document.querySelectorAll('.cycle-btn').forEach(el => el.classList.remove('active'));
+      if (cycle === 'monthly') {
+        document.getElementById('cycle-monthly').classList.add('active');
+      } else {
+        document.getElementById('cycle-annual').classList.add('active');
+      }
+      
+      updatePreview();
+    }
+
+    function renderFeaturesConfigurator() {
+      const container = document.getElementById('features-container');
+      container.innerHTML = '';
+      
+      const plan = plans[selectedPlanKey];
+      plan.features.forEach((feature, idx) => {
+        const div = document.createElement('div');
+        div.className = 'checkbox-item';
+        div.innerHTML = `
+          <input type="checkbox" id="feature-${idx}" ${feature.checked ? 'checked' : ''} onchange="toggleFeature(${idx})">
+          <label for="feature-${idx}">${feature.text}</label>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function toggleFeature(idx) {
+      plans[selectedPlanKey].features[idx].checked = !plans[selectedPlanKey].features[idx].checked;
+      updatePreview();
+    }
+
+    function addCustomService() {
+      const nameInput = document.getElementById('customServiceName');
+      const priceInput = document.getElementById('customServicePrice');
+      
+      const name = nameInput.value.trim();
+      const price = parseFloat(priceInput.value);
+
+      if (name && !isNaN(price) && price > 0) {
+        customServices.push({ name, price });
+        nameInput.value = '';
+        priceInput.value = '';
+        updatePreview();
+      } else {
+        alert("Por favor, ingrese un nombre de servicio válido y un precio mayor a 0.");
+      }
+    }
+
+    function removeCustomService(idx) {
+      customServices.splice(idx, 1);
+      updatePreview();
+    }
+
+    function formatNumber(num) {
+      return new Intl.NumberFormat('es-PY').format(num);
+    }
+
+    function updatePreview() {
+      const plan = plans[selectedPlanKey];
+      const isBonusChecked = document.getElementById('bonusFirstMonth').checked;
+      
+      // Update Client Info
+      document.getElementById('preview-client-name').innerText = document.getElementById('clientName').value || 'Cliente';
+      document.getElementById('preview-client-ruc').innerText = document.getElementById('clientRuc').value || '---';
+      document.getElementById('preview-client-contact').innerText = document.getElementById('clientContact').value || '---';
+
+      // Update Seller Info
+      document.getElementById('preview-seller-name').innerText = document.getElementById('sellerName').value || 'Vendedor';
+      document.getElementById('preview-seller-role').innerText = document.getElementById('sellerRole').value || '';
+      document.getElementById('preview-seller-phone').innerText = document.getElementById('sellerPhone').value || '';
+
+      // Update Pitch Message
+      document.getElementById('preview-pitch').innerText = document.getElementById('proposalPitchText').value || '';
+
+      // Update Highlights
+      document.getElementById('kpi-plan').innerText = `${plan.name} (${plan.clients.split(' ')[1] || 'Ilimitado'})`;
+      document.getElementById('kpi-ciclo').innerText = selectedCycle === 'monthly' ? 'Mensual' : 'Anual';
+
+      // Update Table body
+      const tbody = document.getElementById('proposal-table-body');
+      tbody.innerHTML = '';
+
+      // Plan Subscription item
+      const unitPrice = selectedCycle === 'monthly' ? plan.monthlyPrice : plan.annualPrice;
+      const cycleText = selectedCycle === 'monthly' ? 'Mensual' : 'Mensual (Facturado Anual)';
+      const standardSubTotal = selectedCycle === 'monthly' ? plan.monthlyPrice : plan.annualTotal;
+      const subTotal = isBonusChecked ? 0 : standardSubTotal;
+
+      // Extract active features
+      const activeFeatures = plan.features.filter(f => f.checked).map(f => `<span class="feature-tag-item">${f.text}</span>`).join('');
+
+      let bonusText = '';
+      if (isBonusChecked) {
+        bonusText = `
+          <div style="font-size: 8.5px; color: var(--secondary-dark); font-weight: 800; margin-top: 2px; display: flex; align-items: center; gap: 4px;">
+            🎁 1° MES 100% BONIFICADO (GRATIS) — Pagos recurrentes desde el 2° mes por Gs. ${formatNumber(standardSubTotal)}
+          </div>
+        `;
+      }
+
+      let trSubscription = `
+        <tr>
+          <td>
+            <strong>Licencia SaaS Inteliaudit — Plan ${plan.name}</strong>
+            <div style="font-size: 8px; color: var(--secondary); font-weight: 700; margin-top: 1px;">${plan.clients}</div>
+            <div class="feature-tags-inline">${activeFeatures}</div>
+            ${bonusText}
+          </td>
+          <td style="text-align: center; font-weight: 600; vertical-align: middle;">${cycleText}</td>
+          <td style="text-align: right; font-weight: 700; color: ${isBonusChecked ? 'var(--secondary)' : 'var(--text-dark)'}; vertical-align: middle;">
+            ${isBonusChecked ? 'Gs. 0 (Bonificado)' : 'Gs. ' + formatNumber(subTotal)}
+          </td>
+        </tr>
+      `;
+      tbody.innerHTML += trSubscription;
+
+      // Implementation Cost Row
+      const implementationCost = parseFloat(document.getElementById('implementationCost').value) || 0;
+      if (implementationCost > 0) {
+        let trImplementation = `
+          <tr>
+            <td>
+              <strong>Servicio de Implementación, Onboarding y Configuración</strong>
+              <div style="font-size: 8px; color: var(--text-muted); margin-top: 1px;">
+                Configuración del entorno cloud seguro, vinculación de credenciales impositivas cifradas, carga inicial de clientes y taller de capacitación técnica de ${selectedPlanKey === 'starter' ? '1h' : selectedPlanKey === 'pro' ? '2h' : '4h'} para el equipo.
+              </div>
+            </td>
+            <td style="text-align: center; font-weight: 600; color: var(--text-muted); vertical-align: middle;">Pago Único</td>
+            <td style="text-align: right; font-weight: 700; vertical-align: middle;">Gs. ${formatNumber(implementationCost)}</td>
+          </tr>
+        `;
+        tbody.innerHTML += trImplementation;
+      }
+
+      // Custom services item
+      customServices.forEach((service, idx) => {
+        let trCustom = `
+          <tr>
+            <td>
+              <strong>${service.name}</strong>
+              <div style="font-size: 8px; color: var(--text-muted); margin-top: 1px;">Servicio profesional conexo personalizado solicitado por el cliente</div>
+            </td>
+            <td style="text-align: center; color: var(--text-muted); vertical-align: middle;">Pago Único</td>
+            <td style="text-align: right; font-weight: 700; vertical-align: middle;">
+              Gs. ${formatNumber(service.price)}
+              <span class="configurator-only" style="color: #ef4444; cursor: pointer; font-size: 12px; margin-left: 4px; font-weight: bold;" onclick="removeCustomService(${idx})" title="Eliminar servicio">×</span>
+            </td>
+          </tr>
+        `;
+        tbody.innerHTML += trCustom;
+      });
+
+      // Update Totals Summary
+      document.getElementById('total-implementation').innerText = `Gs. ${formatNumber(implementationCost)}`;
+      
+      document.getElementById('cycle-total-label').innerText = selectedCycle === 'monthly' ? 'Suscripción 1° Mes:' : 'Suscripción Anual:';
+      document.getElementById('total-subscription').innerText = isBonusChecked ? 'Gs. 0 (Bonificado)' : `Gs. ${formatNumber(standardSubTotal)}`;
+
+      // Grand total
+      const customTotal = customServices.reduce((sum, s) => sum + s.price, 0);
+      const grandTotal = implementationCost + subTotal + customTotal;
+      document.getElementById('total-grand').innerText = `Gs. ${formatNumber(grandTotal)}`;
+    }
+
+    function printProposal() {
+      window.print();
+    }
+  </script>
+</body>
+</html>

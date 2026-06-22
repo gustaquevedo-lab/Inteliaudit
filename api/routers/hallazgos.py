@@ -501,3 +501,56 @@ def _serializar(h: Hallazgo) -> dict:
         "creado_por": h.creado_por,
         "creado_en": h.creado_en.isoformat() if h.creado_en else None,
     }
+
+
+global_router = APIRouter(prefix="/hallazgos", tags=["hallazgos"])
+
+@global_router.get("")
+async def listar_todos_hallazgos(
+    cliente_id: Optional[str] = None,
+    impuesto: Optional[str] = None,
+    estado: Optional[str] = None,
+    nivel_riesgo: Optional[str] = None,
+    periodo: Optional[str] = None,
+    busqueda: Optional[str] = None,
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from db.models import Auditoria, Cliente
+    q = select(Hallazgo, Cliente.razon_social, Cliente.ruc).join(
+        Auditoria, Hallazgo.auditoria_id == Auditoria.id
+    ).join(
+        Cliente, Auditoria.cliente_id == Cliente.id
+    ).where(Hallazgo.firma_id == user.firma_id)
+
+    if cliente_id:
+        q = q.where(Auditoria.cliente_id == cliente_id)
+    if impuesto:
+        q = q.where(Hallazgo.impuesto == impuesto.upper())
+    if estado:
+        q = q.where(Hallazgo.estado == estado)
+    if nivel_riesgo:
+        q = q.where(Hallazgo.nivel_riesgo == nivel_riesgo)
+    if periodo:
+        q = q.where(Hallazgo.periodo == periodo)
+    if busqueda:
+        q = q.where(or_(
+            Hallazgo.descripcion.ilike(f"%{busqueda}%"),
+            Hallazgo.tipo_hallazgo.ilike(f"%{busqueda}%"),
+            Cliente.razon_social.ilike(f"%{busqueda}%"),
+        ))
+
+    q = q.order_by(Hallazgo.total_contingencia.desc())
+    result = await db.execute(q)
+    rows = result.all()
+    
+    return [
+        {
+            **_serializar(h),
+            "cliente_nombre": razon_social,
+            "cliente_ruc": ruc,
+            "auditoria_id": h.auditoria_id,
+        }
+        for h, razon_social, ruc in rows
+    ]
+
