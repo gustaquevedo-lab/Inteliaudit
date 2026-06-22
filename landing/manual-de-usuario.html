@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manual de Usuario — Inteliaudit v1.1</title>
+  <title>Manual de Usuario — Inteliaudit v1.2</title>
   <meta name="description" content="Manual interactivo de Inteliaudit — la plataforma de auditoría impositiva automatizada para Paraguay">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -545,7 +545,7 @@
         </defs>
       </svg>
     </div>
-    <div class="version">Manual de Usuario · v1.1 · Junio 2026</div>
+    <div class="version">Manual de Usuario · v1.2 · Junio 2026</div>
   </div>
   <div class="sidebar-search">
     <span class="search-icon">🔍</span>
@@ -563,17 +563,21 @@
     <div class="group-label">Auditorías</div>
     <a href="#crear-auditoria"><span class="icon">➕</span> Crear Auditoría</a>
     <a href="#archivos"><span class="icon">📁</span> Importar Datos</a>
+    <a href="#sifen"><span class="icon">🔍</span> Validación SIFEN</a>
     <a href="#automatizacion"><span class="icon">🤖</span> Automatización DNIT</a>
     <a href="#analisis"><span class="icon">⚡</span> Análisis Automático</a>
     <a href="#bancario"><span class="icon">🏦</span> Conciliación Bancaria</a>
     <a href="#analiticos"><span class="icon">📊</span> Procedimientos Analíticos</a>
     <a href="#conciliacion-fiscal"><span class="icon">🔄</span> Conciliación Fiscal</a>
     <a href="#plazos"><span class="icon">⏰</span> Gestión de Plazos</a>
+    <a href="#copilot"><span class="icon">🧠</span> AI Copilot</a>
     <a href="#hallazgos"><span class="icon">🔍</span> Hallazgos</a>
     <a href="#plan-trabajo"><span class="icon">✅</span> Plan de Trabajo</a>
     <a href="#informes"><span class="icon">📄</span> Informes</a>
     <div class="group-label">Avanzado</div>
     <a href="#evidencia"><span class="icon">🔬</span> Explorador de Evidencia</a>
+    <a href="#jobs"><span class="icon">⚙️</span> Monitor de Jobs</a>
+    <a href="#websocket"><span class="icon">📡</span> Actualizaciones en Vivo</a>
     <a href="#portal"><span class="icon">🔗</span> Portal del Cliente</a>
     <div class="group-label">Administración</div>
     <a href="#configuracion"><span class="icon">⚙️</span> Configuración</a>
@@ -1019,12 +1023,13 @@
       <p>Selecciona los impuestos que cubrirá la auditoría:</p>
       <table>
         <tr><th>Impuesto</th><th>Formulario</th><th>Descripción</th></tr>
-        <tr><td><strong>IVA</strong></td><td>120 + RG90</td><td>Impuesto al Valor Agregado</td></tr>
-        <tr><td><strong>IRE</strong></td><td>500</td><td>Impuesto a la Renta Empresarial</td></tr>
-        <tr><td><strong>IRP</strong></td><td>510</td><td>Impuesto a la Renta Personal</td></tr>
-        <tr><td><strong>IDU</strong></td><td>530</td><td>Impuesto a los Dividendos y Utilidades</td></tr>
-        <tr><td><strong>Retenciones IVA</strong></td><td>800/810</td><td>Retenciones de IVA</td></tr>
-        <tr><td><strong>Retenciones IRE</strong></td><td>820/830</td><td>Retenciones de IRE</td></tr>
+        <tr><td><strong>IVA</strong></td><td>120 + RG90</td><td>Impuesto al Valor Agregado — 5 cruces automáticos</td></tr>
+        <tr><td><strong>IRE</strong></td><td>500</td><td>Impuesto a la Renta Empresarial — conciliación contable→fiscal</td></tr>
+        <tr><td><strong>IRP</strong></td><td>510</td><td>Impuesto a la Renta Personal — obligación del titular/socios</td></tr>
+        <tr><td><strong>IDU</strong></td><td>530</td><td>Impuesto a los Dividendos y Utilidades — verificación DJ</td></tr>
+        <tr><td><strong>IRNR</strong></td><td>520</td><td>Impuesto a la Renta de No Residentes — retenciones aplicables</td></tr>
+        <tr><td><strong>Retenciones IVA</strong></td><td>800/810</td><td>Retenciones de IVA — cruce HECHAUKA vs DJ</td></tr>
+        <tr><td><strong>Retenciones IRE</strong></td><td>820/830</td><td>Retenciones de IRE — verificación agentes de retención</td></tr>
       </table>
 
       <div class="tip"><span class="icon">💡</span><div><strong>Tip:</strong> Puedes seleccionar varios impuestos. El sistema ejecutará los procedimientos correspondientes para cada uno.</div></div>
@@ -1114,7 +1119,25 @@
       <p>El proceso es similar al RG90: selecciona el archivo XLSX descargado de la sección HECHAUKA de Marangatú, previsualiza y confirma.</p>
 
       <h3>Importar Declaraciones Juradas (Formularios)</h3>
-      <p>Puedes subir archivos PDF de las declaraciones juradas presentadas (Form. 120, Form. 500, etc.). El sistema extraerá los datos relevantes para el análisis.</p>
+      <p>Puedes subir archivos PDF de las declaraciones juradas presentadas. El sistema extraerá automáticamente los datos relevantes:</p>
+      <table>
+        <tr><th>Formulario</th><th>Impuesto</th><th>Datos extraídos</th></tr>
+        <tr><td><strong>Form. 120</strong></td><td>IVA</td><td>Crédito fiscal, débito fiscal, saldo a favor, IVA a pagar</td></tr>
+        <tr><td><strong>Form. 500</strong></td><td>IRE</td><td>Renta neta, base imponible, IRE a pagar</td></tr>
+        <tr><td><strong>Form. 510</strong></td><td>IRP</td><td>Ingresos, renta neta, IRP a pagar</td></tr>
+        <tr><td><strong>Form. 530</strong></td><td>IDU</td><td>Dividendos distribuidos, IDU retenido</td></tr>
+        <tr><td><strong>Forms. 800-830</strong></td><td>Retenciones</td><td>Retenciones IVA e IRE practicadas</td></tr>
+      </table>
+
+      <h3>Tipos de archivo soportados</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;">
+        <span class="pill blue">XLSX — RG90, HECHAUKA</span>
+        <span class="pill green">PDF — Declaraciones Juradas</span>
+        <span class="pill amber">XLSX — Extractos bancarios</span>
+        <span class="pill purple">PNG/JPG — Comprobantes, logos</span>
+      </div>
+
+      <div class="note"><span class="icon">ℹ️</span><div><strong>Nota:</strong> Al subir un XLSX de RG90 o HECHAUKA, el sistema detecta automáticamente las columnas y muestra una previsualización antes de confirmar la importación. El archivobank también puede importarse para conciliación bancaria.</div></div>
 
       <h3>Validación SIFEN</h3>
       <p>La sección SIFEN te permite <strong>validar los CDC</strong> (Código de Control) de los comprobantes electrónicos importados:</p>
@@ -1124,7 +1147,84 @@
         <li><div class="step-text">Los resultados se clasifican en: <span class="mock-badge green">Válidos</span>, <span class="mock-badge red">No encontrados</span>, <span class="mock-badge amber">Error</span></div></li>
       </ol>
 
-      <div class="warn"><span class="icon">⚠️</span><div><strong>Límite:</strong> La consulta a SIFEN está limitada a 3 consultas por segundo. El sistema maneja automáticamente esta limitación.</div></div>
+      <div class="warn"><span class="icon">⚠️</span><div><strong>Límite:</strong> La consulta a SIFEN está limitada a 3 consultas por segundo. El sistema maneja automáticamente esta limitación con throttling asíncrono.</div></div>
+    </div>
+
+    <!-- 8B. VALIDACION SIFEN -->
+    <div class="section" id="sifen">
+      <h2><span class="num">🔍</span> Validación SIFEN</h2>
+      <p>La validación SIFEN verifica cada Código de Control (CDC) de los comprobantes electrónicos contra el portal público de la DNIT. Detecta comprobantes inexistentes, cancelados o con montos diferentes a los declarados.</p>
+
+      <div class="app-mockup">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/auditorias/.../archivos</div>
+        </div>
+        <div class="app-body" style="min-height:auto;">
+          <div class="app-content" style="padding:16px;">
+            <div style="font-size:13px;font-weight:700;color:white;margin-bottom:10px;">🔍 Validación SIFEN</div>
+            <div style="display:flex;gap:10px;margin-bottom:14px;">
+              <div class="kpi-card" style="flex:1;">
+                <div class="kpi-label">Total CDCs</div>
+                <div class="kpi-value blue" style="font-size:14px;">360</div>
+              </div>
+              <div class="kpi-card" style="flex:1;">
+                <div class="kpi-label">Válidos</div>
+                <div class="kpi-value green" style="font-size:14px;">342</div>
+              </div>
+              <div class="kpi-card" style="flex:1;">
+                <div class="kpi-label">No encontrados</div>
+                <div class="kpi-value red" style="font-size:14px;">12</div>
+              </div>
+              <div class="kpi-card" style="flex:1;">
+                <div class="kpi-label">Cancelados</div>
+                <div class="kpi-value amber" style="font-size:14px;">6</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;margin-bottom:10px;">
+              <div class="progress-track" style="flex:1;"><div class="progress-fill green" style="width:95%;"></div></div>
+              <span style="font-size:10px;color:#94A3B8;">95% completado</span>
+            </div>
+            <div class="app-btn primary">Validar CDCs en SIFEN</div>
+          </div>
+        </div>
+        <div class="mockup-caption">Panel de validación SIFEN con resultados por estado</div>
+      </div>
+
+      <h3>¿Qué detecta?</h3>
+      <table>
+        <tr><th>Estado SIFEN</th><th>Significado</th><th>Hallazgo</th></tr>
+        <tr><td><span class="pill green">Aprobado</span></td><td>CDC válido, comprobante vigente</td><td>✅ Sin hallazgo</td></tr>
+        <tr><td><span class="pill red">No encontrado</span></td><td>CDC no existe en SIFEN</td><td>Posible comprobante apócrifo (Art. 86 Ley 125/1991)</td></tr>
+        <tr><td><span class="pill amber">Cancelado</span></td><td>CDC fue anulado o cancelado</td><td>Crédito fiscal inválido</td></tr>
+        <tr><td><span class="pill red">Monto diferente</span></td><td>Monto en SIFEN ≠ monto en RG90</td><td>Diferencia a ajustar</td></tr>
+      </table>
+
+      <h3>Cómo ejecutarla</h3>
+      <ol class="step-list">
+        <li><div class="step-text"><strong>Importá RG90</strong> — La validación necesita comprobantes con CDC importados</div></li>
+        <li><div class="step-text"><strong>Andá a la pestaña Archivos → SIFEN</strong></div></li>
+        <li><div class="step-text"><strong>Haz clic en "Validar CDCs"</strong> — El sistema consulta el portal público de la DNIT</div></li>
+        <li><div class="step-text"><strong>Esperá a que complete</strong> — ~360 CDCs se validan en ~2 minutos (throttling 3 req/s)</div></li>
+        <li><div class="step-text"><strong>Revisá los resultados</strong> — Los CDCs no válidos generan hallazgos automáticamente</div></li>
+      </ol>
+
+      <div class="tip"><span class="icon">💡</span><div><strong>Tip:</strong> La validación SIFEN se ejecuta en background. Podés continuar trabajando en otras pestañas mientras se procesa. El progreso se actualiza en tiempo real vía WebSocket.</div></div>
+
+      <details class="collapsible">
+        <summary>📋 ¿Cómo funciona la validación CDC?</summary>
+        <div class="collapsible-body">
+          <p>Cada comprobante electrónico paraguayo tiene un <strong>CDC (Código de Control)</strong> de 44 dígitos que es un hash SHA256 único. El sistema:</p>
+          <ol>
+            <li>Extrae el CDC de cada registro RG90 importado</li>
+            <li>Consulta la API pública de e-Kuatia (<code>ekuatia.set.gov.py</code>)</li>
+            <li>Compara el estado, montos y datos del emisor/receptor</li>
+            <li>Marca como <strong>válido</strong>, <strong>cancelado</strong> o <strong>no encontrado</strong></li>
+            <li>Genera hallazgos para CDCs no válidos o con diferencias de monto</li>
+          </ol>
+          <p>La validación incluye verificación de checksum módulo 11 para detectar CDCs mal formados antes de consultar SIFEN.</p>
+        </div>
+      </details>
     </div>
 
     <!-- 9. AUTOMATIZACION -->
@@ -1622,6 +1722,78 @@
       <div class="tip"><span class="icon">💡</span><div><strong>Tip:</strong> La gestión de plazos es especialmente útil al inicio de una auditoría anual. Ejecutala primero para identificar qué períodos requieren atención urgente.</div></div>
     </div>
 
+    <!-- 10F. AI COPILOT -->
+    <div class="section" id="copilot">
+      <h2><span class="num">🧠</span> AI Copilot</h2>
+      <p>El AI Copilot es un asistente inteligente que te ayuda a analizar hallazgos, obtener recomendaciones legales y generar narrativas técnicas profesionales. Está integrado directamente en el flujo de trabajo de cada auditoría.</p>
+
+      <div class="app-mockup">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/auditorias/.../hallazgos</div>
+        </div>
+        <div class="app-body" style="min-height:auto;">
+          <div class="app-content" style="padding:16px;">
+            <div style="font-size:13px;font-weight:700;color:white;margin-bottom:10px;">🧠 AI Copilot — Análisis de Hallazgo</div>
+            <div style="background:rgba(46,132,240,0.08);border:1px solid rgba(46,132,240,0.2);border-radius:8px;padding:12px;margin-bottom:10px;">
+              <div style="font-size:10px;color:#60A5FA;font-weight:600;margin-bottom:6px;">📋 Hallazgo seleccionado</div>
+              <div style="font-size:11px;color:white;">Crédito fiscal con RUC inactivo — Gs. 24.000.000</div>
+              <div style="font-size:9px;color:#94A3B8;margin-top:2px;">Art. 86 Ley 125/1991 · IVA · Riesgo Alto</div>
+            </div>
+            <div style="background:rgba(34,196,126,0.08);border:1px solid rgba(34,196,126,0.2);border-radius:8px;padding:12px;margin-bottom:10px;">
+              <div style="font-size:10px;color:#4ADE80;font-weight:600;margin-bottom:6px;">💡 Recomendación del Copilot</div>
+              <div style="font-size:10px;color:#CBD5E1;line-height:1.5;">Este hallazgo es de alto riesgo porque los comprobantes con RUC inactivo no generan derecho a crédito fiscal. Se recomienda:</div>
+              <ul style="font-size:10px;color:#CBD5E1;margin:6px 0 0 16px;">
+                <li>Verificar si el proveedor fue dado de baja después de la transacción</li>
+                <li>Solicitar al cliente que gestione la regularización con el proveedor</li>
+                <li>Evaluar si aplicar proporcionalidad del crédito fiscal</li>
+              </ul>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <div class="app-btn primary" style="font-size:9px;">Generar Narrativa</div>
+              <div class="app-btn outline" style="font-size:9px;">Procedimientos Adicionales</div>
+              <div class="app-btn outline" style="font-size:9px;">Calcular Contingencia</div>
+            </div>
+          </div>
+        </div>
+        <div class="mockup-caption">AI Copilot analiza un hallazgo y sugiere acciones concretas</div>
+      </div>
+
+      <h3>¿Qué puede hacer el Copilot?</h3>
+      <table>
+        <tr><th>Función</th><th>Descripción</th><th>Plan</th></tr>
+        <tr><td><strong>Narrativa de hallazgo</strong></td><td>Genera un párrafo profesional con terminología técnica auditing para cada hallazgo</td><td>Pro / Enterprise</td></tr>
+        <tr><td><strong>Narrativas en lote</strong></td><td>Genera narrativas para todos los hallazgos pendientes de una auditoría</td><td>Pro / Enterprise</td></tr>
+        <tr><td><strong>Resumen ejecutivo</strong></td><td>Redacta un resumen ejecutivo para la carta de gerencia</td><td>Pro / Enterprise</td></tr>
+        <tr><td><strong>Recomendaciones</strong></td><td>Sugiere acciones específicas según el tipo de hallazgo y marco legal</td><td>Pro / Enterprise</td></tr>
+        <tr><td><strong>Procedimientos adicionales</strong></td><td>Recomienda procedimientos de auditoría según el alcance y los hallazgos detectados</td><td>Pro / Enterprise</td></tr>
+        <tr><td><strong>Análisis de patrones</strong></td><td>Detecta concentración de proveedores, montos redondos, facturas a fin de mes</td><td>Pro / Enterprise</td></tr>
+        <tr><td><strong>Chat contextual</strong></td><td>Preguntale al Copilot sobre cualquier hallazgo y te dará una respuesta fundamentada</td><td>Enterprise</td></tr>
+      </table>
+
+      <h3>Cómo usar el Copilot</h3>
+      <ol class="step-list">
+        <li><div class="step-text"><strong>Seleccioná un hallazgo</strong> — Andá a la pestaña Hallazgos y hac clic en un hallazgo</div></li>
+        <li><div class="step-text"><strong>Hac clic en "Generar Narrativa"</strong> — El Copilot redacta un párrafo profesional con base legal</div></li>
+        <li><div class="step-text"><strong>Editá si es necesario</strong> — La narrativa es una sugerencia, podés modificarla</div></li>
+        <li><div class="step-text"><strong>Para narrativas en lote</strong> — Usá el botón "Generar Todas las Narrativas" en la barra de herramientas</div></li>
+      </ol>
+
+      <div class="note"><span class="icon">ℹ️</span><div><strong>Límites de IA:</strong> Plan Pro tiene 50 llamadas a IA por mes. Plan Enterprise tiene llamadas ilimitadas. El uso se muestra en Configuración → Uso de IA.</div></div>
+
+      <details class="collapsible">
+        <summary>🧠 ¿Qué modelo de IA usa?</summary>
+        <div class="collapsible-body">
+          <p>Inteliaudit utiliza un sistema de proveedores de IA dual:</p>
+          <ul>
+            <li><strong>Gemini 2.0 Flash</strong> (Google) — Modelo principal, tier gratuito</li>
+            <li><strong>Claude Sonnet 4</strong> (Anthropic) — Modelo alternativo, mayor calidad en textos largos</li>
+          </ul>
+          <p>El sistema selecciona automáticamente el proveedor disponible. Ambos modelos están optimizados para generar texto técnico-legal en español paraguayo.</p>
+        </div>
+      </details>
+    </div>
+
     <!-- 11. HALLAZGOS -->
     <div class="section" id="hallazgos">
       <h2><span class="num">11</span> Gestión de Hallazgos</h2>
@@ -1703,8 +1875,28 @@
       <p>Selecciona múltiples hallazgos usando los checkboxes y aplica:</p>
       <ul>
         <li><strong>Cambiar estado:</strong> Marcar varios como Revisado, Aceptado, etc.</li>
-        <li><strong>Exportar Excel:</strong> Descargar la lista en formato XLSX</li>
+        <li><strong>Generar narrativas IA:</strong> Redactar narrativas profesionales para todos los seleccionados</li>
+        <li><strong>Exportar Excel:</strong> Descargar la lista en formato XLSX con formato profesional</li>
       </ul>
+
+      <h3>Filtros disponibles</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;">
+        <span class="pill blue">Por impuesto (IVA, IRE, Retenciones, IDU, IRP, IRNR)</span>
+        <span class="pill red">Por riesgo (Alto, Medio, Bajo)</span>
+        <span class="pill green">Por estado (Pendiente, Revisado, Aceptado, Regularizado, Descartado)</span>
+        <span class="pill amber">Por período</span>
+        <span class="pill" style="background:rgba(139,92,246,0.15);color:#A78BFA;">Búsqueda por texto</span>
+      </div>
+
+      <h3>Generar narrativas IA en lote</h3>
+      <ol class="step-list">
+        <li><div class="step-text">Seleccioná los hallazgos que querés narrar (o usá "Seleccionar todos")</div></li>
+        <li><div class="step-text">Hac clic en <strong>"Generar Narrativas"</strong> en la barra de herramientas</div></li>
+        <li><div class="step-text">El sistema genera un párrafo profesional para cada hallazgo seleccionado</div></li>
+        <li><div class="step-text">Las narrativas se guardan automáticamente y aparecen en el panel de detalle</div></li>
+      </ol>
+
+      <div class="tip"><span class="icon">💡</span><div><strong>Tip:</strong> Las narrativas IA son un punto de partida. Siempre revisalas y ajustalas según tu criterio profesional antes de incluirlas en el informe final.</div></div>
     </div>
 
     <!-- 12. PLAN DE TRABAJO -->
@@ -1821,26 +2013,42 @@
       <h3>Tipos de informe</h3>
       <table>
         <tr><th>Tipo</th><th>Contenido</th><th>Uso recomendado</th></tr>
-        <tr><td><strong>Completo</strong></td><td>Portada, resumen ejecutivo, detalle de hallazgos, matriz de riesgo, cálculo de contingencia, base legal y anexos</td><td>Informe final para el cliente</td></tr>
-        <tr><td><strong>Carta de Gerencia</strong></td><td>Resumen ejecutivo con principales hallazgos y recomendaciones</td><td>Presentación a la dirección</td></tr>
-        <tr><td><strong>Resumen Ejecutivo</strong></td><td>Una página con KPIs principales y hallazgos de alto riesgo</td><td>Reunión rápida con el cliente</td></tr>
+        <tr><td><strong>Auditoría Completa</strong></td><td>Portada con logo, resumen ejecutivo, metodología, hallazgos por impuesto con narrativa técnica, matriz de riesgo, cálculo de contingencia completo, base legal articulada, conclusiones y anexos</td><td>Informe final para el cliente — documento de trabajo completo</td></tr>
+        <tr><td><strong>Carta de Gerencia</strong></td><td>Carta formal dirigida al Directorio con resumen ejecutivo, principales hallazgos y recomendaciones de acción</td><td>Presentación a la dirección de la empresa auditada</td></tr>
+        <tr><td><strong>Resumen Ejecutivo</strong></td><td>Una página con KPIs principales, top 5 hallazgos por contingencia, distribución de riesgo y recomendaciones prioritarias</td><td>Reunión rápida o presentación ejecutiva</td></tr>
       </table>
 
       <h3>Formatos de descarga</h3>
       <ul>
-        <li><strong>Word (.docx)</strong> — Editable, para personalizar antes de entregar</li>
-        <li><strong>PDF</strong> — Formato final no editable, listo para firmar</li>
+        <li><strong>Word (.docx)</strong> — Editable, para personalizar antes de entregar. Incluye estilos profesionales, colores Inteliaudit y tablas con formato</li>
+        <li><strong>PDF</strong> — Formato final no editable, listo para firmar. Incluye marca de agua "Confidencial", numeración de páginas y header/footer con logo</li>
         <li><strong>Ambos</strong> — Descarga los dos formatos simultáneamente</li>
       </ul>
 
       <h3>Generar un informe</h3>
       <ol class="step-list">
-        <li><div class="step-text">Selecciona el <strong>tipo de informe</strong> (Completo, Carta de Gerencia, Resumen Ejecutivo)</div></li>
-        <li><div class="step-text">Selecciona el <strong>formato</strong> (DOCX, PDF, Ambos)</div></li>
-        <li><div class="step-text">Genera un <strong>Resumen Ejecutivo con IA</strong> (opcional). La IA redactará un resumen profesional</div></li>
+        <li><div class="step-text">Seleccioná el <strong>tipo de informe</strong> (Completo, Carta de Gerencia, Resumen Ejecutivo)</div></li>
+        <li><div class="step-text">Seleccioná el <strong>formato</strong> (DOCX, PDF, Ambos)</div></li>
+        <li><div class="step-text">Generá un <strong>Resumen Ejecutivo con IA</strong> (opcional) — La IA redactará un resumen profesional basado en los hallazgos</div></li>
         <li><div class="step-text">Haz clic en <strong>"Generar Informe"</strong></div></li>
-        <li><div class="step-text">Previsualiza en el navegador o descarga directamente</div></li>
+        <li><div class="step-text">Previsualizá en el navegador o descargá directamente</div></li>
       </ol>
+
+      <details class="collapsible">
+        <summary>📄 Estructura del Informe de Auditoría Completa</summary>
+        <div class="collapsible-body">
+          <ol>
+            <li><strong>Portada</strong> — Logo de la firma, nombre del cliente, período auditado, fecha</li>
+            <li><strong>Resumen Ejecutivo</strong> — Síntesis de hallazgos principales y contingencia total</li>
+            <li><strong>Alcance y Metodología</strong> — Impuestos auditados, procedimientos aplicados, normativa referenciada</li>
+            <li><strong>Hallazgos por Impuesto</strong> — Cada hallazgo con: descripción, base legal, cálculo de contingencia, nivel de riesgo, narrativa técnica</li>
+            <li><strong>Matriz de Riesgo</strong> — Visualización de hallazgos por nivel de riesgo y monto</li>
+            <li><strong>Resumen de Contingencia</strong> — Tabla consolidada de impuesto + multa + intereses por hallazgo</li>
+            <li><strong>Conclusiones</strong> — Opinión del auditor sobre el estado tributario del cliente</li>
+            <li><strong>Anexos</strong> — Comprobantes, extractos, evidencia documental</li>
+          </ol>
+        </div>
+      </details>
 
       <h3>Compartir con el cliente</h3>
       <p>Desde la misma pestaña, genera un <strong>link de portal de cliente</strong> para compartir los hallazgos de forma segura (ver sección Portal del Cliente).</p>
@@ -1931,6 +2139,107 @@
       </ul>
     </div>
 
+    <!-- 15B. MONITOR DE JOBS -->
+    <div class="section" id="jobs">
+      <h2><span class="num">⚙️</span> Monitor de Jobs</h2>
+      <p>El monitor de jobs muestra todas las tareas en segundo plano que se están ejecutando: scraping de Marangatú, validación SIFEN, importación de datos, etc. Accede desde <strong>Administración → Jobs</strong> (solo Admin/Super Admin).</p>
+
+      <div class="app-mockup">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">inteliaudit.vercel.app/admin/jobs</div>
+        </div>
+        <div class="app-body" style="min-height:auto;">
+          <div class="app-content" style="padding:16px;">
+            <div style="font-size:16px;font-weight:700;color:white;margin-bottom:14px;">Monitor de Jobs</div>
+            <div style="display:flex;gap:6px;margin-bottom:12px;">
+              <span class="pill blue" style="padding:3px 8px;">Todos (12)</span>
+              <span class="pill green" style="padding:3px 8px;">Completados (8)</span>
+              <span class="pill amber" style="padding:3px 8px;">En progreso (2)</span>
+              <span class="pill red" style="padding:3px 8px;">Errores (2)</span>
+            </div>
+            <table class="app-table">
+              <tr><th>Tipo</th><th>Estado</th><th>Progreso</th><th>Inicio</th><th>Acciones</th></tr>
+              <tr>
+                <td style="color:white;font-weight:500;">scraper_rg90</td>
+                <td><span class="pill green">Completado</span></td>
+                <td><div class="progress-track" style="width:60px;"><div class="progress-fill green" style="width:100%;"></div></div></td>
+                <td>10:32</td>
+                <td><span style="color:#64748B;font-size:9px;">Ver</span></td>
+              </tr>
+              <tr>
+                <td style="color:white;font-weight:500;">validar_sifen</td>
+                <td><span class="pill blue">En progreso</span></td>
+                <td><div class="progress-track" style="width:60px;"><div class="progress-fill blue" style="width:65%;"></div></div></td>
+                <td>10:35</td>
+                <td><span style="color:#FCA5A5;font-size:9px;">Cancelar</span></td>
+              </tr>
+              <tr>
+                <td style="color:white;font-weight:500;">scraper_hechauka</td>
+                <td><span class="pill red">Error</span></td>
+                <td><div class="progress-track" style="width:60px;"><div class="progress-fill blue" style="width:30%;"></div></div></td>
+                <td>10:28</td>
+                <td><span style="color:#60A5FA;font-size:9px;">Reintentar</span></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <div class="mockup-caption">Monitor de jobs con estado, progreso y acciones</div>
+      </div>
+
+      <h3>Tipos de job</h3>
+      <table>
+        <tr><th>Tipo</th><th>Descripción</th><th>Duración estimada</th></tr>
+        <tr><td><strong>scraper_rg90</strong></td><td>Descarga RG90 de Marangatú vía Playwright</td><td>2-5 min por período</td></tr>
+        <tr><td><strong>scraper_hechauka</strong></td><td>Descarga datos HECHAUKA/Talón de Presentación</td><td>2-5 min por período</td></tr>
+        <tr><td><strong>scraper_dj</strong></td><td>Descarga declaraciones juradas presentadas</td><td>1-3 min por período</td></tr>
+        <tr><td><strong>validar_sifen</strong></td><td>Valida CDCs contra el portal SIFEN</td><td>~2 min por 360 CDCs</td></tr>
+      </table>
+
+      <h3>Estados de un job</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;">
+        <span class="pill amber">Pendiente — En cola, esperando procesamiento</span>
+        <span class="pill blue">En progreso — Ejecutándose activamente</span>
+        <span class="pill green">Completado — Finalizó exitosamente</span>
+        <span class="pill red">Error — Falló (reintentos disponibles)</span>
+        <span class="pill" style="background:rgba(100,116,139,0.15);color:#94A3B8;">Cancelado — Detenido por el usuario</span>
+      </div>
+
+      <div class="tip"><span class="icon">💡</span><div><strong>Tip:</strong> Si un job falla, el sistema reintenta automáticamente hasta 3 veces. Si sigue fallando, revisá las credenciales Marangatú del cliente en su perfil.</div></div>
+    </div>
+
+    <!-- 15C. WEBSOCKET -->
+    <div class="section" id="websocket">
+      <h2><span class="num">📡</span> Actualizaciones en Vivo (WebSocket)</h2>
+      <p>Inteliaudit utiliza WebSocket para enviar actualizaciones en tiempo real a tu navegador. Cuando un job se completa, un hallazgo se detecta o el análisis avanza, lo ves instantáneamente sin recargar la página.</p>
+
+      <h3>¿Qué eventos se reciben en vivo?</h3>
+      <table>
+        <tr><th>Evento</th><th>¿Cuándo se envía?</th><th>¿Qué ves?</th></tr>
+        <tr><td><strong>job_progress</strong></td><td>Cada vez que un job avanza</td><td>Barra de progreso se actualiza</td></tr>
+        <tr><td><strong>job_completed</strong></td><td>Un job finaliza exitosamente</td><td>Toast de éxito + datos actualizados</td></tr>
+        <tr><td><strong>job_error</strong></td><td>Un job falla después de reintentos</td><td>Toast de error con detalle</td></tr>
+        <tr><td><strong>hallazgo_nuevo</strong></td><td>El motor de análisis detecta un hallazgo</td><td>Contador de hallazgos se incrementa</td></tr>
+      </table>
+
+      <h3>Ejemplo en la práctica</h3>
+      <details class="collapsible">
+        <summary>📋 Caso: Validación SIFEN en tiempo real</summary>
+        <div class="collapsible-body">
+          <p><strong>Situación:</strong> Estás en la pestaña Hallazgos mientras se ejecuta una validación SIFEN en background.</p>
+          <ol>
+            <li>El sistema recibe <code>job_progress: 25%</code> → ves la barra de progreso avanzar en el monitor de jobs</li>
+            <li>Se detecta un CDC no válido → recibís <code>hallazgo_nuevo</code> → el contador de hallazgos aumenta de 8 a 9</li>
+            <li>La validación completa → recibís <code>job_completed</code> → ves un toast "Validación SIFEN completada: 12 CDCs no válidos"</li>
+            <li>Actualizás la pestaña Hallazgos → ves los 12 nuevos hallazgos generados</li>
+          </ol>
+          <p><strong>Beneficio:</strong> No necesitas estar en la pestaña correcta ni recargar la página. Las actualizaciones llegan automáticamente.</p>
+        </div>
+      </details>
+
+      <div class="note"><span class="icon">ℹ️</span><div><strong>Nota:</strong> WebSocket funciona solo cuando el navegador está abierto. Si cerrás la pestaña, las actualizaciones en vivo se detienen (los jobs siguen ejecutándose en el servidor).</div></div>
+    </div>
+
     <!-- 16. CONFIGURACION -->
     <div class="section" id="configuracion">
       <h2><span class="num">16</span> Configuración de la Firma</h2>
@@ -1999,14 +2308,22 @@
         <tr><td>Clientes activos</td><td>5</td><td>15</td><td>Ilimitados</td></tr>
         <tr><td>Usuarios por firma</td><td>3</td><td>8</td><td>Ilimitados</td></tr>
         <tr><td>Análisis IVA + IRE + Retenciones</td><td>✓</td><td>✓</td><td>✓</td></tr>
+        <tr><td>IDU, IRP, IRNR</td><td>✓</td><td>✓</td><td>✓</td></tr>
         <tr><td>Cruce RG90 vs SIFEN vs HECHAUKA</td><td>✓</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Conciliación bancaria</td><td>✓</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Procedimientos analíticos</td><td>✓</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Conciliación contable→fiscal</td><td>✓</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Gestión de plazos</td><td>✓</td><td>✓</td><td>✓</td></tr>
         <tr><td>Informes Word + PDF</td><td>✓</td><td>✓</td><td>✓</td></tr>
-        <tr><td>Brain AI Auditor™</td><td>—</td><td>✓</td><td>✓</td></tr>
-        <tr><td>Narrativa Técnica Automatizada</td><td>—</td><td>✓</td><td>✓</td></tr>
+        <tr><td>AI Copilot — Narrativas</td><td>—</td><td>✓ (50/mes)</td><td>✓ (Ilimitado)</td></tr>
+        <tr><td>AI Copilot — Resumen ejecutivo</td><td>—</td><td>✓</td><td>✓</td></tr>
+        <tr><td>AI Copilot — Chat contextual</td><td>—</td><td>—</td><td>✓</td></tr>
         <tr><td>Credenciales encriptadas AES-256</td><td>—</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Automatización Marangatú</td><td>—</td><td>✓</td><td>✓</td></tr>
         <tr><td>Portal de cliente</td><td>—</td><td>—</td><td>✓</td></tr>
         <tr><td>Logo de firma en informes</td><td>—</td><td>—</td><td>✓</td></tr>
         <tr><td><strong>Precio mensual</strong></td><td><strong>Gs. 490.000</strong></td><td><strong>Gs. 890.000</strong></td><td><strong>Gs. 1.790.000</strong></td></tr>
+        <tr><td><strong>Precio anual (−15%)</strong></td><td><strong>Gs. 4.998.000</strong></td><td><strong>Gs. 9.078.000</strong></td><td><strong>Gs. 18.258.000</strong></td></tr>
       </table>
 
       <h3>Solicitar un plan</h3>
@@ -2093,6 +2410,34 @@
           <p>El equipo de Inteliaudit monitorea continuamente las resoluciones de la DNIT y actualiza la lógica de análisis. Las actualizaciones se aplican automáticamente.</p>
         </div>
       </details>
+
+      <details class="collapsible">
+        <summary>¿Cómo funciona la automatización de Marangatú?</summary>
+        <div class="collapsible-body">
+          <p>Inteliaudit usa Playwright (un navegador automatizado) para conectarse a Marangatú con las credenciales del cliente (cifradas con AES-256). Descarga automáticamente los archivos RG90, HECHAUKA y DJ para los períodos que selecciones. Los jobs se ejecutan en background y recibís notificaciones en tiempo real vía WebSocket cuando se completan.</p>
+        </div>
+      </details>
+
+      <details class="collapsible">
+        <summary>¿Qué es el AI Copilot y cuánto cuesta?</summary>
+        <div class="collapsible-body">
+          <p>El AI Copilot es un asistente que genera narrativas técnicas profesionales para hallazgos, resúmenes ejecutivos y recomendaciones. Plan Pro incluye 50 llamadas a IA por mes (suficiente para ~5 auditorías). Plan Enterprise tiene llamadas ilimitadas. El Copilot usa Gemini 2.0 Flash (Google) y Claude Sonnet 4 (Anthropic).</p>
+        </div>
+      </details>
+
+      <details class="collapsible">
+        <summary>¿Puedo usar el sistema sin conexión a internet?</summary>
+        <div class="collapsible-body">
+          <p>Funcionalidades que requieren internet: validación SIFEN, automatización Marangatú, AI Copilot, portal de cliente y notificaciones por email. Funcionan sin internet: importación manual de archivos, visualización de datos existentes, generación de informes (si ya tenés los datos cargados) y consulta de auditorías.</p>
+        </div>
+      </details>
+
+      <details class="collapsible">
+        <summary>¿Mis datos están seguros?</summary>
+        <div class="collapsible-body">
+          <p>Sí. Inteliaudit implementa: aislamiento multi-tenant (cada firma solo ve sus datos), cifrado AES-256 para credenciales, autenticación JWT con expiración, headers de seguridad (HSTS, CSP, X-Frame-Options), rate limiting (100 req/min) y audit trail completo de todas las acciones.</p>
+        </div>
+      </details>
     </div>
 
     <!-- 21. GLOSARIO -->
@@ -2121,6 +2466,15 @@
         <tr><td><strong>Benchmark</strong></td><td>Valor de referencia o promedio de industria para comparar ratios financieros</td></tr>
         <tr><td><strong>Margen bruto</strong></td><td>(Ventas - Compras) / Ventas × 100. Indicador de rentabilidad antes de gastos operativos</td></tr>
         <tr><td><strong>Partes vinculadas</strong></td><td>Empresas o personas relacionadas que deben transar a precios de mercado (Art. 35 Ley 6380)</td></tr>
+        <tr><td><strong>Playwright</strong></td><td>Herramienta de automatización de navegador que usa Inteliaudit para descargar datos de Marangatú</td></tr>
+        <tr><td><strong>WebSocket</strong></td><td>Protocolo de comunicación en tiempo real entre el navegador y el servidor para actualizaciones instantáneas</td></tr>
+        <tr><td><strong>Job</strong></td><td>Tarea en segundo plano (scraping, validación, importación) que se ejecuta de forma asíncrona</td></tr>
+        <tr><td><strong>AI Copilot</strong></td><td>Asistente inteligente que genera narrativas técnicas, resúmenes y recomendaciones usando IA</td></tr>
+        <tr><td><strong>Gemini</strong></td><td>Modelo de IA de Google utilizado para generación de texto técnico-legal</td></tr>
+        <tr><td><strong>Claude</strong></td><td>Modelo de IA de Anthropic utilizado como proveedor alternativo de IA</td></tr>
+        <tr><td><strong>Multi-tenancy</strong></td><td>Arquitectura que aísla los datos de cada firma de auditoría. Cada firma solo ve sus propios clientes y auditorías</td></tr>
+        <tr><td><strong>JWT</strong></td><td>JSON Web Token — token de autenticación con expiración used para mantener la sesión</td></tr>
+        <tr><td><strong>AES-256</strong></td><td>Estándar de cifrado simétrico utilizado para proteger las credenciales de Marangatú</td></tr>
       </table>
     </div>
 
