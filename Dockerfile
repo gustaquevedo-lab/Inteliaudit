@@ -3,9 +3,10 @@ FROM python:3.12-slim
 WORKDIR /app
 
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
 
-# System deps for runtime: libpq (postgres), libcairo/pango/gdk-pixbuf (WeasyPrint), libxml2/libxslt (lxml)
+# System deps - full set for runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc g++ \
     libpq-dev \
@@ -25,7 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy project files
 COPY . .
 
-# Install Python dependencies directly (no wheel build, just install deps from pyproject.toml)
+# Install Python dependencies
 RUN pip install --no-cache-dir \
     "fastapi>=0.115" \
     "uvicorn[standard]>=0.30" \
@@ -67,6 +68,9 @@ RUN pip install --no-cache-dir \
 
 RUN playwright install --with-deps chromium 2>/dev/null || true
 
+# Make entrypoint executable
+RUN chmod +x entrypoint.sh
+
 EXPOSE 8000
 
-CMD uvicorn api.main:app --host 0.0.0.0 --port ${PORT:-8000}
+ENTRYPOINT ["/bin/bash", "entrypoint.sh"]
