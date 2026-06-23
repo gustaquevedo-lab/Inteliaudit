@@ -80,7 +80,7 @@ class SecurityHeadersMiddleware:
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
-        "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'",
+        "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://inteliaudit-production.up.railway.app https://inteliaudit.vercel.app wss://inteliaudit-production.up.railway.app; font-src 'self'",
         "Referrer-Policy": "strict-origin-when-cross-origin",
     }
 

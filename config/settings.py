@@ -1,3 +1,4 @@
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -64,7 +65,23 @@ class Settings(BaseSettings):
 
     # CORS — en producción setear ALLOWED_ORIGINS="https://inteliaudit.com,https://www.inteliaudit.com"
     frontend_url: str = ""
-    allowed_origins: list[str] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:8000"]
+    allowed_origins: list[str] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:8000", "https://inteliaudit.vercel.app"]
+
+    @field_validator("allowed_origins", mode="before")
+    @classmethod
+    def parse_allowed_origins(cls, v):
+        import json
+        if isinstance(v, str):
+            try:
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return parsed
+            except Exception:
+                pass
+            if "," in v:
+                return [o.strip() for o in v.split(",") if o.strip()]
+            return [v.strip()]
+        return v
 
     @property
     def is_postgres(self) -> bool:
