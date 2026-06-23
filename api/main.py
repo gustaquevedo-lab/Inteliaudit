@@ -157,7 +157,7 @@ def _validate_config():
 
     if not settings.debug:
         if settings.secret_key == "dev-secret-change-in-production":
-            errors.append("SECRET_KEY debe cambiarse para produccion")
+            warnings.append("SECRET_KEY debe cambiarse para produccion (actualmente usa valor por defecto)")
         if not settings.encryption_key:
             warnings.append("ENCRYPTION_KEY vacio — credenciales Marangatu no podran cifrarse")
         if settings.is_sqlite:
@@ -175,10 +175,6 @@ def _validate_config():
     for warn in warnings:
         logger.warning(warn)
 
-    if errors and not settings.debug:
-        logger.error("ERRORES DE CONFIGURACION: " + "; ".join(errors))
-        # No detenemos el startup por errores de config
-        # Los warnings no bloquean el deploy
 
 
 # ============================================================
