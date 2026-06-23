@@ -34,7 +34,7 @@ from analytics import init_posthog, identify, capture, capture_exception
 def _setup_logging():
     """Configura logging en formato JSON para produccion."""
     log_handler = logging.StreamHandler()
-    log_handler.setLevel(logging.INFO if settings.debug else logging.WARNING)
+    log_handler.setLevel(logging.INFO)
 
     class JSONFormatter(logging.Formatter):
         def format(self, record):
