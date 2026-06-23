@@ -8,10 +8,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgdk-pixbuf-2.0-0 libdbus-1-3 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml .
-RUN pip install --no-cache-dir .
-
 COPY . .
+RUN pip install --no-cache-dir .
 
 RUN playwright install --with-deps chromium 2>/dev/null || true
 
