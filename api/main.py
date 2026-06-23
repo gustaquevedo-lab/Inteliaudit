@@ -91,6 +91,16 @@ class SecurityHeadersMiddleware:
         if scope["type"] != "http":
             return await self.app(scope, receive, send)
 
+        # Extraer origin de las cabeceras de la petición
+        origin = None
+        for k, v in scope.get("headers", []):
+            if k == b"origin":
+                try:
+                    origin = v.decode("utf-8")
+                except Exception:
+                    pass
+                break
+
         original_send = send
 
         async def send_with_headers(message):
@@ -98,6 +108,16 @@ class SecurityHeadersMiddleware:
                 headers = message.get("headers", [])
                 for header_name, header_value in self.SECURITY_HEADERS.items():
                     headers.append((header_name.lower().encode(), header_value.encode()))
+                
+                # Inyección manual de CORS como respaldo ante errores/excepciones
+                if origin and origin in settings.allowed_origins:
+                    has_cors = any(h[0] == b"access-control-allow-origin" for h in headers)
+                    if not has_cors:
+                        headers.append((b"access-control-allow-origin", origin.encode()))
+                        headers.append((b"access-control-allow-credentials", b"true"))
+                        headers.append((b"access-control-allow-methods", b"*".encode()))
+                        headers.append((b"access-control-allow-headers", b"*".encode()))
+                
                 message["headers"] = headers
             await original_send(message)
 
@@ -254,7 +274,12 @@ async def trial_middleware(request: Request, call_next):
                     if firma and firma.plan == "trial" and firma.trial_hasta:
                         from datetime import datetime, timezone
                         if datetime.now(timezone.utc) > firma.trial_hasta:
-                            return JSONResponse(status_code=403, content={"detail": "Trial expirado. Elegi un plan para continuar."})
+                            response = JSONResponse(status_code=403, content={"detail": "Trial expirado. Elegi un plan para continuar."})
+                            origin = request.headers.get("origin")
+                            if origin and origin in settings.allowed_origins:
+                                response.headers["Access-Control-Allow-Origin"] = origin
+                                response.headers["Access-Control-Allow-Credentials"] = "true"
+                            return response
         except Exception:
             pass
     return await call_next(request)
