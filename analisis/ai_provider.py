@@ -20,7 +20,7 @@ class AIProvider:
             import google.generativeai as genai
             from config.settings import settings
             genai.configure(api_key=settings.gemini_api_key or "")
-            self._client = genai.GenerativeModel("gemini-2.0-flash")
+            self._client = genai.GenerativeModel(settings.gemini_model or "gemini-2.5-flash")
         elif self.provider == "claude":
             import anthropic
             from config.settings import settings
