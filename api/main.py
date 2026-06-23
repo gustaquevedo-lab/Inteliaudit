@@ -115,8 +115,8 @@ class SecurityHeadersMiddleware:
                     if not has_cors:
                         headers.append((b"access-control-allow-origin", origin.encode()))
                         headers.append((b"access-control-allow-credentials", b"true"))
-                        headers.append((b"access-control-allow-methods", b"*".encode()))
-                        headers.append((b"access-control-allow-headers", b"*".encode()))
+                        headers.append((b"access-control-allow-methods", b"*"))
+                        headers.append((b"access-control-allow-headers", b"*"))
                 
                 message["headers"] = headers
             await original_send(message)
