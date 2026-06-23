@@ -130,13 +130,16 @@ export default function Layout() {
                   <NavLink
                     key={item.path}
                     to={item.path}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 text-[13px] font-bold ${
-                        isActive
+                    className={({ isActive }) => {
+                      const isItemActive = item.path === '/auditorias'
+                        ? location.pathname === '/auditorias' || (location.pathname.startsWith('/auditorias/') && location.pathname !== '/auditorias/nueva')
+                        : isActive;
+                      return `flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 text-[13px] font-bold ${
+                        isItemActive
                           ? 'bg-white text-primary shadow-lg shadow-black/20 scale-[1.01]'
                           : 'text-blue-100/60 hover:bg-white/8 hover:text-white'
-                      }`
-                    }
+                      }`;
+                    }}
                   >
                     <span className="shrink-0">{item.icon}</span>
                     <span className="truncate">{item.label}</span>
