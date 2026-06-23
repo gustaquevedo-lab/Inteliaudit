@@ -154,7 +154,7 @@ export default function HallazgoPanel({ hallazgo: h, auditoriaId, onClose, onUpd
             {editando ? (
               <textarea className="input-field text-sm resize-none" rows={3} value={editDesc} onChange={e => setEditDesc(e.target.value)} />
             ) : (
-              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{h.descripcion}</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">{h.descripcion}</p>
             )}
 
             {editando && (

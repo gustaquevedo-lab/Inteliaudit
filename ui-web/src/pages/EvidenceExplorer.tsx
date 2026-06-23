@@ -219,7 +219,7 @@ export default function EvidenceExplorer() {
                   </div>
                 </div>
                 
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line">
                   {selectedHallazgo.descripcion}
                 </p>
                 

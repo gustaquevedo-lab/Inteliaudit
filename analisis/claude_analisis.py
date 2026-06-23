@@ -64,12 +64,15 @@ Total Contingencia: Gs. {hallazgo.get('total_contingencia', 0):,}
 Nivel de Riesgo: {hallazgo.get('nivel_riesgo', 'N/A')}
 
 INSTRUCCIONES:
-- Redacta en espanol formal paraguayo
-- Explica por que este hallazgo constituye una observacion de auditoria
-- Cita el articulo legal aplicable y explica su relevancia
-- Cuantifica la contingencia fiscal: impuesto omitido, multa (50%), intereses (1% mensual)
-- Tono: formal, objetivo, tecnico pero comprensible para el directorio de la empresa
-- 2-3 parrafos como maximo
+- Redacta una NARRATIVA TÉCNICA DE AUDITORÍA para un informe, NO una nota de comunicación, correo o carta (prohibido incluir saludos como 'Estimados señores', firmas o introducciones conversacionales). El texto debe empezar directamente describiendo el hallazgo.
+- NO utilices formato Markdown en absoluto (evita usar asteriscos '**' o '*' para negritas o listas). Debe ser texto plano separado por párrafos con saltos de línea.
+- Redacta en espanol formal paraguayo.
+- Estructura la narrativa en 2 o 3 párrafos cubriendo:
+  1. Condición (el hecho irregular detectado y periodo).
+  2. Criterio (el artículo legal aplicable y su relevancia).
+  3. Efecto/Contingencia (cuantificación del impuesto omitido, multa del 50% e intereses del 1% mensual).
+- Tono: formal, objetivo, tecnico pero comprensible para el directorio de la empresa.
+- 2-3 parrafos como maximo.
 """
 
     try:

@@ -196,7 +196,7 @@ export default function PortalCliente() {
                       {h.nivel_riesgo}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-3">{h.descripcion}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-3 whitespace-pre-line">{h.descripcion}</p>
                   <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20 rounded-xl p-3 mb-3">
                     <p className="text-xs text-amber-800 dark:text-amber-300 font-medium italic">{h.articulo_legal}</p>
                   </div>
