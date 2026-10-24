@@ -26,10 +26,11 @@ interface AnalisisEstado {
 }
 
 const IMPUESTOS = [
-  { id: 'iva',         label: 'IVA',                  desc: '5 cruces: RG90 vs Form.120, SIFEN, HECHAUKA, RUC',                  icon: BarChart3 },
-  { id: 'ire',         label: 'IRE',                  desc: 'Conciliacion contable, depreciaciones, gastos sin comprobante',        icon: TrendingUp },
-  { id: 'retenciones', label: 'Retenciones',          desc: 'Cruce HECHAUKA vs Forms. 800/820, retenciones omitidas',            icon: FileSearch },
-  { id: 'banco',       label: 'Conciliación Bancaria', desc: 'Cruce extractos vs ventas RG90 y detección de gastos personales', icon: ArrowRight },
+  { id: 'iva',         label: 'IVA',                         desc: '5 cruces: RG90 vs Form.120, SIFEN, HECHAUKA, RUC',                     icon: BarChart3 },
+  { id: 'ire',         label: 'IRE (Art. 16)',               desc: 'Conciliación fiscal, depreciaciones, gastos sin comprobante',           icon: TrendingUp },
+  { id: 'retenciones', label: 'Retenciones',                 desc: 'Cruce HECHAUKA vs Forms. 800/820, retenciones omitidas',               icon: FileSearch },
+  { id: 'banco',       label: 'Conciliación Bancaria',        desc: 'Cruce extractos vs ventas RG90 y detección de gastos personales',       icon: ArrowRight },
+  { id: 'analiticos',  label: 'Procedimientos Analíticos',    desc: 'NIA 520: Ratios, márgenes brutos, benchmarks Paraguay y desvíos >30%', icon: Zap },
 ]
 
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Setiembre','Octubre','Noviembre','Diciembre']
@@ -57,6 +58,26 @@ export default function TabAnalisis({ auditoriaId }: Props) {
   const [jobId, setJobId] = useState<string | null>(null)
   const [estado, setEstado] = useState<AnalisisEstado | null>(null)
   const [running, setRunning] = useState(false)
+  const [analiticos, setAnaliticos] = useState<any | null>(null)
+  const [conciliacion, setConciliacion] = useState<any | null>(null)
+  const [loadingExtras, setLoadingExtras] = useState(false)
+
+  const loadExtras = useCallback(async () => {
+    setLoadingExtras(true)
+    try {
+      const [an, cf] = await Promise.allSettled([
+        api.get<any>(`/auditorias/${auditoriaId}/analiticos`),
+        api.get<any>(`/auditorias/${auditoriaId}/conciliacion-fiscal`),
+      ])
+      if (an.status === 'fulfilled' && an.value?.ok) setAnaliticos(an.value)
+      if (cf.status === 'fulfilled' && cf.value?.ok) setConciliacion(cf.value)
+    } catch { /* ignore */ }
+    setLoadingExtras(false)
+  }, [auditoriaId])
+
+  useEffect(() => {
+    loadExtras()
+  }, [loadExtras])
 
   const loadRg90 = useCallback(async () => {
     setLoadingRg90(true)
@@ -77,7 +98,10 @@ export default function TabAnalisis({ auditoriaId }: Props) {
         if (e.estado === 'completado' || e.estado === 'error') {
           setRunning(false)
           clearInterval(interval)
-          if (e.estado === 'completado') success('Analisis completado')
+          if (e.estado === 'completado') {
+            success('Analisis completado')
+            loadExtras()
+          }
         }
       } catch { /* polling failed */ }
     }, 2000)
@@ -310,6 +334,95 @@ export default function TabAnalisis({ auditoriaId }: Props) {
             className="btn-primary w-full py-3 text-sm flex items-center justify-center gap-2">
             Ver hallazgos <ChevronRight size={14} />
           </button>
+        </div>
+      )}
+
+      {/* Procedimientos Analíticos (NIA 520) */}
+      {analiticos && analiticos.ratios && analiticos.ratios.length > 0 && (
+        <div className="card p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="section-label mb-0 flex items-center gap-2">
+              <Zap size={16} className="text-primary" /> Ratios y Benchmarks de Industria (NIA 520)
+            </p>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+              Período {analiticos.periodo} • {analiticos.actividad || 'General'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {analiticos.ratios.map((r: any, idx: number) => (
+              <div key={idx} className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 border border-gray-100 dark:border-gray-700">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[11px] font-bold text-gray-500">{r.nombre}</span>
+                  {r.dentro_rango !== null && (
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                      r.dentro_rango ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                    }`}>
+                      {r.dentro_rango ? 'En rango' : 'Desvío'}
+                    </span>
+                  )}
+                </div>
+                <p className="text-lg font-black text-gray-900 dark:text-white">
+                  {typeof r.valor === 'number' ? r.valor.toLocaleString('es-PY') : r.valor} <span className="text-xs font-normal text-gray-400">{r.unidad}</span>
+                </p>
+                {r.benchmark_min !== null && r.benchmark_max !== null && (
+                  <p className="text-[10px] text-gray-400 mt-1">
+                    Benchmark: {r.benchmark_min} - {r.benchmark_max} {r.unidad}
+                  </p>
+                )}
+                {r.observacion && (
+                  <p className="text-[10px] text-gray-400 italic mt-0.5">{r.observacion}</p>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {analiticos.alertas && analiticos.alertas.length > 0 && (
+            <div className="space-y-1.5 mt-2">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Alertas Analíticas:</p>
+              {analiticos.alertas.map((alt: string, i: number) => (
+                <div key={i} className="text-xs p-2 rounded-lg bg-amber-50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-300 flex items-center gap-2">
+                  <AlertTriangle size={14} className="shrink-0 text-amber-500" />
+                  <span>{alt}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Conciliación Contable → Fiscal (IRE Art. 16) */}
+      {conciliacion && (conciliacion.resultado_contable !== 0 || (conciliacion.ajustes && conciliacion.ajustes.length > 0)) && (
+        <div className="card p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="section-label mb-0 flex items-center gap-2">
+              <TrendingUp size={16} className="text-primary" /> Conciliación Fiscal IRE (Ley 6380 Art. 16)
+            </p>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+              Ejercicio {conciliacion.ejercicio}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 text-center">
+              <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Resultado Contable</p>
+              <p className="text-xs font-black text-gray-800 dark:text-gray-200">{pyg(conciliacion.resultado_contable)}</p>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 text-center">
+              <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Ajustes Art. 16 (+)</p>
+              <p className="text-xs font-black text-amber-600">{pyg(conciliacion.ajustes_suma)}</p>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 text-center">
+              <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Renta Neta Imponible</p>
+              <p className="text-xs font-black text-primary">{pyg(conciliacion.renta_neta_imponible)}</p>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 text-center">
+              <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Diferencia IRE (10%)</p>
+              <p className={`text-xs font-black ${conciliacion.diferencia !== 0 ? 'text-red-600' : 'text-green-600'}`}>
+                {pyg(conciliacion.diferencia)}
+              </p>
+            </div>
+          </div>
         </div>
       )}
     </div>

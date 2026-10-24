@@ -54,3 +54,13 @@ class TestAuditorias:
         resp = await client.get("/api/auditorias/aud-123/plazos")
         assert resp.status_code in (401, 403)
 
+    @pytest.mark.asyncio
+    async def test_obtener_analiticos_requires_auth(self, client: AsyncClient):
+        resp = await client.get("/api/auditorias/aud-123/analiticos")
+        assert resp.status_code in (401, 403)
+
+    @pytest.mark.asyncio
+    async def test_obtener_conciliacion_fiscal_requires_auth(self, client: AsyncClient):
+        resp = await client.get("/api/auditorias/aud-123/conciliacion-fiscal")
+        assert resp.status_code in (401, 403)
+

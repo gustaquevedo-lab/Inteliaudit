@@ -445,6 +445,7 @@ async def ejecutar_analisis(
             {"nombre": "Conciliación contable", "estado": "pendiente", "hallazgos": 0},
             {"nombre": "Depreciaciones", "estado": "pendiente", "hallazgos": 0},
             {"nombre": "Gastos sin comprobante", "estado": "pendiente", "hallazgos": 0},
+            {"nombre": "Conciliación fiscal Art. 16", "estado": "pendiente", "hallazgos": 0},
         ]
     if "retenciones" in impuestos:
         cruces_plan += [
@@ -454,6 +455,10 @@ async def ejecutar_analisis(
     if "banco" in impuestos:
         cruces_plan += [
             {"nombre": "Conciliación Bancaria vs RG90", "estado": "pendiente", "hallazgos": 0},
+        ]
+    if "analiticos" in impuestos:
+        cruces_plan += [
+            {"nombre": "Ratios y Benchmarks de Industria (NIA 520)", "estado": "pendiente", "hallazgos": 0},
         ]
 
     job_id = f"analisis-{auditoria_id}-{int(asyncio.get_event_loop().time())}"
@@ -853,6 +858,7 @@ async def _run_analysis_background(
             if "ire" in impuestos:
                 await db.commit()
                 from analisis.ire import AuditoriaIRE
+                from analisis.conciliacion_fiscal import ConciliacionFiscal
 
                 auditoria = await crud.get_auditoria(db, firma_id, auditoria_id)
                 if auditoria:
@@ -880,6 +886,22 @@ async def _run_analysis_background(
                                 _analysis_progress[job_id]["progreso"] = int((idx + 1) / len(cruces) * 100)
                                 _analysis_progress[job_id]["total_hallazgos"] = total_hallazgos
                                 idx += 1
+
+                        if idx < len(cruces):
+                            cruces[idx]["estado"] = "ejecutando"
+                            try:
+                                motor_cf = ConciliacionFiscal(db, firma_id, auditoria_id, auditoria.materialidad)
+                                res_cf = await motor_cf.ejecutar(cliente.id, ejercicio)
+                                total_hallazgos += res_cf.hallazgos_generados
+                                cruces[idx]["hallazgos"] = res_cf.hallazgos_generados
+                                await db.commit()
+                                cruces[idx]["estado"] = "completado"
+                            except Exception as e:
+                                cruces[idx]["estado"] = "error"
+                                cruces[idx]["error"] = str(e)[:200]
+                            _analysis_progress[job_id]["progreso"] = int((idx + 1) / len(cruces) * 100)
+                            _analysis_progress[job_id]["total_hallazgos"] = total_hallazgos
+                            idx += 1
 
             if "retenciones" in impuestos:
                 await db.commit()
@@ -959,6 +981,51 @@ async def _run_analysis_background(
                             _analysis_progress[job_id]["progreso"] = int((idx + 1) / len(cruces) * 100)
                             _analysis_progress[job_id]["total_hallazgos"] = total_hallazgos
                             idx += 1
+
+            if "analiticos" in impuestos:
+                await db.commit()
+                from analisis.analiticos import ProcedimientosAnaliticos
+
+                auditoria = await crud.get_auditoria(db, firma_id, auditoria_id)
+                if auditoria:
+                    cliente = await crud.get_cliente(db, firma_id, id=auditoria.cliente_id)
+                    if cliente and idx < len(cruces):
+                        cruces[idx]["estado"] = "ejecutando"
+                        try:
+                            motor_an = ProcedimientosAnaliticos(db, firma_id, auditoria_id, auditoria.materialidad)
+                            h_an = 0
+                            for i, p in enumerate(periodos):
+                                p_ant = periodos[i - 1] if i > 0 else None
+                                res_an = await motor_an.ejecutar(cliente.id, p, p_ant)
+                                for anom in res_an.anomalias:
+                                    if anom.get("riesgo") == "alto":
+                                        desc = anom.get("descripcion", anom.get("tipo", "Anomalía NIA 520"))
+                                        await crud.crear_hallazgo(
+                                            db,
+                                            firma_id=firma_id,
+                                            auditoria_id=auditoria_id,
+                                            impuesto="GENERAL",
+                                            periodo=p,
+                                            tipo_hallazgo="NIA520_ANOMALIA_ANALITICA",
+                                            descripcion=f"Procedimiento Analítico NIA 520: {desc}",
+                                            articulo_legal="NIA 520 — Procedimientos Analíticos Sustantivos",
+                                            base_ajuste=0,
+                                            impuesto_omitido=0,
+                                            multa_estimada=0,
+                                            intereses_estimados=0,
+                                            nivel_riesgo="alto",
+                                        )
+                                        h_an += 1
+                                await db.commit()
+                            total_hallazgos += h_an
+                            cruces[idx]["hallazgos"] = h_an
+                            cruces[idx]["estado"] = "completado"
+                        except Exception as e:
+                            cruces[idx]["estado"] = "error"
+                            cruces[idx]["error"] = str(e)[:200]
+                        _analysis_progress[job_id]["progreso"] = int((idx + 1) / len(cruces) * 100)
+                        _analysis_progress[job_id]["total_hallazgos"] = total_hallazgos
+                        idx += 1
 
             # Finalizar
             from sqlalchemy import update as sa_update
@@ -1249,6 +1316,109 @@ async def ejecutar_analisis_ire(
         "ok": True,
         "ejercicio_analizado": ejercicio,
         "hallazgos_generados": resultado.hallazgos_generados,
+        "errores": resultado.errores,
+    }
+
+
+@router.get("/{auditoria_id}/conciliacion-fiscal")
+async def obtener_conciliacion_fiscal(
+    auditoria_id: str,
+    ejercicio: Optional[str] = None,
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Retorna la conciliación contable -> fiscal (IRE Art. 16)."""
+    from analisis.conciliacion_fiscal import ConciliacionFiscal
+
+    auditoria = await crud.get_auditoria(db, user.firma_id, auditoria_id)
+    if not auditoria:
+        raise HTTPException(404, "Auditoría no encontrada")
+    cliente = await crud.get_cliente(db, user.firma_id, id=auditoria.cliente_id)
+    if not cliente:
+        raise HTTPException(404, "Cliente no encontrado")
+
+    ej = ejercicio or auditoria.periodo_desde[:4]
+    motor = ConciliacionFiscal(db, user.firma_id, auditoria_id, auditoria.materialidad)
+    resultado = await motor.ejecutar(cliente.id, ej)
+
+    return {
+        "ok": True,
+        "ejercicio": ej,
+        "resultado_contable": resultado.resultado_contable,
+        "ajustes_suma": resultado.ajustes_suma,
+        "ajustes_resta": resultado.ajustes_resta,
+        "renta_neta_imponible": resultado.renta_neta_imponible,
+        "impuesto_esperado": resultado.impuesto_esperado,
+        "impuesto_declarado": resultado.impuesto_declarado,
+        "diferencia": resultado.diferencia,
+        "ajustes": [
+            {
+                "concepto": a.concepto,
+                "tipo": a.tipo,
+                "monto": a.monto,
+                "articulo_legal": a.articulo_legal,
+                "es_permanente": a.es_permanente,
+                "descripcion": a.descripcion,
+            }
+            for a in resultado.ajustes
+        ],
+        "hallazgos_generados": resultado.hallazgos_generados,
+        "errores": resultado.errores,
+    }
+
+
+@router.get("/{auditoria_id}/analiticos")
+async def obtener_analiticos(
+    auditoria_id: str,
+    periodo: Optional[str] = None,
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Ejecuta y retorna los ratios, benchmarks y anomalías analíticas (NIA 520)."""
+    from analisis.analiticos import ProcedimientosAnaliticos
+
+    auditoria = await crud.get_auditoria(db, user.firma_id, auditoria_id)
+    if not auditoria:
+        raise HTTPException(404, "Auditoría no encontrada")
+    cliente = await crud.get_cliente(db, user.firma_id, id=auditoria.cliente_id)
+    if not cliente:
+        raise HTTPException(404, "Cliente no encontrado")
+
+    p_actual = periodo or auditoria.periodo_hasta
+    p_ant = None
+    try:
+        a, m = int(p_actual[:4]), int(p_actual[5:7])
+        if m == 1:
+            p_ant = f"{a - 1}-12"
+        else:
+            p_ant = f"{a}-{m - 1:02d}"
+    except Exception:
+        pass
+
+    motor = ProcedimientosAnaliticos(db, user.firma_id, auditoria_id, auditoria.materialidad)
+    resultado = await motor.ejecutar(cliente.id, p_actual, p_ant)
+
+    return {
+        "ok": True,
+        "periodo": p_actual,
+        "periodo_anterior": p_ant,
+        "actividad": cliente.actividad_principal,
+        "ratios": [
+            {
+                "nombre": r.nombre,
+                "valor": r.valor,
+                "unidad": r.unidad,
+                "periodo": r.periodo,
+                "benchmark_min": r.benchmark_min,
+                "benchmark_max": r.benchmark_max,
+                "dentro_rango": r.dentro_rango,
+                "observacion": r.observacion,
+            }
+            for r in resultado.ratios
+        ],
+        "anomalias": resultado.anomalias,
+        "tendencias": resultado.tendencias,
+        "alertas": resultado.alertas,
         "errores": resultado.errores,
     }
 

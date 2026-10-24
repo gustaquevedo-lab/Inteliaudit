@@ -117,7 +117,7 @@ class ProcedimientosAnaliticos:
 
         # 3. Análisis de tendencias
         if datos_anterior:
-            tendencias = self._analizar_tendencias(datos_actual, datos_anterior, periodo_actual)
+            tendencias = self._analizar_tendencias(datos_actual, datos_anterior, periodo_actual, resultado)
             resultado.tendencias = tendencias
 
         # 4. Detectar anomalías
@@ -262,7 +262,9 @@ class ProcedimientosAnaliticos:
                         "unidad": ratio.unidad,
                     })
 
-    def _analizar_tendencias(self, actual: dict, anterior: dict, periodo: str) -> list[dict]:
+    def _analizar_tendencias(
+        self, actual: dict, anterior: dict, periodo: str, resultado: Optional[ResultadoAnalitico] = None
+    ) -> list[dict]:
         """Analiza variaciones entre períodos."""
         tendencias = []
         
@@ -291,14 +293,15 @@ class ProcedimientosAnaliticos:
                 })
 
                 # Alerta si variación > 30%
-                if abs(variacion_pct) > 30:
-                    resultado_obj = ResultadoAnalitico(periodo=periodo, procedimiento="")
-                    resultado_obj.anomalias.append({
+                if abs(variacion_pct) > 30 and resultado is not None:
+                    resultado.anomalias.append({
                         "tipo": "variacion_significativa",
                         "campo": nombre,
                         "variacion_pct": round(variacion_pct, 1),
                         "periodo_anterior": val_anterior,
                         "periodo_actual": val_actual,
+                        "descripcion": f"Variación de {nombre}: {variacion_pct:+.1f}% respecto al período anterior",
+                        "riesgo": "medio" if abs(variacion_pct) <= 50 else "alto",
                     })
 
         return tendencias
