@@ -3,6 +3,12 @@ Script de siembra inicial de Normativas Legales y RAG para Inteliaudit.
 Carga e indexa en la base de datos (PostgreSQL / SQLite) los textos y artículos
 fundamentales de la legislación tributaria paraguaya y compendio NIA.
 """
+import os
+import sys
+
+# Asegurar path raíz del proyecto
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import asyncio
 import logging
 from sqlalchemy import select
