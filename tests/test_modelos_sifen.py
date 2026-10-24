@@ -5,7 +5,7 @@ from db.models import SifenCache
 @pytest.mark.asyncio
 async def test_modelo_sifen_cache_creacion(db_session):
     cache = SifenCache(
-        cdc="01800123456001001000000122024010112345678901",
+        cdc="01800999999001001000000122024010112345678901",
         estado_sifen="APROBADO",
         ruc_emisor="80012345-6",
         razon_social="PROVEEDOR MODELO S.A.",

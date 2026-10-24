@@ -6,7 +6,7 @@ from ingesta.sifen_validator import calcular_dv_modulo11
 
 @pytest.mark.asyncio
 async def test_consultar_cdc_con_cache_existente(db_session):
-    cdc = "01080012346100100100000011202401151123456780"
+    cdc = "01080012346100100100000011202401151123456789"
     db_session.add(SifenCache(
         cdc=cdc,
         estado_sifen="APROBADO",
@@ -53,7 +53,7 @@ async def test_consultar_cdc_valido_sin_cache(db_session):
 
 @pytest.mark.asyncio
 async def test_verificar_lote_cdcs(db_session):
-    cdc_43 = "0108001234610010010000001120240115112345678"
+    cdc_43 = "0108001234610010010000001120240115112345999"
     dv = calcular_dv_modulo11(cdc_43)
     cdc_valido = cdc_43 + str(dv)
     cdcs = [cdc_valido, "9999999"]

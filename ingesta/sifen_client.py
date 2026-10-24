@@ -130,19 +130,14 @@ async def verificar_lote_cdcs(
     max_concurrencia: int = 5
 ) -> Dict[str, Dict[str, Any]]:
     """
-    Verifica una lista de CDCs procesando concurrentemente con semáforo.
+    Verifica una lista de CDCs procesando con la base de datos de forma segura.
     Retorna un diccionario mapeando CDC -> Dict resultado.
     """
-    semaforo = asyncio.Semaphore(max_concurrencia)
     resultados: Dict[str, Dict[str, Any]] = {}
-
-    async def _verificar(cdc_item: str):
-        async with semaforo:
-            res = await consultar_o_validar_cdc(db, cdc_item, consultar_online=consultar_online)
-            resultados[cdc_item] = res
-
-    tareas = [_verificar(cdc) for cdc in cdcs if cdc]
-    if tareas:
-        await asyncio.gather(*tareas)
+    for cdc_item in cdcs:
+        if not cdc_item:
+            continue
+        res = await consultar_o_validar_cdc(db, cdc_item, consultar_online=consultar_online)
+        resultados[cdc_item] = res
 
     return resultados
