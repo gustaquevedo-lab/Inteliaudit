@@ -65,5 +65,7 @@ update_roadmap*.py
 .vercel
 
 # Graphify
-graphify-out/cache/
-graphify-out/.graphify_*
+graphify-out/
+
+# TypeScript build info
+*.tsbuildinfo
