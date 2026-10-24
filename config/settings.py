@@ -29,11 +29,13 @@ class Settings(BaseSettings):
         url = url.replace("&sslmode=require", "&ssl=require")
         return url
 
-    # AI
+    # AI (Ollama local, Gemini, Claude)
     anthropic_api_key: str = ""
     gemini_api_key: str = ""
-    ai_provider: str = "gemini"  # "gemini" | "claude"
+    ai_provider: str = "ollama"  # "ollama" | "gemini" | "claude"
     gemini_model: str = "gemini-2.5-flash"
+    ollama_base_url: str = "http://localhost:11434"
+    ollama_model: str = "inteliaudit-forense"
 
     # Emails transaccionales (Resend)
     resend_api_key: str = ""

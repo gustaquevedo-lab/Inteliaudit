@@ -660,6 +660,64 @@ async def generar_resumen_ejecutivo(
     return {"ok": True, "resumen": texto, "hallazgos_incluidos": len(hallazgos_db), "total_contingencia": resumen["total_contingencia"]}
 
 
+@router.post("/{auditoria_id}/copilot/chat")
+async def copilot_chat(
+    auditoria_id: str,
+    body: dict,
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Chat contextual con el Auditor Forense IA (inteliaudit-forense / Qwen 2.5 Coder 14B).
+    """
+    pregunta = body.get("pregunta", "").strip()
+    if not pregunta:
+        raise HTTPException(400, "La pregunta no puede estar vacía")
+
+    auditoria = await crud.get_auditoria(db, user.firma_id, auditoria_id)
+    if not auditoria:
+        raise HTTPException(404, "Auditoría no encontrada")
+
+    cliente = await crud.get_cliente(db, user.firma_id, id=auditoria.cliente_id)
+    if not cliente:
+        raise HTTPException(404, "Cliente no encontrado")
+
+    # Obtener hallazgos activos para contexto
+    hallazgos_db = await crud.get_hallazgos(db, user.firma_id, auditoria_id)
+    contexto_hallazgos = [
+        {
+            "tipo_hallazgo": h.tipo_hallazgo,
+            "periodo": h.periodo,
+            "descripcion": h.descripcion,
+            "total_contingencia": h.total_contingencia,
+            "nivel_riesgo": h.nivel_riesgo,
+        }
+        for h in hallazgos_db if h.estado != "descartado"
+    ][:10]
+
+    contexto_cliente = {
+        "razon_social": cliente.razon_social,
+        "ruc": cliente.ruc,
+        "actividad_principal": cliente.actividad_principal or "",
+    }
+
+    from analisis.copilot import AuditoriaCopilot
+    copilot = AuditoriaCopilot(firma_id=user.firma_id, auditoria_id=auditoria_id)
+    respuesta = await copilot.preguntar(
+        pregunta=pregunta,
+        contexto_hallazgos=contexto_hallazgos,
+        contexto_cliente=contexto_cliente,
+    )
+
+    return {
+        "ok": True,
+        "auditoria_id": auditoria_id,
+        "pregunta": pregunta,
+        "respuesta": respuesta,
+        "modelo": "inteliaudit-forense",
+    }
+
+
 async def _run_analysis_background(
     job_id: str,
     firma_id: str,

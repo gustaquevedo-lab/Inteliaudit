@@ -29,7 +29,31 @@ class AIProvider:
 
     def generar(self, system_prompt: str, user_prompt: str, max_tokens: int = 1500) -> str:
         client = self._get_client()
-        if self.provider == "gemini":
+        if self.provider == "ollama":
+            import httpx
+            from config.settings import settings
+            url = f"{settings.ollama_base_url.rstrip('/')}/api/chat"
+            payload = {
+                "model": settings.ollama_model,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                "stream": False,
+                "options": {
+                    "temperature": 0.1,
+                    "num_predict": max_tokens,
+                },
+            }
+            try:
+                with httpx.Client(timeout=120.0) as client_http:
+                    resp = client_http.post(url, json=payload)
+                    if resp.status_code == 200:
+                        return resp.json().get("message", {}).get("content", "").strip()
+                    return f"[Error Ollama: HTTP {resp.status_code}]"
+            except Exception as e:
+                return f"[Error de conexión a Ollama: {str(e)}]"
+        elif self.provider == "gemini":
             response = client.generate_content(
                 f"{system_prompt}\n\n{user_prompt}",
                 generation_config={"max_output_tokens": max_tokens},
