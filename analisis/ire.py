@@ -89,7 +89,10 @@ class AuditoriaIRE:
         for mes in range(1, 13):
             p = f"{ejercicio}-{mes:02d}"
             ventas = await crud.get_rg90(self.db, self.firma_id, cliente_id, p, "venta")
-            total_ventas_rg90 += sum(v.iva_total for v in ventas)
+            total_ventas_rg90 += sum(
+                v.total_comprobante or (v.base_gravada_10 + v.base_gravada_5 + v.monto_exento)
+                for v in ventas
+            )
 
         diferencia = abs(total_ingresos - total_ventas_rg90)
 

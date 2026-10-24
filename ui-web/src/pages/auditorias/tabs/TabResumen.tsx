@@ -1,9 +1,24 @@
+import { useState, useEffect } from 'react'
 import { pyg, rangoPeríodos } from '../../../utils/formatters'
 import { BadgeRiesgo, BadgeImpuesto } from '../../../components/Badge'
 import RiskMatrix from '../../../components/RiskMatrix'
 import KPICard from '../../../components/KPICard'
-import { AlertTriangle, TrendingUp, FileSearch, CheckCircle } from 'lucide-react'
+import { AlertTriangle, TrendingUp, FileSearch, CheckCircle, Clock } from 'lucide-react'
+import { api } from '../../../api/client'
 import type { Auditoria, Cliente, Hallazgo } from '../../../api/types'
+
+interface AlertaPlazo {
+  tipo: string
+  nivel: string
+  periodo: string
+  mensaje: string
+  dias_restantes?: number
+}
+
+interface PlazosData {
+  fecha_calculo: string
+  alertas: AlertaPlazo[]
+}
 
 interface Props {
   auditoria: Auditoria
@@ -12,6 +27,14 @@ interface Props {
 }
 
 export default function TabResumen({ auditoria, cliente, hallazgos }: Props) {
+  const [plazos, setPlazos] = useState<PlazosData | null>(null)
+
+  useEffect(() => {
+    api.get<PlazosData>(`/auditorias/${auditoria.id}/plazos`)
+      .then(setPlazos)
+      .catch(() => {})
+  }, [auditoria.id])
+
   const activos = hallazgos.filter(h => h.estado !== 'descartado')
   const altos = activos.filter(h => h.nivel_riesgo === 'alto')
   const confirmados = activos.filter(h => h.estado === 'confirmado')
@@ -21,6 +44,41 @@ export default function TabResumen({ auditoria, cliente, hallazgos }: Props) {
 
   return (
     <div className="space-y-6">
+      {/* Alertas de Prescripción Fiscal (Ley 125/1991) */}
+      {plazos && plazos.alertas && plazos.alertas.length > 0 && (
+        <div className="card p-4 border-l-4 border-amber-500 bg-amber-50/40 dark:bg-amber-950/20">
+          <div className="flex items-center justify-between mb-2.5">
+            <div className="flex items-center gap-2">
+              <Clock className="text-amber-600 dark:text-amber-400" size={17} />
+              <p className="text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-200">
+                Control de Prescripción Tributaria (Ley 125/1991 Art. 219)
+              </p>
+            </div>
+            <span className="text-[10px] text-gray-500">Cálculo: {plazos.fecha_calculo}</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {plazos.alertas.slice(0, 4).map((alerta, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-2 p-2 rounded-lg bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-900/40 shadow-xs"
+              >
+                <span
+                  className={`mt-0.5 px-1.5 py-0.5 text-[9px] font-black rounded uppercase ${
+                    alerta.nivel === 'alto'
+                      ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                      : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                  }`}
+                >
+                  {alerta.periodo}
+                </span>
+                <p className="text-xs text-gray-700 dark:text-gray-200 leading-snug">
+                  {alerta.mensaje}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard

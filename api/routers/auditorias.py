@@ -892,6 +892,33 @@ async def get_auditoria(
         "auditor": auditoria.auditor,
     }
 
+
+@router.get("/{auditoria_id}/plazos")
+async def obtener_plazos_auditoria(
+    auditoria_id: str,
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Calcula plazos de vencimiento y prescripción tributaria según Ley 125/1991."""
+    from dataclasses import asdict
+    from analisis.plazos import GestionPlazos
+
+    auditoria = await crud.get_auditoria(db, firma_id=user.firma_id, auditoria_id=auditoria_id)
+    if not auditoria:
+        raise HTTPException(404, "Auditoría no encontrada")
+
+    gestor = GestionPlazos(db, user.firma_id)
+    resultado = await gestor.calcular_plazos(auditoria.cliente_id)
+
+    return {
+        "fecha_calculo": resultado.fecha_calculo,
+        "alertas": resultado.alertas[:10],
+        "obligaciones": [asdict(o) for o in resultado.obligaciones[:12]],
+        "ventanas_abiertas": [v for v in resultado.ventanas_fiscalizacion if not v["prescrito_fiscal"]][:12],
+        "errores": resultado.errores,
+    }
+
+
 @router.post("/{auditoria_id}/ingestar")
 async def trigger_ingesta(
     auditoria_id: str,
@@ -969,62 +996,7 @@ async def analizar_documento_ia(
         ]
     }
 
-@router.post("/{auditoria_id}/validar-sifen")
-async def validar_sifen(
-    auditoria_id: str,
-    user: Usuario = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    """Valida los comprobantes electrónicos (CDC) de la auditoría."""
-    from sqlalchemy import select, update
-    from db.models import RG90
-    from analisis.sifen import validar_cdc, analizar_coherencia_rg90_vs_sifen
-    
-    # 1. Obtener registros con CDC
-    result = await db.execute(
-        select(RG90).where(
-            RG90.auditoria_id == auditoria_id,
-            RG90.firma_id == user.firma_id,
-            RG90.cdc != None
-        )
-    )
-    registros = result.scalars().all()
-    
-    procesados = 0
-    validos = 0
-    con_errores = 0
-    
-    for reg in registros:
-        cdc_info = validar_cdc(reg.cdc)
-        
-        updates = {
-            "cdc_valido": cdc_info["valido"]
-        }
-        
-        if cdc_info["valido"]:
-            # Verificar coherencia entre lo declarado en RG90 y lo que dice el CDC
-            coherencia = analizar_coherencia_rg90_vs_sifen(reg.__dict__, cdc_info)
-            if coherencia["coherente"]:
-                validos += 1
-            else:
-                con_errores += 1
-        else:
-            con_errores += 1
-            
-        await db.execute(
-            update(RG90)
-            .where(RG90.id == reg.id)
-            .values(**updates)
-        )
-        procesados += 1
-        
-    await db.commit()
-    
-    return {
-        "total_procesados": procesados,
-        "cdc_validos": validos,
-        "con_discrepancias": con_errores
-    }
+
 
 @router.post("/{auditoria_id}/ejecutar-analisis-iva")
 async def ejecutar_analisis_iva(
