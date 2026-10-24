@@ -63,3 +63,7 @@ check_phase*.py
 update_roadmap*.py
 
 .vercel
+
+# Graphify
+graphify-out/cache/
+graphify-out/.graphify_*

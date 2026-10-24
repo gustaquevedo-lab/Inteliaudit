@@ -26,9 +26,10 @@ interface AnalisisEstado {
 }
 
 const IMPUESTOS = [
-  { id: 'iva',     label: 'IVA',          desc: '5 cruces: RG90 vs Form.120, SIFEN, HECHAUKA, RUC',           icon: BarChart3 },
-  { id: 'ire',     label: 'IRE',          desc: 'Conciliacion contable, depreciaciones, gastos sin comprobante', icon: TrendingUp },
-  { id: 'retenciones', label: 'Retenciones', desc: 'Cruce HECHAUKA vs Forms. 800/820, retenciones omitidas',     icon: FileSearch },
+  { id: 'iva',         label: 'IVA',                  desc: '5 cruces: RG90 vs Form.120, SIFEN, HECHAUKA, RUC',                  icon: BarChart3 },
+  { id: 'ire',         label: 'IRE',                  desc: 'Conciliacion contable, depreciaciones, gastos sin comprobante',        icon: TrendingUp },
+  { id: 'retenciones', label: 'Retenciones',          desc: 'Cruce HECHAUKA vs Forms. 800/820, retenciones omitidas',            icon: FileSearch },
+  { id: 'banco',       label: 'Conciliación Bancaria', desc: 'Cruce extractos vs ventas RG90 y detección de gastos personales', icon: ArrowRight },
 ]
 
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Setiembre','Octubre','Noviembre','Diciembre']

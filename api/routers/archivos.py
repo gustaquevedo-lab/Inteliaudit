@@ -90,6 +90,42 @@ async def subir_archivo(
             resultado["error"] = str(e)
         os.unlink(tmp_path)
 
+    elif tipo == "banco":
+        if not periodo:
+            raise HTTPException(400, "Periodo requerido para extracto bancario (YYYY-MM)")
+        import tempfile, os, json
+        from dataclasses import asdict
+        from ingesta.parser_banco import parsear_extracto_bancario
+        ext = os.path.splitext(archivo.filename)[-1].lower() or ".xlsx"
+        with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
+            tmp.write(contenido)
+            tmp_path = tmp.name
+        try:
+            transacciones = parsear_extracto_bancario(tmp_path)
+            banco_json_key = f"{user.firma_id}/{auditoria.cliente_id}/{auditoria_id}/banco/{periodo}.json"
+            tx_data = [asdict(t) for t in transacciones]
+            await storage.upload(banco_json_key, json.dumps(tx_data, ensure_ascii=False).encode("utf-8"), "application/json")
+
+            total_ingresos = sum(t.monto for t in transacciones if t.tipo == "ingreso")
+            total_egresos = sum(abs(t.monto) for t in transacciones if t.tipo == "egreso")
+
+            await crud.log_trail(
+                db, firma_id=user.firma_id, usuario_id=user.id,
+                accion=f"Extracto bancario importado: {len(transacciones)} movimientos ({periodo})",
+                modulo="ingesta", auditoria_id=auditoria_id,
+                datos={"archivo": archivo.filename, "periodo": periodo, "movimientos": len(transacciones), "total_ingresos": total_ingresos, "total_egresos": total_egresos}
+            )
+            resultado["procesado"] = True
+            resultado["registros_importados"] = len(transacciones)
+            resultado["total_ingresos"] = total_ingresos
+            resultado["total_egresos"] = total_egresos
+        except Exception as e:
+            resultado["procesado"] = False
+            resultado["error"] = str(e)
+        finally:
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+
     return resultado
 
 

@@ -21,6 +21,10 @@ interface ImportResult {
   registros_importados?: number
   confirmada?: boolean
   requiere_confirmacion?: boolean
+  procesado?: boolean
+  total_ingresos?: number
+  total_egresos?: number
+  error?: string
 }
 
 interface ImportState {
@@ -71,6 +75,7 @@ export default function TabArchivos({ auditoriaId }: Props) {
   const [rg90Periodo, setRg90Periodo] = useState(INIT_PERIODO)
   const [rg90Tipo, setRg90Tipo] = useState<'compras' | 'ventas'>('compras')
   const [hechaukaPeriodo, setHechaukaPeriodo] = useState(INIT_PERIODO)
+  const [bancoPeriodo, setBancoPeriodo] = useState(INIT_PERIODO)
   const [djPeriodo, setDjPeriodo] = useState(INIT_PERIODO)
   const [djFormulario, setDjFormulario] = useState('120')
   const [loadingHistory, setLoadingHistory] = useState(false)
@@ -220,6 +225,31 @@ export default function TabArchivos({ auditoriaId }: Props) {
     }
   }
 
+  const handleBanco = async (file: File) => {
+    const id = `banco-${Date.now()}`
+    addImport(id, 'Extracto Bancario', file.name, bancoPeriodo)
+    const fd = new FormData()
+    fd.append('archivo', file)
+    fd.append('tipo', 'banco')
+    fd.append('periodo', bancoPeriodo)
+    try {
+      const res = await api.upload<ImportResult>(`/auditorias/${auditoriaId}/archivos`, fd)
+      if (res.procesado) {
+        updateImport(id, {
+          status: 'done',
+          registros_importados: res.registros_importados,
+          total_registros: res.registros_importados,
+          total_monto: res.total_ingresos,
+        })
+        loadHistory()
+      } else {
+        updateImport(id, { status: 'error', error_msg: res.error || 'Error al procesar extracto' })
+      }
+    } catch (e: unknown) {
+      updateImport(id, { status: 'error', error_msg: e instanceof Error ? e.message : 'Error al subir extracto' })
+    }
+  }
+
   const discardImport = (id: string) => {
     setImports(prev => prev.filter(s => s.id !== id))
   }
@@ -365,6 +395,29 @@ export default function TabArchivos({ auditoriaId }: Props) {
             <div key={s.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-400 text-xs font-medium">
               <CheckCircle size={12} />
               {s.registros_importados ? `${s.registros_importados} registros importados` : `${s.total_registros} registros`}
+            </div>
+          ))}
+        </div>
+
+        {/* EXTRACTO BANCARIO */}
+        <div className="card p-5 space-y-4">
+          <div>
+            <p className="font-bold text-sm uppercase tracking-wide">Extracto Bancario</p>
+            <p className="text-xs text-gray-500">Conciliación con ventas RG90 y detección de gastos personales</p>
+          </div>
+          <div>
+            <label className="input-label">Periodo</label>
+            <input type="month" className="input-field" value={bancoPeriodo} onChange={e => setBancoPeriodo(e.target.value)} />
+          </div>
+          <BancoUploadZone
+            key={`banco-${bancoPeriodo}`}
+            onFile={handleBanco}
+            disabled={ImportsEnProgreso.some(s => s.tipo === 'Extracto Bancario')}
+          />
+          {ImportsDone.filter(s => s.tipo === 'Extracto Bancario').slice(-3).map(s => (
+            <div key={s.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-400 text-xs font-medium">
+              <CheckCircle size={12} />
+              {s.registros_importados ? `${s.registros_importados} movimientos importados` : 'Extracto importado'}
             </div>
           ))}
         </div>
@@ -590,6 +643,36 @@ function DjUploadZone({ onFile, disabled }: { onFile: (f: File) => void; disable
       <p className="text-xs font-bold text-gray-600 dark:text-gray-400">Arrastra el PDF o hace clic</p>
       <p className="text-[10px] text-gray-400">PDF de declaracion jurada (descargado de Marangatu)</p>
       <input ref={inputRef} type="file" accept=".pdf" className="hidden" onChange={e => handle(e.target.files?.[0])} disabled={disabled} />
+    </div>
+  )
+}
+
+function BancoUploadZone({ onFile, disabled }: { onFile: (f: File) => void; disabled: boolean }) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [dragging, setDragging] = useState(false)
+
+  const handle = (file: File | undefined) => {
+    if (file && !disabled && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.name.endsWith('.csv'))) {
+      onFile(file)
+    }
+  }
+
+  return (
+    <div
+      className={`border-2 border-dashed rounded-2xl p-6 flex flex-col items-center gap-2 transition-all cursor-pointer ${
+        dragging ? 'border-primary bg-primary/5' : 'border-gray-200 dark:border-gray-700 hover:border-primary/40 hover:bg-gray-50 dark:hover:bg-gray-800/40'
+      } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      onClick={() => !disabled && inputRef.current?.click()}
+      onDragOver={e => { e.preventDefault(); setDragging(true) }}
+      onDragLeave={() => setDragging(false)}
+      onDrop={e => { e.preventDefault(); setDragging(false); handle(e.dataTransfer.files[0]) }}
+    >
+      <div className={`p-3 rounded-xl ${dragging ? 'bg-primary/10' : 'bg-gray-100 dark:bg-gray-800'}`}>
+        <Upload size={20} className={dragging ? 'text-primary' : 'text-gray-400'} />
+      </div>
+      <p className="text-xs font-bold text-gray-600 dark:text-gray-400">Arrastra el extracto bancario o hace clic</p>
+      <p className="text-[10px] text-gray-400">XLSX o CSV de cualquier banco (Itaú, Continental, BNF, etc.)</p>
+      <input ref={inputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={e => handle(e.target.files?.[0])} disabled={disabled} />
     </div>
   )
 }

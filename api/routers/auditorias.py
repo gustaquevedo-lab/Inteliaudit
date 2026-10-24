@@ -451,6 +451,10 @@ async def ejecutar_analisis(
             {"nombre": "HECHAUKA vs Forms. 800/820", "estado": "pendiente", "hallazgos": 0},
             {"nombre": "Retenciones omitidas", "estado": "pendiente", "hallazgos": 0},
         ]
+    if "banco" in impuestos:
+        cruces_plan += [
+            {"nombre": "Conciliación Bancaria vs RG90", "estado": "pendiente", "hallazgos": 0},
+        ]
 
     job_id = f"analisis-{auditoria_id}-{int(asyncio.get_event_loop().time())}"
     _analysis_progress[job_id] = {
@@ -770,6 +774,55 @@ async def _run_analysis_background(
                                 _analysis_progress[job_id]["progreso"] = int((idx + 1) / len(cruces) * 100)
                                 _analysis_progress[job_id]["total_hallazgos"] = total_hallazgos
                                 idx += 1
+
+            if "banco" in impuestos:
+                await db.commit()
+                from analisis.bancario import ConciliacionBancaria, TransaccionBancaria
+                from storage.adapter import get_storage
+                import json
+
+                auditoria = await crud.get_auditoria(db, firma_id, auditoria_id)
+                if auditoria:
+                    cliente = await crud.get_cliente(db, firma_id, id=auditoria.cliente_id)
+                    if cliente:
+                        motor_bco = ConciliacionBancaria(db, firma_id, auditoria_id, auditoria.materialidad)
+                        storage = get_storage()
+
+                        if idx < len(cruces):
+                            cruces[idx]["estado"] = "ejecutando"
+                            try:
+                                h_total_bco = 0
+                                for p in periodos:
+                                    banco_key = f"{firma_id}/{cliente.id}/{auditoria_id}/banco/{p}.json"
+                                    try:
+                                        data_bytes = await storage.download(banco_key)
+                                    except Exception:
+                                        data_bytes = None
+
+                                    if data_bytes:
+                                        tx_list_raw = json.loads(data_bytes.decode("utf-8"))
+                                        txs = [
+                                            TransaccionBancaria(
+                                                fecha=t["fecha"],
+                                                descripcion=t["descripcion"],
+                                                monto=t["monto"],
+                                                tipo=t["tipo"],
+                                                referencia=t.get("referencia"),
+                                            )
+                                            for t in tx_list_raw
+                                        ]
+                                        res_bco = await motor_bco.ejecutar(cliente.id, p, txs)
+                                        h_total_bco += res_bco.hallazgos_generados
+                                        await db.commit()
+                                total_hallazgos += h_total_bco
+                                cruces[idx]["hallazgos"] = h_total_bco
+                                cruces[idx]["estado"] = "completado"
+                            except Exception as e:
+                                cruces[idx]["estado"] = "error"
+                                cruces[idx]["error"] = str(e)[:200]
+                            _analysis_progress[job_id]["progreso"] = int((idx + 1) / len(cruces) * 100)
+                            _analysis_progress[job_id]["total_hallazgos"] = total_hallazgos
+                            idx += 1
 
             # Finalizar
             from sqlalchemy import update as sa_update
