@@ -1,16 +1,19 @@
 import json
 import secrets
 import string
+import time
 from datetime import datetime, timezone
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, status
+import httpx
 from pydantic import BaseModel, EmailStr
-from sqlalchemy import select, func, update
+from sqlalchemy import select, func, update, case
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from config.settings import settings
 from db.base import get_db
-from db.models import Firma, Usuario, Cliente
-from api.routers.auth import get_current_user, _hash
+from db.models import Firma, Usuario, Cliente, ErrorPlataforma, SifenCache
+from api.routers.auth import get_current_user, _hash, _crear_token
 
 router = APIRouter(prefix="/superadmin", tags=["superadmin"])
 
@@ -424,3 +427,225 @@ async def reset_usuario_password(
     user.debe_cambiar_password = body.debe_cambiar_password
     await db.commit()
     return {"ok": True, "message": "Contraseña restablecida con éxito"}
+
+
+# ============================================================
+#  Impersonación de Tenants
+# ============================================================
+
+@router.post("/firmas/{firma_id}/impersonate")
+async def impersonate_firma(
+    firma_id: str,
+    super_admin: Usuario = Depends(get_current_super_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """Genera un JWT temporal para ingresar a la plataforma exactamente como un usuario de la firma."""
+    firma = (await db.execute(select(Firma).where(Firma.id == firma_id))).scalar_one_or_none()
+    if not firma:
+        raise HTTPException(status_code=404, detail="Firma no encontrada")
+
+    # Buscar el usuario administrador o el primer usuario activo
+    query = (
+        select(Usuario)
+        .where(Usuario.firma_id == firma_id, Usuario.activo == True)
+        .order_by(case((Usuario.rol == "admin", 0), else_=1), Usuario.creado_en.asc())
+    )
+    user = (await db.execute(query)).scalars().first()
+    if not user:
+        raise HTTPException(status_code=404, detail="La firma no posee usuarios activos para impersonar")
+
+    token_data = {
+        "sub": user.id,
+        "email": user.email,
+        "user_id": user.id,
+        "firma_id": firma.id,
+        "rol": user.rol,
+        "impersonated_by": super_admin.email,
+    }
+    access_token = _crear_token(token_data, expire_minutes=120)
+
+    return {
+        "ok": True,
+        "token": access_token,
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "nombre": user.nombre,
+            "rol": user.rol,
+        },
+        "firma": {
+            "id": firma.id,
+            "nombre": firma.nombre,
+            "plan": firma.plan,
+        },
+        "impersonated_by": super_admin.email,
+    }
+
+
+# ============================================================
+#  Métricas SaaS Globales
+# ============================================================
+
+@router.get("/stats")
+async def get_stats(
+    super_admin: Usuario = Depends(get_current_super_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """Retorna métricas consolidadas de adopción, clientes y salud del SaaS."""
+    total_firmas = (await db.execute(select(func.count(Firma.id)))).scalar() or 0
+    firmas_activas = (await db.execute(select(func.count(Firma.id)).where(Firma.activa == True))).scalar() or 0
+    total_usuarios = (await db.execute(select(func.count(Usuario.id)).where(Usuario.activo == True))).scalar() or 0
+    total_clientes = (await db.execute(select(func.count(Cliente.id)))).scalar() or 0
+
+    planes_res = await db.execute(select(Firma.plan, func.count(Firma.id)).group_by(Firma.plan))
+    distribucion_planes = {str(p): count for p, count in planes_res.all()}
+
+    total_errores_pendientes = (await db.execute(
+        select(func.count(ErrorPlataforma.id)).where(ErrorPlataforma.resuelto == False)
+    )).scalar() or 0
+
+    return {
+        "total_firmas": total_firmas,
+        "firmas_activas": firmas_activas,
+        "total_usuarios": total_usuarios,
+        "total_clientes": total_clientes,
+        "distribucion_planes": distribucion_planes,
+        "total_errores_pendientes": total_errores_pendientes,
+    }
+
+
+# ============================================================
+#  Sentry-Lite: Registro y Gestión de Errores de Plataforma
+# ============================================================
+
+class ErrorResolverBody(BaseModel):
+    notas_resolucion: Optional[str] = None
+
+
+@router.get("/errores")
+async def list_errores(
+    resuelto: Optional[bool] = None,
+    limit: int = 50,
+    offset: int = 0,
+    super_admin: Usuario = Depends(get_current_super_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """Lista las excepciones 5xx capturadas y deduplicadas por el middleware Sentry-Lite."""
+    query = select(ErrorPlataforma).order_by(ErrorPlataforma.ultima_vez.desc()).limit(limit).offset(offset)
+    if resuelto is not None:
+        query = query.where(ErrorPlataforma.resuelto == resuelto)
+    
+    rows = (await db.execute(query)).scalars().all()
+    return [
+        {
+            "id": e.id,
+            "fingerprint": e.fingerprint,
+            "tipo_error": e.tipo_error,
+            "mensaje": e.mensaje,
+            "path": e.path,
+            "metodo": e.metodo,
+            "status_code": e.status_code,
+            "stacktrace": e.stacktrace,
+            "contexto_json": e.contexto_json,
+            "firma_id": e.firma_id,
+            "usuario_email": e.usuario_email,
+            "ocurrencias": e.ocurrencias,
+            "primera_vez": e.primera_vez,
+            "ultima_vez": e.ultima_vez,
+            "resuelto": e.resuelto,
+            "resuelto_en": e.resuelto_en,
+            "notas_resolucion": e.notas_resolucion,
+        }
+        for e in rows
+    ]
+
+
+@router.post("/errores/{error_id}/resolver")
+async def resolver_error(
+    error_id: str,
+    body: ErrorResolverBody,
+    super_admin: Usuario = Depends(get_current_super_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """Marca un incidente de plataforma como resuelto."""
+    err = (await db.execute(select(ErrorPlataforma).where(ErrorPlataforma.id == error_id))).scalar_one_or_none()
+    if not err:
+        raise HTTPException(status_code=404, detail="Error no encontrado")
+
+    err.resuelto = True
+    err.resuelto_en = datetime.now(timezone.utc)
+    if body.notas_resolucion is not None:
+        err.notas_resolucion = body.notas_resolucion
+    await db.commit()
+
+    return {
+        "ok": True,
+        "id": err.id,
+        "resuelto": err.resuelto,
+        "resuelto_en": err.resuelto_en,
+        "notas_resolucion": err.notas_resolucion,
+    }
+
+
+# ============================================================
+#  System Vitals: Salud y Latencia de Componentes de Infraestructura
+# ============================================================
+
+@router.get("/vitals")
+async def get_vitals(
+    super_admin: Usuario = Depends(get_current_super_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """Chequeo de disponibilidad, latencia y versiones de DB, R2, Ollama Qwen 14B y SIFEN."""
+    t_db = time.time()
+    try:
+        await db.execute(select(func.count(Usuario.id)))
+        db_lat = int((time.time() - t_db) * 1000)
+        db_status = "ok"
+    except Exception as exc:
+        db_lat = int((time.time() - t_db) * 1000)
+        db_status = f"error: {str(exc)}"
+
+    # Caché SIFEN
+    try:
+        sifen_count = (await db.execute(select(func.count(SifenCache.cdc)))).scalar() or 0
+        sifen_cache_info = {"status": "ok", "total_comprobantes_cacheados": sifen_count}
+    except Exception as exc:
+        sifen_cache_info = {"status": "error", "error": str(exc)}
+
+    # Ollama Local (Qwen 14B)
+    ollama_url = getattr(settings, "ollama_url", "http://localhost:11434")
+    t_ol = time.time()
+    try:
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            resp = await client.get(f"{ollama_url}/api/tags")
+            ol_lat = int((time.time() - t_ol) * 1000)
+            if resp.status_code == 200:
+                modelos = [m.get("name") for m in resp.json().get("models", [])]
+                ollama_info = {"status": "ok", "latency_ms": ol_lat, "modelos": modelos}
+            else:
+                ollama_info = {"status": "warning", "latency_ms": ol_lat, "http_status": resp.status_code}
+    except Exception as exc:
+        ollama_info = {"status": "offline", "latency_ms": int((time.time() - t_ol) * 1000), "error": str(exc)}
+
+    # Cloudflare R2 / Storage
+    r2_info = {
+        "status": "ok" if settings.r2_bucket else "local_fallback",
+        "bucket": settings.r2_bucket or "local_filesystem",
+    }
+
+    overall = "ok" if db_status == "ok" else "degraded"
+
+    return {
+        "status": overall,
+        "timestamp": datetime.now(timezone.utc),
+        "database": {
+            "status": db_status,
+            "latency_ms": db_lat,
+            "engine": "SQLite" if settings.is_sqlite else "PostgreSQL",
+        },
+        "ollama_ai": ollama_info,
+        "sifen_cache": sifen_cache_info,
+        "storage": r2_info,
+    }
+
