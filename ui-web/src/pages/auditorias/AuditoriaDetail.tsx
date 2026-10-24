@@ -13,6 +13,7 @@ import TabInformes from './tabs/TabInformes'
 import TabPlanTrabajo from './tabs/TabPlanTrabajo'
 import TabAnalisis from './tabs/TabAnalisis'
 import TabAutomatizacion from './tabs/TabAutomatizacion'
+import CopilotDrawer from '../../components/CopilotDrawer'
 
 const TABS = [
   { id: 'resumen', label: 'Resumen', path: '' },
@@ -200,6 +201,8 @@ export default function AuditoriaDetail() {
             return <TabResumen auditoria={auditoria} cliente={cliente} hallazgos={hallazgos} />
         }
       })()}
+
+      <CopilotDrawer auditoriaId={id!} clienteNombre={cliente.razon_social} />
     </div>
   )
 }

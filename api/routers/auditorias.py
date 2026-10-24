@@ -718,6 +718,84 @@ async def copilot_chat(
     }
 
 
+@router.post("/{auditoria_id}/copilot/stream")
+async def copilot_chat_stream(
+    auditoria_id: str,
+    body: dict,
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Streaming SSE contextual con el Auditor Forense IA (inteliaudit-forense / Qwen 14B).
+    """
+    from fastapi.responses import StreamingResponse
+    import json
+    import requests
+    from analisis.copilot import SYSTEM_PROMPT
+    from config.settings import settings
+
+    pregunta = body.get("pregunta", "").strip()
+    if not pregunta:
+        raise HTTPException(400, "La pregunta no puede estar vacía")
+
+    auditoria = await crud.get_auditoria(db, user.firma_id, auditoria_id)
+    if not auditoria:
+        raise HTTPException(404, "Auditoría no encontrada")
+
+    cliente = await crud.get_cliente(db, user.firma_id, id=auditoria.cliente_id)
+    if not cliente:
+        raise HTTPException(404, "Cliente no encontrado")
+
+    hallazgos_db = await crud.get_hallazgos(db, user.firma_id, auditoria_id)
+    contexto_hallazgos = [
+        f"- [{h.nivel_riesgo.upper()}] {h.tipo_hallazgo} ({h.periodo}): {h.descripcion} (Contingencia: Gs. {h.total_contingencia:,})"
+        for h in hallazgos_db if h.estado != "descartado"
+    ][:10]
+
+    contexto = (
+        f"CLIENTE: {cliente.razon_social} (RUC {cliente.ruc})\n"
+        f"ACTIVIDAD: {cliente.actividad_principal or 'N/A'}\n"
+        f"PERIODO AUDITADO: {auditoria.periodo_desde} a {auditoria.periodo_hasta}\n"
+        f"HALLAZGOS ACTIVOS:\n" + ("\n".join(contexto_hallazgos) if contexto_hallazgos else "Sin hallazgos activos registrados.")
+    )
+
+    url = f"{settings.ollama_base_url.rstrip('/')}/api/chat"
+    payload = {
+        "model": settings.ollama_model,
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": f"Contexto de la auditoría:\n{contexto}\n\nPregunta del auditor:\n{pregunta}"},
+        ],
+        "stream": True,
+        "options": {
+            "temperature": 0.1,
+            "num_thread": 12,
+        },
+    }
+
+    def generate_events():
+        try:
+            with requests.post(url, json=payload, stream=True, timeout=180) as r:
+                for line in r.iter_lines():
+                    if line:
+                        chunk = json.loads(line.decode("utf-8"))
+                        content = chunk.get("message", {}).get("content", "")
+                        if content:
+                            yield f"data: {json.dumps({'content': content})}\n\n"
+                        if chunk.get("done", False):
+                            yield "data: [DONE]\n\n"
+                            break
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+            yield "data: [DONE]\n\n"
+
+    return StreamingResponse(
+        generate_events(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
 async def _run_analysis_background(
     job_id: str,
     firma_id: str,
