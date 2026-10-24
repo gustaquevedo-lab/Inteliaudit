@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { CheckCircle2, Circle, Info, Gavel, FileText, Settings, Sparkles, Plus, AlertTriangle, Loader2 } from 'lucide-react'
+import { CheckCircle2, Circle, Info, Gavel, FileText, Settings, Sparkles, Plus, AlertTriangle, Loader2, RefreshCw, ChevronRight, X, FileCheck } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { api } from '../../../api/client'
 import { useToast } from '../../../components/Toaster'
@@ -25,6 +25,19 @@ interface Patron {
   periodo?: string
 }
 
+interface CedulaItem {
+  id: string
+  codigo: string
+  nombre: string
+  impuesto: string
+  periodo: string
+  tipo: string
+  preparado_por: string
+  fecha_preparacion: string
+  norma_tecnica: string
+  datos: any
+}
+
 const COLORS_RISK: Record<string, string> = { alto: '#E53E3E', medio: '#D97706', bajo: '#22C47E' }
 const COLORS_SEV: Record<string, string> = { alta: '#E53E3E', media: '#D97706', baja: '#22C47E' }
 
@@ -34,6 +47,37 @@ export default function TabPlanTrabajo({ auditoria, onUpdate }: Props) {
   const [sugerenciasData, setSugerenciasData] = useState<{ patrones: Patron[]; sugerencias: Sugerencia[] } | null>(null)
   const [loadingSugerencias, setLoadingSugerencias] = useState(false)
   const [cargandoTarea, setCargandoTarea] = useState<string | null>(null)
+  const [cedulas, setCedulas] = useState<CedulaItem[]>([])
+  const [loadingCedulas, setLoadingCedulas] = useState(false)
+  const [generandoCedulas, setGenerandoCedulas] = useState(false)
+  const [selectedCedula, setSelectedCedula] = useState<CedulaItem | null>(null)
+
+  const cargarCedulas = async () => {
+    setLoadingCedulas(true)
+    try {
+      const res = await api.get<{ ok: boolean; cedulas: CedulaItem[] }>(`/auditorias/${auditoria.id}/cedulas`)
+      if (res.ok) setCedulas(res.cedulas)
+    } catch { /* ignore */ }
+    setLoadingCedulas(false)
+  }
+
+  useEffect(() => {
+    cargarCedulas()
+  }, [auditoria.id])
+
+  const compilarCedulas = async () => {
+    setGenerandoCedulas(true)
+    try {
+      const res = await api.post<{ ok: boolean; total: number }>(`/auditorias/${auditoria.id}/generar-cedulas`, {})
+      if (res.ok) {
+        success(`Se compilaron ${res.total} cédulas de auditoría (NIA 230)`)
+        await cargarCedulas()
+      }
+    } catch (e: unknown) {
+      error(e instanceof Error ? e.message : 'Error al compilar cédulas')
+    }
+    setGenerandoCedulas(false)
+  }
 
   useEffect(() => {
     api.get<{ patrones: Patron[]; sugerencias: Sugerencia[] }>(`/auditorias/${auditoria.id}/sugerencias-ia`)
@@ -246,6 +290,136 @@ export default function TabPlanTrabajo({ auditoria, onUpdate }: Props) {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Papeles de Trabajo y Cédulas (NIA 230) */}
+      <div className="card p-5 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <p className="section-label mb-0 flex items-center gap-2">
+              <FileCheck size={16} className="text-primary" /> Papeles de Trabajo y Cédulas (NIA 230)
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Documentación formal de evidencia, cruces, pruebas sustantivas y conclusiones del auditor.
+            </p>
+          </div>
+          <button
+            onClick={compilarCedulas}
+            disabled={generandoCedulas}
+            className="btn-primary text-xs py-2 px-3 flex items-center gap-1.5 shrink-0 self-start sm:self-auto"
+          >
+            {generandoCedulas ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
+            {cedulas.length > 0 ? 'Recompilar Cédulas' : 'Compilar Legajo NIA 230'}
+          </button>
+        </div>
+
+        {loadingCedulas ? (
+          <div className="py-8 text-center text-gray-400 text-xs flex items-center justify-center gap-2">
+            <Loader2 size={16} className="animate-spin text-primary" /> Cargando papeles de trabajo...
+          </div>
+        ) : cedulas.length === 0 ? (
+          <div className="p-6 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/60 text-center">
+            <FileText size={28} className="mx-auto mb-2 text-gray-400 opacity-60" />
+            <p className="text-xs font-bold text-gray-600 dark:text-gray-300">No hay cédulas compiladas para esta auditoría</p>
+            <p className="text-[11px] text-gray-400 mt-0.5">
+              Haz clic en "Compilar Legajo NIA 230" para generar las cédulas sumarias y analíticas basadas en los hallazgos y cruces.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {cedulas.map((c) => (
+              <div
+                key={c.id}
+                onClick={() => setSelectedCedula(c)}
+                className="p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary/50 dark:hover:border-primary/50 bg-white dark:bg-gray-800/50 cursor-pointer transition-all space-y-2 group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[10px] font-black px-2 py-0.5 rounded bg-primary/10 text-primary">
+                      {c.codigo}
+                    </span>
+                    <span className="text-[10px] uppercase font-bold text-gray-400">
+                      {c.impuesto}
+                    </span>
+                  </div>
+                  <ChevronRight size={14} className="text-gray-400 group-hover:text-primary transition-colors" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-gray-900 dark:text-white line-clamp-1">{c.nombre}</h4>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5">
+                    {c.datos?.conclusion || c.datos?.procedimiento || 'Papel de trabajo documentado'}
+                  </p>
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-gray-400 pt-1 border-t border-gray-100 dark:border-gray-700/50">
+                  <span>{c.norma_tecnica}</span>
+                  <span>{c.preparado_por}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Modal para Cédula Detalle */}
+      {selectedCedula && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-gray-800/30">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xs font-black px-2.5 py-1 rounded-lg bg-primary text-white">
+                  {selectedCedula.codigo}
+                </span>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">{selectedCedula.nombre}</h3>
+                  <p className="text-[10px] text-gray-400">{selectedCedula.norma_tecnica} • Preparado por {selectedCedula.preparado_por}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedCedula(null)}
+                className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-5 overflow-y-auto space-y-4 text-xs">
+              {selectedCedula.datos?.procedimiento && (
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Procedimiento Aplicado:</span>
+                  <p className="text-gray-700 dark:text-gray-300 mt-0.5 leading-relaxed bg-gray-50 dark:bg-gray-800/50 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700/50">
+                    {selectedCedula.datos.procedimiento}
+                  </p>
+                </div>
+              )}
+
+              {selectedCedula.datos?.conclusion && (
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Conclusión del Auditor (NIA 230):</span>
+                  <p className="text-gray-800 dark:text-gray-200 mt-0.5 leading-relaxed bg-primary/5 dark:bg-primary/10 p-2.5 rounded-xl border border-primary/20 font-medium">
+                    {selectedCedula.datos.conclusion}
+                  </p>
+                </div>
+              )}
+
+              {/* Detalle estructurado JSON */}
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Evidencia y Contenido del Papel de Trabajo:</span>
+                <pre className="mt-1 p-3 bg-gray-900 text-gray-100 rounded-xl font-mono text-[11px] overflow-x-auto max-h-60">
+                  {JSON.stringify(selectedCedula.datos, null, 2)}
+                </pre>
+              </div>
+            </div>
+
+            <div className="p-3 border-t border-gray-100 dark:border-gray-800 flex justify-end">
+              <button
+                onClick={() => setSelectedCedula(null)}
+                className="btn-outline text-xs py-1.5 px-4"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}

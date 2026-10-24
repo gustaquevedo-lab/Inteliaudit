@@ -381,3 +381,50 @@ async def log_trail(
     )
     db.add(trail)
     await db.flush()
+
+
+# ============================================================
+#  CEDULAS (PAPELES DE TRABAJO NIA 230)
+# ============================================================
+
+async def crear_cedula(
+    db: AsyncSession,
+    firma_id: str,
+    auditoria_id: str,
+    codigo: str,
+    nombre: str,
+    datos_json: str,
+) -> str:
+    from db.models import Cedula
+    cedula = Cedula(
+        firma_id=firma_id,
+        auditoria_id=auditoria_id,
+        codigo=codigo,
+        nombre=nombre,
+        datos_json=datos_json,
+    )
+    db.add(cedula)
+    await db.flush()
+    return cedula.id
+
+
+async def get_cedulas(
+    db: AsyncSession,
+    firma_id: str,
+    auditoria_id: str,
+) -> list:
+    from db.models import Cedula
+    q = select(Cedula).where(Cedula.auditoria_id == auditoria_id, Cedula.firma_id == firma_id).order_by(Cedula.codigo)
+    result = await db.execute(q)
+    return list(result.scalars().all())
+
+
+async def get_cedula(
+    db: AsyncSession,
+    firma_id: str,
+    cedula_id: str,
+):
+    from db.models import Cedula
+    q = select(Cedula).where(Cedula.id == cedula_id, Cedula.firma_id == firma_id)
+    result = await db.execute(q)
+    return result.scalar_one_or_none()

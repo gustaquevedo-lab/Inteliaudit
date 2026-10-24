@@ -1423,6 +1423,98 @@ async def obtener_analiticos(
     }
 
 
+@router.get("/{auditoria_id}/cedulas")
+async def listar_cedulas(
+    auditoria_id: str,
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Lista todas las cédulas analíticas y papeles de trabajo (NIA 230)."""
+    auditoria = await crud.get_auditoria(db, user.firma_id, auditoria_id)
+    if not auditoria:
+        raise HTTPException(404, "Auditoría no encontrada")
+
+    cedulas = await crud.get_cedulas(db, user.firma_id, auditoria_id)
+    out = []
+    for c in cedulas:
+        try:
+            datos = json.loads(c.datos_json)
+        except Exception:
+            datos = {}
+        out.append({
+            "id": c.id,
+            "codigo": c.codigo,
+            "nombre": c.nombre,
+            "impuesto": datos.get("impuesto", "GENERAL"),
+            "periodo": datos.get("periodo", ""),
+            "tipo": datos.get("tipo", "cruce"),
+            "preparado_por": datos.get("preparado_por", "Inteliaudit"),
+            "fecha_preparacion": datos.get("fecha_preparacion", ""),
+            "norma_tecnica": datos.get("norma_tecnica", "NIA 230"),
+            "datos": datos,
+        })
+    return {"ok": True, "cedulas": out}
+
+
+@router.get("/{auditoria_id}/cedulas/{cedula_id}")
+async def detalle_cedula(
+    auditoria_id: str,
+    cedula_id: str,
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Retorna el detalle completo de una cédula de trabajo (NIA 230)."""
+    auditoria = await crud.get_auditoria(db, user.firma_id, auditoria_id)
+    if not auditoria:
+        raise HTTPException(404, "Auditoría no encontrada")
+
+    c = await crud.get_cedula(db, user.firma_id, cedula_id)
+    if not c or c.auditoria_id != auditoria_id:
+        raise HTTPException(404, "Cédula no encontrada")
+
+    try:
+        datos = json.loads(c.datos_json)
+    except Exception:
+        datos = {}
+
+    return {
+        "ok": True,
+        "id": c.id,
+        "codigo": c.codigo,
+        "nombre": c.nombre,
+        "datos": datos,
+    }
+
+
+@router.post("/{auditoria_id}/generar-cedulas")
+async def generar_cedulas(
+    auditoria_id: str,
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Compila automáticamente el legajo de cédulas de trabajo según la NIA 230."""
+    from papeles.cedulas import compilar_cedulas_auditoria
+
+    auditoria = await crud.get_auditoria(db, user.firma_id, auditoria_id)
+    if not auditoria:
+        raise HTTPException(404, "Auditoría no encontrada")
+
+    cedulas_creadas = await compilar_cedulas_auditoria(db, user.firma_id, auditoria_id)
+
+    await crud.log_trail(
+        db,
+        firma_id=user.firma_id,
+        usuario_id=user.id,
+        accion=f"Compiladas {len(cedulas_creadas)} cédulas de auditoría (NIA 230)",
+        modulo="papeles",
+        auditoria_id=auditoria_id,
+        datos={"cedulas": [c["codigo"] for c in cedulas_creadas]},
+    )
+    await db.commit()
+
+    return {"ok": True, "total": len(cedulas_creadas), "cedulas": cedulas_creadas}
+
+
 @router.post("/{auditoria_id}/ejecutar-analisis-retenciones")
 async def ejecutar_analisis_retenciones(
     auditoria_id: str,
