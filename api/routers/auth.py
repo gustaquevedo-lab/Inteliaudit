@@ -283,7 +283,7 @@ async def crear_usuario(
             to=body.email,
             template="invitacion_usuario",
             firma=firma_nombre,
-            activate_url=f"{settings.allowed_origins[0] if settings.allowed_origins else 'https://inteliaudit-production.up.railway.app'}/app/login",
+            activate_url=f"{settings.frontend_url or 'https://inteliaudit.vercel.app'}/login",
         ))
     except Exception:
         pass
@@ -459,8 +459,8 @@ async def crear_firma(body: FirmaCreate, db: AsyncSession = Depends(get_db)):
             template="bienvenida",
             nombre=body.admin_nombre,
             firma=firma.nombre,
-            dashboard_url=f"{settings.allowed_origins[0] if settings.allowed_origins else 'https://inteliaudit-production.up.railway.app'}/app/dashboard",
-            planes_url=f"{settings.allowed_origins[0] if settings.allowed_origins else 'https://inteliaudit.com'}/#precios",
+            dashboard_url=f"{settings.frontend_url or 'https://inteliaudit.vercel.app'}/dashboard",
+            planes_url=f"{settings.frontend_url or 'https://inteliaudit.vercel.app'}/#precios",
         ))
     except Exception:
         pass

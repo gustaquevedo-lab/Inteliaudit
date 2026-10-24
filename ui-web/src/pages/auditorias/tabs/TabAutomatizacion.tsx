@@ -135,12 +135,24 @@ export default function TabAutomatizacion({ auditoriaId, clienteRuc }: Props) {
     <div className="space-y-6">
       {/* Panel de encolamiento */}
       <div className="card p-6">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-          <Download size={20} className="text-primary" />
-          Descargar de Marangatú
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <Download size={20} className="text-primary" />
+            Descargar de Marangatú
+          </h3>
+          <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+            En Mantenimiento (DNIT 2026)
+          </span>
+        </div>
+
+        <div className="p-3.5 mb-5 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 flex items-start gap-3">
+          <AlertTriangle size={18} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <p className="text-xs leading-relaxed text-amber-900 dark:text-amber-300">
+            <strong>Aviso de importación:</strong> La descarga directa automatizada vía robot está en mantenimiento preventivo por actualizaciones del portal DNIT. Para auditar este cliente de inmediato, suba directamente los reportes <strong>RG90</strong> o <strong>Hechauka</strong> (XLSX/PDF) en la pestaña <strong>Archivos</strong>.
+          </p>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 opacity-60 pointer-events-none">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Tipo de descarga
@@ -169,7 +181,7 @@ export default function TabAutomatizacion({ auditoriaId, clienteRuc }: Props) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 opacity-60 pointer-events-none">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Período desde
@@ -197,20 +209,11 @@ export default function TabAutomatizacion({ auditoriaId, clienteRuc }: Props) {
 
         <button
           onClick={encolarJob}
-          disabled={encolando}
-          className="w-full px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          disabled={true}
+          className="w-full px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-lg cursor-not-allowed flex items-center justify-center gap-2"
         >
-          {encolando ? (
-            <>
-              <RefreshCw size={16} className="animate-spin" />
-              Encolando...
-            </>
-          ) : (
-            <>
-              <Play size={16} />
-              Encolar descarga
-            </>
-          )}
+          <Play size={16} />
+          Descarga automatizada pausada (Use pestaña Archivos)
         </button>
 
         <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">

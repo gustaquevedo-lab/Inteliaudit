@@ -7,7 +7,10 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
+        extra="ignore",
     )
+
+    port: int = 8000
 
     # Base de datos
     # Railway inyecta DATABASE_URL como postgres://... — lo normalizamos a asyncpg
@@ -66,7 +69,14 @@ class Settings(BaseSettings):
 
     # CORS — en producción setear ALLOWED_ORIGINS="https://inteliaudit.com,https://www.inteliaudit.com"
     frontend_url: str = ""
-    allowed_origins: list[str] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:8000", "https://inteliaudit.vercel.app"]
+    allowed_origins: list[str] = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:8000",
+        "http://localhost:8001",
+        "https://inteliaudit.vercel.app",
+        "https://inteliaudit.intellihouse.lat",
+    ]
 
     @field_validator("allowed_origins", mode="before")
     @classmethod
