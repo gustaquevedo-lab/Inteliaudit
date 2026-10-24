@@ -8,9 +8,12 @@ from typing import Optional
 from rich.console import Console
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from sqlalchemy import select
+
 from analisis.riesgo import calcular_contingencia, clasificar_riesgo
 from db import db as crud
-from db.models import RG90
+from db.models import RG90, Auditoria, Hallazgo, SifenCache
+from ingesta.sifen_validator import validar_formato_cdc
 
 console = Console()
 
@@ -18,6 +21,7 @@ console = Console()
 ARTICULOS = {
     "IVA_CREDITO_RUC_INACTIVO":       "Art. 95 Ley 6380/2019 — Requisitos crédito fiscal",
     "IVA_CREDITO_SIN_CDC":            "Art. 95 Ley 6380/2019 + RG 80/2021 — CDC obligatorio",
+    "IVA_CF_SIFEN_NO_REGISTRADO":     "Art. 85 Ley 6380/2019 — Comprobante electrónico no registrado o rechazado en SIFEN",
     "IVA_COMPROBANTE_NO_DECLARADO":   "Art. 97 Ley 6380/2019 — Obligación declaración",
     "IVA_DIFERENCIA_RG90_DJ":         "Art. 97 Ley 6380/2019 — Consistencia DJ",
     "IVA_DEBITO_OMITIDO_HECHAUKA":    "Art. 93 Ley 6380/2019 — Débito fiscal omitido + Art. 16 RG 90/2021",
@@ -170,6 +174,38 @@ class AuditoriaIVA:
                     resultado.monto_ajuste += compra.iva_total
                 continue
 
+            # 1. Verificar primero en SifenCache global
+            cache_stmt = select(SifenCache).where(SifenCache.cdc == compra.cdc)
+            sc = (await self.db.execute(cache_stmt)).scalar_one_or_none()
+
+            if sc:
+                if not sc.es_valido or sc.estado_sifen in ("NO_EXISTE", "RECHAZADO", "CANCELADO", "INUTILIZADO"):
+                    cont = calcular_contingencia(compra.iva_total, compra.fecha_emision)
+                    await crud.crear_hallazgo(
+                        self.db,
+                        firma_id=self.firma_id,
+                        auditoria_id=self.auditoria_id,
+                        impuesto="IVA",
+                        periodo=periodo,
+                        tipo_hallazgo="IVA_CF_SIFEN_NO_REGISTRADO",
+                        descripcion=f"Comprobante CDC {compra.cdc[:12]}... estado '{sc.estado_sifen}' en SIFEN. Impugnación de crédito fiscal: Gs. {compra.iva_total:,}",
+                        articulo_legal=ARTICULOS["IVA_CF_SIFEN_NO_REGISTRADO"],
+                        base_ajuste=compra.base_gravada_10 + compra.base_gravada_5,
+                        impuesto_omitido=compra.iva_total,
+                        multa_estimada=cont["multa_estimada"],
+                        intereses_estimados=cont["intereses_estimados"],
+                        nivel_riesgo=clasificar_riesgo(cont["total_contingencia"], self.materialidad),
+                        evidencias=[{"tipo": "rg90", "id": compra.id, "cdc": compra.cdc, "estado_sifen": sc.estado_sifen}],
+                    )
+                    await crud.marcar_validacion_rg90(self.db, compra.id, en_sifen=False)
+                    resultado.hallazgos_generados += 1
+                    resultado.monto_ajuste += compra.iva_total
+                    continue
+                elif sc.es_valido and sc.estado_sifen == "APROBADO":
+                    await crud.marcar_validacion_rg90(self.db, compra.id, en_sifen=True)
+                    continue
+
+            # 2. Fallback a SifenComprobante (tabla interna por firma)
             sifen = await crud.get_sifen_por_cdc(self.db, self.firma_id, compra.cdc)
             if not sifen:
                 # CDC no consultado aún — marcar para validación posterior
@@ -462,3 +498,126 @@ class AuditoriaIVA:
             nivel_riesgo=clasificar_riesgo(cont["total_contingencia"], self.materialidad),
             evidencias=[{"tipo": "rg90", "id": compra.id}],
         )
+
+
+async def auditar_credito_fiscal_sifen(
+    db: AsyncSession,
+    auditoria_id: str,
+) -> list[Hallazgo]:
+    """
+    Procedimiento sustantivo de auditoría IVA sobre Facturas Electrónicas (RG 90 vs SifenCache).
+    Verifica que cada comprobante electrónico (tipo 109 o con CDC) esté debidamente registrado
+    y aprobado en SIFEN.
+    Si el comprobante no existe o fue rechazado/cancelado/inutilizado en SIFEN, impugna
+    automáticamente el crédito fiscal bajo el Art. 85 de la Ley 6380/2019 y genera el hallazgo
+    IVA_CF_SIFEN_NO_REGISTRADO.
+    """
+    stmt_aud = select(Auditoria).where(Auditoria.id == auditoria_id)
+    auditoria = (await db.execute(stmt_aud)).scalar_one_or_none()
+    firma_id = auditoria.firma_id if auditoria else "sistema"
+    materialidad = auditoria.materialidad if auditoria else 0
+
+    stmt_compras = select(RG90).where(
+        RG90.auditoria_id == auditoria_id,
+        RG90.tipo == "compra",
+    )
+    compras = list((await db.execute(stmt_compras)).scalars().all())
+
+    hallazgos_creados: list[Hallazgo] = []
+
+    for compra in compras:
+        # Solo comprobantes electrónicos o con CDC
+        if not compra.cdc and compra.tipo_comprobante != "109":
+            continue
+
+        if not compra.cdc:
+            # Comprobante electrónico declarado sin CDC
+            iva_omitido = compra.iva_total or (compra.iva_10 + compra.iva_5)
+            cont = calcular_contingencia(iva_omitido, compra.fecha_emision)
+            h = await crud.crear_hallazgo(
+                db,
+                firma_id=firma_id,
+                auditoria_id=auditoria_id,
+                impuesto="IVA",
+                periodo=compra.periodo,
+                tipo_hallazgo="IVA_CREDITO_SIN_CDC",
+                descripcion=(
+                    f"Factura electrónica nro. {compra.nro_comprobante} declarada sin CDC obligatorio. "
+                    f"Impugnación de crédito fiscal: Gs. {iva_omitido:,}."
+                ),
+                articulo_legal=ARTICULOS["IVA_CREDITO_SIN_CDC"],
+                base_ajuste=compra.base_gravada_10 + compra.base_gravada_5,
+                impuesto_omitido=iva_omitido,
+                multa_estimada=cont["multa_estimada"],
+                intereses_estimados=cont["intereses_estimados"],
+                nivel_riesgo=clasificar_riesgo(cont["total_contingencia"], materialidad),
+                evidencias=[{"tipo": "rg90", "id": compra.id}],
+            )
+            hallazgos_creados.append(h)
+            continue
+
+        # Consultar SifenCache
+        stmt_cache = select(SifenCache).where(SifenCache.cdc == compra.cdc)
+        cache = (await db.execute(stmt_cache)).scalar_one_or_none()
+
+        if cache:
+            if not cache.es_valido or cache.estado_sifen in ("NO_EXISTE", "RECHAZADO", "CANCELADO", "INUTILIZADO"):
+                iva_omitido = compra.iva_total or (compra.iva_10 + compra.iva_5)
+                base = (compra.base_gravada_10 + compra.base_gravada_5) or (compra.total_comprobante - iva_omitido)
+                cont = calcular_contingencia(iva_omitido, compra.fecha_emision)
+                h = await crud.crear_hallazgo(
+                    db,
+                    firma_id=firma_id,
+                    auditoria_id=auditoria_id,
+                    impuesto="IVA",
+                    periodo=compra.periodo,
+                    tipo_hallazgo="IVA_CF_SIFEN_NO_REGISTRADO",
+                    descripcion=(
+                        f"Factura electrónica CDC {compra.cdc} no registrada o en estado '{cache.estado_sifen}' "
+                        f"en SIFEN. Impugnación de crédito fiscal por Gs. {iva_omitido:,} (Art. 85 Ley 6380/2019)."
+                    ),
+                    articulo_legal=ARTICULOS["IVA_CF_SIFEN_NO_REGISTRADO"],
+                    base_ajuste=base,
+                    impuesto_omitido=iva_omitido,
+                    multa_estimada=cont["multa_estimada"],
+                    intereses_estimados=cont["intereses_estimados"],
+                    nivel_riesgo=clasificar_riesgo(cont["total_contingencia"], materialidad),
+                    evidencias=[{"tipo": "rg90", "id": compra.id, "cdc": compra.cdc, "estado_sifen": cache.estado_sifen}],
+                )
+                compra.en_sifen = False
+                compra.cdc_valido = False
+                hallazgos_creados.append(h)
+            elif cache.es_valido and cache.estado_sifen == "APROBADO":
+                compra.en_sifen = True
+                compra.cdc_valido = True
+        else:
+            # Si no está en cache, evaluar algoritmo matemático de CDC
+            val = validar_formato_cdc(compra.cdc)
+            if not val["valido"]:
+                iva_omitido = compra.iva_total or (compra.iva_10 + compra.iva_5)
+                base = (compra.base_gravada_10 + compra.base_gravada_5) or (compra.total_comprobante - iva_omitido)
+                cont = calcular_contingencia(iva_omitido, compra.fecha_emision)
+                h = await crud.crear_hallazgo(
+                    db,
+                    firma_id=firma_id,
+                    auditoria_id=auditoria_id,
+                    impuesto="IVA",
+                    periodo=compra.periodo,
+                    tipo_hallazgo="IVA_CF_SIFEN_NO_REGISTRADO",
+                    descripcion=(
+                        f"Factura electrónica CDC {compra.cdc} con dígito verificador inválido ({val['error']}). "
+                        f"Impugnación de crédito fiscal por Gs. {iva_omitido:,} (Art. 85 Ley 6380/2019)."
+                    ),
+                    articulo_legal=ARTICULOS["IVA_CF_SIFEN_NO_REGISTRADO"],
+                    base_ajuste=base,
+                    impuesto_omitido=iva_omitido,
+                    multa_estimada=cont["multa_estimada"],
+                    intereses_estimados=cont["intereses_estimados"],
+                    nivel_riesgo=clasificar_riesgo(cont["total_contingencia"], materialidad),
+                    evidencias=[{"tipo": "rg90", "id": compra.id, "cdc": compra.cdc, "error_cdc": val["error"]}],
+                )
+                compra.cdc_valido = False
+                hallazgos_creados.append(h)
+
+    await db.flush()
+    return hallazgos_creados
