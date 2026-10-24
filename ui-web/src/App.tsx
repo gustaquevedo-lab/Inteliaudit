@@ -21,6 +21,7 @@ import PortalCliente from './pages/PortalCliente'
 import Planes from './pages/Planes'
 import Registro from './pages/Registro'
 import SuperAdminDashboard from './pages/admin/SuperAdminDashboard'
+import NormativasAdmin from './pages/admin/NormativasAdmin'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -62,6 +63,7 @@ function AppRoutes() {
         <Route path="informes" element={<InformesList />} />
         <Route path="planes" element={<Planes />} />
         <Route path="admin/configuracion" element={<Configuracion />} />
+        <Route path="admin/normativas" element={<NormativasAdmin />} />
         <Route path="admin/trail" element={<AuditTrail />} />
         <Route path="superadmin/dashboard" element={<SuperAdminDashboard />} />
       </Route>

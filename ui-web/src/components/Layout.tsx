@@ -3,7 +3,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Users, FolderSearch, FileText, Settings,
   Shield, Sun, Moon, Monitor, LogOut, Menu, X,
-  Building2, ChevronRight, Search, Bell, Activity, Zap, FolderOpen
+  Building2, ChevronRight, Search, Bell, Activity, Zap, FolderOpen, BookOpen
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
@@ -42,6 +42,7 @@ const NAV_GROUPS = [
     title: 'Administración',
     items: [
       { path: '/admin/usuarios', icon: <Users size={17} />, label: 'Usuarios', roles: ['super_admin', 'admin'] },
+      { path: '/admin/normativas', icon: <BookOpen size={17} />, label: 'Base Legal RAG', roles: ['super_admin', 'admin', 'auditor_senior', 'auditor'] },
       { path: '/admin/jobs', icon: <Activity size={17} />, label: 'Cola de tareas', roles: ['super_admin', 'admin'] },
       { path: '/planes', icon: <Zap size={17} />, label: 'Planes y suscripción', roles: ['super_admin', 'admin'] },
       { path: '/admin/configuracion', icon: <Settings size={17} />, label: 'Configuración', roles: ['super_admin', 'admin'] },
