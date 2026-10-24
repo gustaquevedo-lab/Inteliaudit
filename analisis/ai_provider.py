@@ -30,8 +30,10 @@ class AIProvider:
     def generar(self, system_prompt: str, user_prompt: str, max_tokens: int = 1500) -> str:
         client = self._get_client()
         if self.provider == "ollama":
-            import httpx
+            import json
+            import urllib.request
             from config.settings import settings
+
             url = f"{settings.ollama_base_url.rstrip('/')}/api/chat"
             payload = {
                 "model": settings.ollama_model,
@@ -46,11 +48,14 @@ class AIProvider:
                 },
             }
             try:
-                with httpx.Client(timeout=120.0) as client_http:
-                    resp = client_http.post(url, json=payload)
-                    if resp.status_code == 200:
-                        return resp.json().get("message", {}).get("content", "").strip()
-                    return f"[Error Ollama: HTTP {resp.status_code}]"
+                req = urllib.request.Request(
+                    url,
+                    data=json.dumps(payload).encode("utf-8"),
+                    headers={"Content-Type": "application/json"},
+                )
+                with urllib.request.urlopen(req, timeout=120) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    return data.get("message", {}).get("content", "").strip()
             except Exception as e:
                 return f"[Error de conexión a Ollama: {str(e)}]"
         elif self.provider == "gemini":
