@@ -314,6 +314,8 @@ from api.routers.jobs import router as jobs_router
 from api.routers.superadmin import router as superadmin_router
 from api.routers.agente import router as agente_router
 from api.routers.normativas import router as normativas_router
+from api.routers.marangatu_sync import router as marangatu_sync_router
+from api.routers.sifen import router as sifen_router
 
 api = APIRouter(prefix="/api")
 
@@ -326,6 +328,8 @@ api.include_router(clientes_router)
 api.include_router(auditorias_router)
 api.include_router(agente_router)
 api.include_router(normativas_router)
+api.include_router(marangatu_sync_router)
+api.include_router(sifen_router)
 api.include_router(trail_router)
 api.include_router(portal_router)
 api.include_router(importacion_router)

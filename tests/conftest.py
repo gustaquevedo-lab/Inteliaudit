@@ -63,7 +63,7 @@ async def usuario_admin(db_session: AsyncSession, firma: Firma) -> Usuario:
     u = Usuario(
         id=_uuid(),
         firma_id=firma.id,
-        email="admin@demo.com",
+        email=f"admin_{_uuid()[:8]}@demo.com",
         nombre="Admin Demo",
         password_hash=pw,
         rol="admin",
@@ -81,7 +81,7 @@ async def usuario_auditor(db_session: AsyncSession, firma: Firma) -> Usuario:
     u = Usuario(
         id=_uuid(),
         firma_id=firma.id,
-        email="auditor@demo.com",
+        email=f"auditor_{_uuid()[:8]}@demo.com",
         nombre="Auditor Demo",
         password_hash=pw,
         rol="auditor",
