@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from typing import Optional, List
-from sqlalchemy import String, Text, Boolean, Integer, BigInteger, ForeignKey, DateTime, func, Index, UniqueConstraint
+from sqlalchemy import String, Text, Boolean, Integer, BigInteger, ForeignKey, DateTime, func, Index, UniqueConstraint, JSON, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from db.base import Base
 
@@ -423,3 +423,121 @@ class Job(Base):
     creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     iniciado_en: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     completado_en: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+
+
+# ============================================================
+#  RAG LEGAL Y NORMATIVAS (CAPA GLOBAL / TENANT)
+# ============================================================
+
+class NormativaLegal(Base):
+    """Leyes, decretos, resoluciones generales y NIAs."""
+    __tablename__ = "normativas_legales"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    firma_id: Mapped[Optional[str]] = mapped_column(String(36), ForeignKey("firmas.id", ondelete="CASCADE"), nullable=True)
+    tipo: Mapped[str] = mapped_column(String(50), nullable=False)  # 'ley', 'decreto', 'resolucion_general', 'nia'
+    numero: Mapped[str] = mapped_column(String(50), nullable=False)  # '6380/2019', '90/2021', '3107/2019'
+    titulo: Mapped[str] = mapped_column(Text, nullable=False)
+    organismo: Mapped[str] = mapped_column(String(100), default="DNIT")
+    fecha_vigencia: Mapped[Optional[str]] = mapped_column(String(10))  # YYYY-MM-DD
+    estado: Mapped[str] = mapped_column(String(20), default="vigente")  # 'vigente', 'modificada', 'derogada'
+    fuente_url: Mapped[Optional[str]] = mapped_column(Text)
+    archivo_ruta: Mapped[Optional[str]] = mapped_column(Text)
+    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    chunks: Mapped[list["NormativaChunk"]] = relationship(back_populates="normativa", cascade="all, delete-orphan")
+
+
+class NormativaChunk(Base):
+    """Fragmento semántico de normativa con embedding y texto indexable."""
+    __tablename__ = "normativas_chunks"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    normativa_id: Mapped[str] = mapped_column(String(36), ForeignKey("normativas_legales.id", ondelete="CASCADE"), nullable=False)
+    jerarquia: Mapped[str] = mapped_column(Text, nullable=False)  # ej: 'Título I > Cap. III > Art. 16'
+    articulo: Mapped[Optional[str]] = mapped_column(String(50))
+    numeral_inciso: Mapped[Optional[str]] = mapped_column(String(50))
+    texto: Mapped[str] = mapped_column(Text, nullable=False)
+    embedding: Mapped[Optional[list]] = mapped_column(JSON)  # Vector 768-dim nomic-embed-text
+    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    normativa: Mapped["NormativaLegal"] = relationship(back_populates="chunks")
+
+
+# ============================================================
+#  GRAFO DE CONOCIMIENTO FORENSE (CAPA CLIENTE AISLADA)
+# ============================================================
+
+class GrafoNodo(Base):
+    """Nodo en el grafo de relaciones económicas del cliente auditado."""
+    __tablename__ = "grafo_nodos"
+    __table_args__ = (
+        Index("idx_grafo_nodos_scope", "firma_id", "cliente_id", "auditoria_id"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    firma_id: Mapped[str] = mapped_column(String(36), ForeignKey("firmas.id", ondelete="CASCADE"), nullable=False)
+    cliente_id: Mapped[str] = mapped_column(String(36), ForeignKey("clientes.id", ondelete="CASCADE"), nullable=False)
+    auditoria_id: Mapped[str] = mapped_column(String(36), ForeignKey("auditorias.id", ondelete="CASCADE"), nullable=False)
+    tipo: Mapped[str] = mapped_column(String(50), nullable=False)  # 'cliente', 'proveedor', 'banco', 'hallazgo'
+    identificador: Mapped[str] = mapped_column(String(100), nullable=False)  # RUC, Nro Cuenta, etc.
+    etiqueta: Mapped[str] = mapped_column(Text, nullable=False)
+    atributos_json: Mapped[Optional[dict]] = mapped_column(JSON, default=dict)
+    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class GrafoArista(Base):
+    """Arista dirigida entre dos nodos del grafo con metadatos y peso."""
+    __tablename__ = "grafo_aristas"
+    __table_args__ = (
+        Index("idx_grafo_aristas_scope", "firma_id", "cliente_id", "auditoria_id"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    firma_id: Mapped[str] = mapped_column(String(36), ForeignKey("firmas.id", ondelete="CASCADE"), nullable=False)
+    cliente_id: Mapped[str] = mapped_column(String(36), ForeignKey("clientes.id", ondelete="CASCADE"), nullable=False)
+    auditoria_id: Mapped[str] = mapped_column(String(36), ForeignKey("auditorias.id", ondelete="CASCADE"), nullable=False)
+    nodo_origen_id: Mapped[str] = mapped_column(String(36), ForeignKey("grafo_nodos.id", ondelete="CASCADE"), nullable=False)
+    nodo_destino_id: Mapped[str] = mapped_column(String(36), ForeignKey("grafo_nodos.id", ondelete="CASCADE"), nullable=False)
+    relacion: Mapped[str] = mapped_column(String(50), nullable=False)  # 'PROVEEDOR_DE', 'DECLARADO_EN', 'DISCREPA_CON', 'PAGO_BANCARIO'
+    peso: Mapped[float] = mapped_column(Float, default=1.0)
+    metadatos_json: Mapped[Optional[dict]] = mapped_column(JSON, default=dict)
+    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+# ============================================================
+#  MEMORIA DE DIÁLOGO DEL AGENTE FORENSE
+# ============================================================
+
+class AgenteConversacion(Base):
+    """Sesión o hilo de conversación persistente por auditoría."""
+    __tablename__ = "agente_conversaciones"
+    __table_args__ = (
+        Index("idx_agente_conv_scope", "firma_id", "auditoria_id"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    firma_id: Mapped[str] = mapped_column(String(36), ForeignKey("firmas.id", ondelete="CASCADE"), nullable=False)
+    auditoria_id: Mapped[str] = mapped_column(String(36), ForeignKey("auditorias.id", ondelete="CASCADE"), nullable=False)
+    usuario_id: Mapped[Optional[str]] = mapped_column(String(36), ForeignKey("usuarios.id", ondelete="SET NULL"), nullable=True)
+    titulo: Mapped[str] = mapped_column(String(200), default="Nueva consulta forense")
+    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    actualizado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    mensajes: Mapped[list["AgenteMensaje"]] = relationship(back_populates="conversacion", cascade="all, delete-orphan")
+
+
+class AgenteMensaje(Base):
+    """Mensaje individual (usuario, asistente o llamada de herramienta)."""
+    __tablename__ = "agente_mensajes"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    conversacion_id: Mapped[str] = mapped_column(String(36), ForeignKey("agente_conversaciones.id", ondelete="CASCADE"), nullable=False)
+    rol: Mapped[str] = mapped_column(String(20), nullable=False)  # 'user', 'assistant', 'system', 'tool'
+    contenido: Mapped[str] = mapped_column(Text, nullable=False)
+    herramientas_usadas: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
+    tokens: Mapped[int] = mapped_column(Integer, default=0)
+    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    conversacion: Mapped["AgenteConversacion"] = relationship(back_populates="mensajes")
+
