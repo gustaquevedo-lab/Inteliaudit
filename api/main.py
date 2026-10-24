@@ -25,6 +25,7 @@ from db import db as crud
 from api.routers.auth import get_current_user
 from db.models import Usuario
 from analytics import init_posthog, identify, capture, capture_exception
+from api.middleware.error_tracker import global_exception_handler
 
 
 # ============================================================
@@ -232,6 +233,7 @@ app = FastAPI(
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(Exception, global_exception_handler)
 
 # Seguridad: headers
 app.add_middleware(SecurityHeadersMiddleware)
