@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from typing import Optional, List
-from sqlalchemy import String, Text, Boolean, Integer, BigInteger, ForeignKey, DateTime, func, Index, UniqueConstraint, JSON, Float
+from sqlalchemy import String, Text, Boolean, Integer, BigInteger, ForeignKey, DateTime, func, Index, UniqueConstraint, JSON, Float, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from db.base import Base
 
@@ -540,4 +540,26 @@ class AgenteMensaje(Base):
     creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     conversacion: Mapped["AgenteConversacion"] = relationship(back_populates="mensajes")
+
+
+# ============================================================
+#  CACHÉ DE COMPROBANTES ELECTRÓNICOS SIFEN (e-Kuatia)
+# ============================================================
+
+class SifenCache(Base):
+    """Caché global de comprobantes electrónicos consultados a la DNIT."""
+    __tablename__ = "sifen_cache"
+
+    cdc: Mapped[str] = mapped_column(String(44), primary_key=True, index=True)
+    estado_sifen: Mapped[str] = mapped_column(String(50), nullable=False)  # 'APROBADO', 'NO_EXISTE', 'RECHAZADO', 'CANCELADO'
+    ruc_emisor: Mapped[Optional[str]] = mapped_column(String(20), nullable=True, index=True)
+    razon_social: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    timbrado: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    fecha_emision: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    total_comprobante: Mapped[Optional[float]] = mapped_column(Numeric(18, 2), nullable=True)
+    iva_10: Mapped[Optional[float]] = mapped_column(Numeric(18, 2), nullable=True)
+    iva_5: Mapped[Optional[float]] = mapped_column(Numeric(18, 2), nullable=True)
+    es_valido: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    respuesta_raw: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    consultado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
