@@ -118,6 +118,12 @@ class TokenResponse(BaseModel):
     rol: str
     firma_id: str
     firma_nombre: str
+    debe_cambiar_password: bool = False
+
+
+class CambiarPasswordBody(BaseModel):
+    password_actual: str
+    password_nueva: str
 
 
 class UsuarioCreate(BaseModel):
@@ -186,6 +192,7 @@ async def login(
         rol=user.rol,
         firma_id=user.firma_id,
         firma_nombre=firma.nombre if firma else "",
+        debe_cambiar_password=user.debe_cambiar_password,
     )
 
 
@@ -254,12 +261,48 @@ async def listar_usuarios(
     return [_ser_usuario(u) for u in usuarios]
 
 
+@router.post("/cambiar-password")
+async def cambiar_password(
+    body: CambiarPasswordBody,
+    user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Permite al usuario autenticado cambiar su contraseña y limpiar el flag debe_cambiar_password."""
+    if not _verify(body.password_actual, user.password_hash):
+        raise HTTPException(400, "La contraseña actual es incorrecta")
+    if len(body.password_nueva) < 8:
+        raise HTTPException(400, "La nueva contraseña debe tener al menos 8 caracteres")
+    user.password_hash = _hash(body.password_nueva)
+    user.debe_cambiar_password = False
+    await db.commit()
+    return {"ok": True, "message": "Contraseña actualizada exitosamente"}
+
+
 @router.post("/usuarios", status_code=201)
 async def crear_usuario(
     body: UsuarioCreate,
     admin: Usuario = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
+    from config.plans import get_firma_limits
+    from sqlalchemy import func
+
+    # Verificar límites de usuarios de la firma
+    f_res = await db.execute(select(Firma).where(Firma.id == admin.firma_id))
+    firma = f_res.scalar_one_or_none()
+    if firma:
+        limits = get_firma_limits(firma.plan, firma.features_override_json)
+        max_users = limits.get("max_usuarios")
+        if max_users is not None:
+            user_count = (await db.execute(
+                select(func.count(Usuario.id)).where(Usuario.firma_id == admin.firma_id, Usuario.activo == True)
+            )).scalar() or 0
+            if user_count >= max_users:
+                raise HTTPException(
+                    403,
+                    f"Límite de usuarios ({max_users}) alcanzado para el plan '{firma.plan}' de la firma."
+                )
+
     existing = await db.execute(select(Usuario).where(Usuario.email == body.email))
     if existing.scalar_one_or_none():
         raise HTTPException(400, "El email ya está registrado")
@@ -269,15 +312,13 @@ async def crear_usuario(
         nombre=body.nombre,
         password_hash=_hash(body.password),
         rol=body.rol,
+        debe_cambiar_password=True,
     )
     db.add(user)
     await db.flush()
 
     try:
         from notificaciones.email import enviar_email
-        from db.models import Firma
-        f_res = await db.execute(select(Firma).where(Firma.id == admin.firma_id))
-        firma = f_res.scalar_one_or_none()
         firma_nombre = firma.nombre if firma else "Inteliaudit"
         asyncio.create_task(enviar_email(
             to=body.email,
@@ -541,6 +582,7 @@ def _ser_usuario(u: Usuario) -> dict:
         "nombre": u.nombre,
         "rol": u.rol,
         "activo": u.activo,
+        "debe_cambiar_password": getattr(u, "debe_cambiar_password", False),
         "creado_en": u.creado_en.isoformat() if u.creado_en else None,
         "ultimo_acceso": u.ultimo_acceso.isoformat() if u.ultimo_acceso else None,
     }

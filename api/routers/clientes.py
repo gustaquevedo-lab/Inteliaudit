@@ -51,25 +51,26 @@ async def crear_cliente(
     user: Usuario = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
+    from config.plans import get_firma_limits
     from config.plans import get_plan, PLAN_ALIAS_MAP
 
-    # Verificar límite de clientes según plan
+    # Verificar límite de clientes según plan y overrides
     firma_result = await db.execute(select(Firma).where(Firma.id == user.firma_id))
     firma = firma_result.scalar_one_or_none()
 
     if firma:
-        plan_key = PLAN_ALIAS_MAP.get(firma.plan, firma.plan)
-        plan_cfg = get_plan(plan_key)
+        limits = get_firma_limits(firma.plan, firma.features_override_json)
+        max_clientes = limits.get("max_clientes")
 
-        if plan_cfg.max_clientes is not None:
+        if max_clientes is not None:
             count_result = await db.execute(
                 select(func.count(Cliente.id)).where(Cliente.firma_id == user.firma_id)
             )
             num_clientes = count_result.scalar() or 0
-            if num_clientes >= plan_cfg.max_clientes:
+            if num_clientes >= max_clientes:
                 raise HTTPException(
                     403,
-                    f"Tu plan {plan_cfg.nombre} permite hasta {plan_cfg.max_clientes} clientes. "
+                    f"Tu firma permite hasta {max_clientes} clientes según tu plan y configuración. "
                     f"Actualmente tenés {num_clientes}. Contactanos para actualizar tu plan."
                 )
 

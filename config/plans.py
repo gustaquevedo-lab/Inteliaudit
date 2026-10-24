@@ -134,3 +134,28 @@ def can_add_usuario(plan_id: str, current_count: int) -> bool:
     if cfg.max_usuarios is None:
         return True
     return current_count < cfg.max_usuarios
+
+
+def get_firma_limits(plan_id: str, features_override_json: Optional[str] = None) -> dict:
+    """Calcula los límites efectivos de la firma combinando el plan base y cualquier override superadmin."""
+    cfg = get_plan(plan_id)
+    limits = {
+        "max_clientes": cfg.max_clientes,
+        "max_usuarios": cfg.max_usuarios,
+        "tiene_ia": cfg.tiene_ia,
+        "tiene_credenciales_encriptadas": cfg.tiene_credenciales_encriptadas,
+        "tiene_portal_cliente": cfg.tiene_portal_cliente,
+        "tiene_api_personalizada": cfg.tiene_api_personalizada,
+        "tiene_logo_firma": cfg.tiene_logo_firma,
+    }
+    if features_override_json:
+        try:
+            import json
+            overrides = json.loads(features_override_json)
+            if isinstance(overrides, dict):
+                for k, v in overrides.items():
+                    if k in limits:
+                        limits[k] = v
+        except Exception:
+            pass
+    return limits
