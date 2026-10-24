@@ -344,8 +344,17 @@ export default function TabArchivos({ auditoriaId }: Props) {
                     <tbody>
                       {s.preview.slice(0, 10).map((row, i) => (
                         <tr key={i} className="border-b border-gray-50 dark:border-gray-800">
-                          {Object.values(row).slice(0, 6).map((val, j) => (
-                            <td key={j} className="py-2 px-2 text-gray-700 dark:text-gray-300 truncate max-w-[120px]">{String(val ?? '')}</td>
+                          {Object.entries(row).slice(0, 6).map(([key, val], j) => (
+                            <td key={j} className="py-2 px-2 text-gray-700 dark:text-gray-300 truncate max-w-[140px]">
+                              {key.toLowerCase().includes('cdc') && val && String(val).length === 44 ? (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800" title={String(val)}>
+                                  <Shield size={10} className="text-primary shrink-0" />
+                                  {String(val).slice(0, 11)}...
+                                </span>
+                              ) : (
+                                String(val ?? '')
+                              )}
+                            </td>
                           ))}
                         </tr>
                       ))}
