@@ -27,7 +27,7 @@ secrets.yaml
 *.sqlite3
 
 # Node / frontend
-ui-web/node_modules/
+ui-web/node_modules
 ui-web/.vite/
 ui-web/dist/
 
