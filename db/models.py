@@ -25,6 +25,7 @@ class Firma(Base):
     eslogan: Mapped[Optional[str]] = mapped_column(Text)
     # 'trial' | 'starter' | 'professional' | 'enterprise'
     plan: Mapped[str] = mapped_column(String(20), default="trial")
+    features_override_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     activa: Mapped[bool] = mapped_column(Boolean, default=True)
     trial_hasta: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -46,6 +47,7 @@ class Usuario(Base):
     # 'super_admin' | 'admin' | 'auditor_senior' | 'auditor'
     rol: Mapped[str] = mapped_column(String(30), default="auditor")
     activo: Mapped[bool] = mapped_column(Boolean, default=True)
+    debe_cambiar_password: Mapped[bool] = mapped_column(Boolean, default=False)
     avatar_path: Mapped[Optional[str]] = mapped_column(Text)
     creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     ultimo_acceso: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
@@ -562,4 +564,31 @@ class SifenCache(Base):
     es_valido: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     respuesta_raw: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     consultado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+# ============================================================
+#  SENTRY-LITE: TELEMETRÍA Y ERRORES DE PLATAFORMA
+# ============================================================
+
+class ErrorPlataforma(Base):
+    """Registro deduplicado de errores y excepciones no controladas 5xx."""
+    __tablename__ = "errores_plataforma"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    fingerprint: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
+    tipo_error: Mapped[str] = mapped_column(String(100), nullable=False)
+    mensaje: Mapped[str] = mapped_column(Text, nullable=False)
+    path: Mapped[str] = mapped_column(String(500), nullable=False)
+    metodo: Mapped[str] = mapped_column(String(10), nullable=False)
+    status_code: Mapped[int] = mapped_column(Integer, default=500)
+    stacktrace: Mapped[str] = mapped_column(Text, nullable=False)
+    contexto_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    firma_id: Mapped[Optional[str]] = mapped_column(String(36), ForeignKey("firmas.id", ondelete="SET NULL"), nullable=True)
+    usuario_email: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    ocurrencias: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    primera_vez: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    ultima_vez: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    resuelto: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    resuelto_en: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    notas_resolucion: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
