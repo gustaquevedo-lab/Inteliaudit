@@ -288,6 +288,24 @@ async def get_sifen_recibidas(
     return list(result.scalars().all())
 
 
+async def guardar_sifen_batch(
+    db: AsyncSession,
+    firma_id: str,
+    comprobantes: list[SifenComprobante],
+) -> int:
+    """Inserta comprobantes SIFEN ignorando duplicados por CDC."""
+    if not comprobantes:
+        return 0
+    guardados = 0
+    for c in comprobantes:
+        existente = await get_sifen_por_cdc(db, firma_id, c.cdc)
+        if not existente:
+            db.add(c)
+            guardados += 1
+    await db.flush()
+    return guardados
+
+
 async def marcar_validacion_rg90(
     db: AsyncSession,
     rg90_id: str,

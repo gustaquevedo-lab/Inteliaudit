@@ -74,3 +74,8 @@ class TestAuditorias:
         resp = await client.post("/api/auditorias/aud-123/generar-cedulas")
         assert resp.status_code in (401, 403)
 
+    @pytest.mark.asyncio
+    async def test_subir_sifen_zip_requires_auth(self, client: AsyncClient):
+        resp = await client.post("/api/auditorias/aud-123/archivos")
+        assert resp.status_code in (401, 403)
+

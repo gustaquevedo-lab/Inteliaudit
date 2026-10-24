@@ -24,7 +24,8 @@ TIPOS_PERMITIDOS = {
     "banco":             [".xlsx", ".xls", ".csv", ".pdf"],
     "logo_cliente":      [".png", ".jpg", ".jpeg", ".svg"],
     "comprobante":       [".pdf", ".xml", ".jpg", ".jpeg", ".png"],
-    "otro":              [".pdf", ".xlsx", ".xls", ".docx", ".png", ".jpg"],
+    "sifen_zip":         [".zip"],
+    "otro":              [".pdf", ".xlsx", ".xls", ".docx", ".png", ".jpg", ".zip"],
 }
 
 MAX_SIZE_MB = 20
@@ -33,7 +34,7 @@ MAX_SIZE_MB = 20
 @router.post("")
 async def subir_archivo(
     auditoria_id: str,
-    tipo: Literal["rg90", "hechauka", "estado_cuenta", "estados_contables", "banco", "logo_cliente", "comprobante", "otro"] = Form(...),
+    tipo: Literal["rg90", "hechauka", "estado_cuenta", "estados_contables", "banco", "logo_cliente", "comprobante", "sifen_zip", "otro"] = Form(...),
     periodo: Optional[str] = Form(None, description="YYYY-MM requerido para rg90 y hechauka"),
     archivo: UploadFile = File(...),
     user: Usuario = Depends(get_current_user),
@@ -125,6 +126,62 @@ async def subir_archivo(
         finally:
             if os.path.exists(tmp_path):
                 os.unlink(tmp_path)
+
+    elif tipo == "sifen_zip":
+        import zipfile, io
+        from ingesta.sifen import SifenClient
+        from db.models import SifenComprobante
+
+        comprobantes = []
+        errores_xml = 0
+        try:
+            with zipfile.ZipFile(io.BytesIO(contenido)) as zf:
+                for fname in zf.namelist():
+                    if fname.lower().endswith(".xml"):
+                        try:
+                            xml_bytes = zf.read(fname)
+                            xml_str = xml_bytes.decode("utf-8", errors="replace")
+                            parsed = SifenClient.parsear_xml(xml_str)
+                            if parsed.get("encontrado") and parsed.get("cdc"):
+                                comp = SifenComprobante(
+                                    firma_id=user.firma_id,
+                                    auditoria_id=auditoria_id,
+                                    cdc=parsed["cdc"],
+                                    tipo_de=str(parsed.get("tipo_de") or "1"),
+                                    ruc_emisor=str(parsed.get("ruc_emisor") or ""),
+                                    nombre_emisor=parsed.get("nombre_emisor"),
+                                    ruc_receptor=parsed.get("ruc_receptor"),
+                                    nombre_receptor=parsed.get("nombre_receptor"),
+                                    timbrado=str(parsed.get("timbrado") or ""),
+                                    establecimiento=parsed.get("establecimiento"),
+                                    punto_expedicion=parsed.get("punto_expedicion"),
+                                    nro_comprobante=parsed.get("nro_comprobante"),
+                                    fecha_emision=str(parsed.get("fecha_emision") or ""),
+                                    base_gravada_10=parsed.get("base_gravada_10", 0),
+                                    base_gravada_5=parsed.get("base_gravada_5", 0),
+                                    monto_exento=parsed.get("monto_exento", 0),
+                                    iva_total=parsed.get("iva_total", 0),
+                                    total_comprobante=parsed.get("total_comprobante", 0),
+                                    estado_sifen="aprobado",
+                                )
+                                comprobantes.append(comp)
+                        except Exception:
+                            errores_xml += 1
+
+            n = await crud.guardar_sifen_batch(db, user.firma_id, comprobantes)
+            await crud.log_trail(
+                db, firma_id=user.firma_id, usuario_id=user.id,
+                accion=f"Lote e-Kuatia importado: {n} comprobantes electrónicos guardados ({len(comprobantes)} XMLs leídos)",
+                modulo="ingesta", auditoria_id=auditoria_id,
+                datos={"archivo": archivo.filename, "validos": len(comprobantes), "guardados": n, "errores": errores_xml}
+            )
+            resultado["procesado"] = True
+            resultado["xml_encontrados"] = len(comprobantes)
+            resultado["registros_importados"] = n
+            resultado["errores_xml"] = errores_xml
+        except Exception as e:
+            resultado["procesado"] = False
+            resultado["error"] = f"Error al procesar archivo ZIP: {e}"
 
     return resultado
 

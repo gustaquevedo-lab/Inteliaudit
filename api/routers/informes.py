@@ -241,9 +241,8 @@ async def generar_pdf(
             hallazgos=hallazgos,
             notas_auditor=config.notas_auditor,
         )
-        ruta_pdf.write_bytes(contenido)
-    except ImportError:
-        raise HTTPException(501, "Módulo PDF no disponible. Instalá WeasyPrint o usá el informe Word.")
+    except (ImportError, Exception) as e:
+        raise HTTPException(501, f"Módulo PDF no disponible ({e}). Instalá WeasyPrint o usá el informe Word.")
 
     informe = Informe(
         firma_id=user.firma_id,
@@ -342,6 +341,9 @@ async def generar_informe(
     archivo_docx = None
     archivo_pdf = None
 
+    from storage.adapter import get_storage
+    storage = get_storage()
+
     if body.formato in ("docx", "ambos"):
         nombre = f"{base_nombre}.docx"
         ruta = output_dir / nombre
@@ -351,7 +353,12 @@ async def generar_informe(
             notas_auditor=body.notas_auditor, tipo_informe=body.tipo,
         )
         ruta.write_bytes(contenido)
-        archivo_docx = str(ruta)
+        storage_key = f"{user.firma_id}/{auditoria.cliente_id}/{auditoria_id}/informes/{nombre}"
+        try:
+            await storage.upload(storage_key, contenido, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            archivo_docx = storage_key
+        except Exception:
+            archivo_docx = str(ruta)
 
     if body.formato in ("pdf", "ambos"):
         try:
@@ -363,8 +370,13 @@ async def generar_informe(
                 notas_auditor=body.notas_auditor, tipo_informe=body.tipo,
             )
             ruta.write_bytes(contenido)
-            archivo_pdf = str(ruta)
-        except ImportError:
+            storage_key = f"{user.firma_id}/{auditoria.cliente_id}/{auditoria_id}/informes/{nombre}"
+            try:
+                await storage.upload(storage_key, contenido, "application/pdf")
+                archivo_pdf = storage_key
+            except Exception:
+                archivo_pdf = str(ruta)
+        except (ImportError, Exception):
             pass
 
     informe = Informe(
@@ -505,9 +517,17 @@ async def descargar_informe(
 
     from storage.adapter import get_storage
     storage = get_storage()
-    data = await storage.download(ruta_str)
+    data = None
+    try:
+        data = await storage.download(ruta_str)
+    except Exception:
+        pass
+
+    if data is None and Path(ruta_str).exists():
+        data = Path(ruta_str).read_bytes()
+
     if data is None:
-        raise HTTPException(404, "Archivo no encontrado en storage")
+        raise HTTPException(404, "Archivo no encontrado en storage ni en disco")
 
     media_types = {"docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "pdf": "application/pdf"}
     from fastapi.responses import Response

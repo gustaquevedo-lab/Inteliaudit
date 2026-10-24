@@ -263,7 +263,11 @@ _HTML_TEMPLATE = """<!DOCTYPE html>
   <div class="logo-text">
     <span class="blue">Inteli</span><span class="green">audit</span>
   </div>
-  <h1>Informe de Auditoría Impositiva</h1>
+  <h1>
+    {% if tipo_informe == 'carta_gerencia' %}Carta a la Gerencia
+    {% elif tipo_informe == 'resumen_ejecutivo' %}Resumen Ejecutivo de Auditoría
+    {% else %}Informe de Auditoría Impositiva{% endif %}
+  </h1>
   <p class="meta">{{ cliente.razon_social }} — RUC {{ cliente.ruc }}</p>
   <p class="meta">Período: {{ auditoria.periodo_desde }} al {{ auditoria.periodo_hasta }}</p>
   <p class="meta">Fecha de emisión: {{ fecha_emision }}</p>
@@ -459,6 +463,7 @@ def generar_informe_pdf(
     cliente: dict,
     hallazgos: list[dict],
     notas_auditor: Optional[str] = None,
+    tipo_informe: str = "auditoria_completa",
 ) -> bytes:
     """
     Genera el informe de auditoría en PDF usando WeasyPrint + Jinja2.
@@ -468,6 +473,7 @@ def generar_informe_pdf(
         cliente: Dict con ruc, razon_social, nombre_fantasia, actividad_principal, regimen, direccion
         hallazgos: Lista de dicts de hallazgos serializados
         notas_auditor: Texto libre adicional
+        tipo_informe: 'auditoria_completa' | 'carta_gerencia' | 'resumen_ejecutivo'
 
     Returns:
         bytes del PDF generado
@@ -475,9 +481,9 @@ def generar_informe_pdf(
     try:
         from jinja2 import Environment, BaseLoader
         from weasyprint import HTML as WeasyprintHTML, CSS
-    except ImportError as e:
+    except (ImportError, OSError) as e:
         raise ImportError(
-            f"PDF requiere jinja2 y weasyprint: pip install jinja2 weasyprint. Detalle: {e}"
+            f"PDF requiere jinja2 y weasyprint con librerías del sistema: pip install jinja2 weasyprint. Detalle: {e}"
         )
 
     # Calcular resumen
@@ -501,6 +507,7 @@ def generar_informe_pdf(
         hallazgos=hallazgos,
         resumen=resumen,
         notas_auditor=notas_auditor,
+        tipo_informe=tipo_informe,
         fecha_emision=date.today().strftime("%d/%m/%Y"),
     )
 

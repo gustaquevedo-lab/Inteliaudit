@@ -250,6 +250,29 @@ export default function TabArchivos({ auditoriaId }: Props) {
     }
   }
 
+  const handleSifenZip = async (file: File) => {
+    const id = `sifen-${Date.now()}`
+    addImport(id, 'e-Kuatia (ZIP)', file.name, 'Lote XML')
+    const fd = new FormData()
+    fd.append('archivo', file)
+    fd.append('tipo', 'sifen_zip')
+    try {
+      const res = await api.upload<any>(`/auditorias/${auditoriaId}/archivos`, fd)
+      if (res.procesado) {
+        updateImport(id, {
+          status: 'done',
+          registros_importados: res.registros_importados,
+          total_registros: res.xml_encontrados,
+        })
+        loadHistory()
+      } else {
+        updateImport(id, { status: 'error', error_msg: res.error || 'Error al procesar lote ZIP e-Kuatia' })
+      }
+    } catch (e: unknown) {
+      updateImport(id, { status: 'error', error_msg: e instanceof Error ? e.message : 'Error al subir lote ZIP' })
+    }
+  }
+
   const discardImport = (id: string) => {
     setImports(prev => prev.filter(s => s.id !== id))
   }
@@ -418,6 +441,25 @@ export default function TabArchivos({ auditoriaId }: Props) {
             <div key={s.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-400 text-xs font-medium">
               <CheckCircle size={12} />
               {s.registros_importados ? `${s.registros_importados} movimientos importados` : 'Extracto importado'}
+            </div>
+          ))}
+        </div>
+
+        {/* E-KUATIA SIFEN ZIP */}
+        <div className="card p-5 space-y-4">
+          <div>
+            <p className="font-bold text-sm uppercase tracking-wide">e-Kuatia (SIFEN ZIP)</p>
+            <p className="text-xs text-gray-500">Lote masivo de comprobantes electrónicos XML</p>
+          </div>
+          <SifenZipUploadZone
+            key="sifen-zip"
+            onFile={handleSifenZip}
+            disabled={ImportsEnProgreso.some(s => s.tipo === 'e-Kuatia (ZIP)')}
+          />
+          {ImportsDone.filter(s => s.tipo === 'e-Kuatia (ZIP)').slice(-3).map(s => (
+            <div key={s.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-400 text-xs font-medium">
+              <CheckCircle size={12} />
+              {s.registros_importados ? `${s.registros_importados} comprobantes e-Kuatia importados` : 'Lote ZIP importado'}
             </div>
           ))}
         </div>
@@ -676,3 +718,34 @@ function BancoUploadZone({ onFile, disabled }: { onFile: (f: File) => void; disa
     </div>
   )
 }
+
+function SifenZipUploadZone({ onFile, disabled }: { onFile: (f: File) => void; disabled: boolean }) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [dragging, setDragging] = useState(false)
+
+  const handle = (file: File | undefined) => {
+    if (file && !disabled && file.name.toLowerCase().endsWith('.zip')) {
+      onFile(file)
+    }
+  }
+
+  return (
+    <div
+      className={`border-2 border-dashed rounded-2xl p-6 flex flex-col items-center gap-2 transition-all cursor-pointer ${
+        dragging ? 'border-primary bg-primary/5' : 'border-gray-200 dark:border-gray-700 hover:border-primary/40 hover:bg-gray-50 dark:hover:bg-gray-800/40'
+      } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      onClick={() => !disabled && inputRef.current?.click()}
+      onDragOver={e => { e.preventDefault(); setDragging(true) }}
+      onDragLeave={() => setDragging(false)}
+      onDrop={e => { e.preventDefault(); setDragging(false); handle(e.dataTransfer.files[0]) }}
+    >
+      <div className={`p-3 rounded-xl ${dragging ? 'bg-primary/10' : 'bg-gray-100 dark:bg-gray-800'}`}>
+        <Upload size={20} className={dragging ? 'text-primary' : 'text-gray-400'} />
+      </div>
+      <p className="text-xs font-bold text-gray-600 dark:text-gray-400">Arrastra el archivo ZIP con XMLs o hace clic</p>
+      <p className="text-[10px] text-gray-400">Lote de comprobantes electrónicos e-Kuatia (.zip con archivos .xml)</p>
+      <input ref={inputRef} type="file" accept=".zip" className="hidden" onChange={e => handle(e.target.files?.[0])} disabled={disabled} />
+    </div>
+  )
+}
+
