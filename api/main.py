@@ -506,6 +506,38 @@ async def websocket_endpoint(websocket, firma_id: str):
         await ws_manager.disconnect(websocket, firma_id)
 
 
-@app.get("/", include_in_schema=False)
-async def root():
-    return {"status": "ok", "service": "inteliaudit-api"}
+# ============================================================
+#  Frontend SPA / Landing
+# ============================================================
+frontend_dist = Path(__file__).parent.parent / "ui-web" / "dist"
+if frontend_dist.exists():
+    from fastapi.staticfiles import StaticFiles
+    from fastapi.responses import FileResponse
+
+    assets_dir = frontend_dist / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+
+    landing_dir = frontend_dist / "landing"
+    landing_index = landing_dir / "index.html" if landing_dir.exists() else None
+
+    @app.get("/", include_in_schema=False)
+    async def root():
+        if landing_index and landing_index.exists():
+            return FileResponse(str(landing_index))
+        return {"status": "ok", "service": "inteliaudit-api"}
+
+    app_html = frontend_dist / "app.html"
+    if app_html.exists():
+        @app.get("/login", include_in_schema=False)
+        @app.get("/dashboard", include_in_schema=False)
+        @app.get("/auditorias{full_path:path}", include_in_schema=False)
+        @app.get("/clientes{full_path:path}", include_in_schema=False)
+        @app.get("/configuracion{full_path:path}", include_in_schema=False)
+        @app.get("/app{full_path:path}", include_in_schema=False)
+        async def serve_spa(full_path: str = ""):
+            return FileResponse(str(app_html))
+else:
+    @app.get("/", include_in_schema=False)
+    async def root():
+        return {"status": "ok", "service": "inteliaudit-api"}
