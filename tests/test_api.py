@@ -79,3 +79,13 @@ class TestAuditorias:
         resp = await client.post("/api/auditorias/aud-123/archivos")
         assert resp.status_code in (401, 403)
 
+    @pytest.mark.asyncio
+    async def test_listar_normativas_requires_auth(self, client: AsyncClient):
+        resp = await client.get("/api/normativas")
+        assert resp.status_code in (401, 403)
+
+    @pytest.mark.asyncio
+    async def test_listar_conversaciones_agente_requires_auth(self, client: AsyncClient):
+        resp = await client.get("/api/auditorias/aud-123/agente/conversaciones")
+        assert resp.status_code in (401, 403)
+

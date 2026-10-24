@@ -312,6 +312,8 @@ from api.routers.importacion import router as importacion_router
 from api.routers.suscripciones import router as suscripciones_router
 from api.routers.jobs import router as jobs_router
 from api.routers.superadmin import router as superadmin_router
+from api.routers.agente import router as agente_router
+from api.routers.normativas import router as normativas_router
 
 api = APIRouter(prefix="/api")
 
@@ -322,6 +324,8 @@ api.include_router(global_hallazgos_router)
 api.include_router(informes_router)
 api.include_router(clientes_router)
 api.include_router(auditorias_router)
+api.include_router(agente_router)
+api.include_router(normativas_router)
 api.include_router(trail_router)
 api.include_router(portal_router)
 api.include_router(importacion_router)
