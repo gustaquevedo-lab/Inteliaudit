@@ -25,7 +25,9 @@ rsync -avz --delete \
   --exclude '__pycache__' \
   --exclude '*.pyc' \
   --exclude '.pytest_cache' \
-  --exclude 'storage' \
+  --exclude 'storage/backups' \
+  --exclude 'storage/*.sql*' \
+  --exclude 'storage/*.gz' \
   --exclude '.env' \
   --exclude 'inteliaudit.db' \
   --exclude 'ui-web/node_modules' \
