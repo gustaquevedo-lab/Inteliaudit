@@ -171,7 +171,7 @@ async def request_logging_middleware(request: Request, call_next):
 #  Config validation
 # ============================================================
 
-def _validate_config():
+def _validate_config() -> tuple[list[str], list[str]]:
     """Valida configuracion critica en startup. Logea warnings y errors."""
     warnings = []
     errors = []
@@ -181,6 +181,12 @@ def _validate_config():
             warnings.append("SECRET_KEY debe cambiarse para produccion (actualmente usa valor por defecto)")
         if not settings.encryption_key:
             warnings.append("ENCRYPTION_KEY vacio — credenciales Marangatu no podran cifrarse")
+        else:
+            try:
+                from cryptography.fernet import Fernet
+                Fernet(settings.encryption_key.encode())
+            except Exception:
+                warnings.append("ENCRYPTION_KEY inválido — debe ser una clave Fernet válida de 32 bytes base64")
         if settings.is_sqlite:
             warnings.append("DATABASE_URL es SQLite — usar PostgreSQL en produccion")
         if not settings.anthropic_api_key:
@@ -195,6 +201,8 @@ def _validate_config():
         logger.error(err)
     for warn in warnings:
         logger.warning(warn)
+
+    return errors, warnings
 
 
 
