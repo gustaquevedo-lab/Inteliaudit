@@ -386,9 +386,16 @@
           </div>
         </div>
 
-        <p>Los datos se almacenan en infraestructura de <strong>Neon PostgreSQL</strong> con backups automáticos cada 24 horas y <strong>Render.com</strong> como plataforma de hosting. Ambos proveedores cuentan con certificaciones de seguridad estándar de la industria (SOC 2 Type II).</p>
+        <div class="callout green" style="margin-top:16px; margin-bottom:16px;">
+          <div class="callout-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00a651" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <p><strong>Secreto Fiscal y Deber de Reserva (Art. 190 Ley N° 125/1991):</strong> En estricto acatamiento de la legislación tributaria paraguaya, las declaraciones juradas, comprobantes de pago, libros del RG 90 y papeles de trabajo fiscales gozan de secreto absoluto. Intellihouse se abstiene categóricamente de utilizar, ceder o exponer datos tributarios para cualquier propósito distinto a la auditoría solicitada por el usuario.</p>
+        </div>
+
+        <p>Los datos se almacenan en infraestructura de <strong>PostgreSQL dedicado</strong> bajo túneles seguros <strong>Cloudflare Zero Trust</strong> y almacenamiento de objetos compatible con S3 en <strong>Cloudflare R2</strong>. Se ejecutan respaldos automatizados cifrados cada 24 horas con retención de 30 días.</p>
         <p>Las <strong>contraseñas de los usuarios</strong> se almacenan exclusivamente como hashes bcrypt con sal única por usuario. Ningún empleado de Intellihouse puede conocer la contraseña de un usuario en texto plano — ni siquiera para soporte técnico.</p>
-        <p>Las <strong>credenciales de Marangatú</strong> (RUC y clave SET de clientes auditados) se cifran con AES-256 antes de persistirse en base de datos. La clave de cifrado se gestiona de forma separada a los datos cifrados. Nunca se transmiten en texto plano por ningún canal.</p>
+        <p>Las <strong>credenciales de Marangatú</strong> (RUC y clave SET de clientes auditados) se cifran mediante el estándar criptográfico simétrico <strong>Fernet (AES-128-CBC + HMAC-SHA256)</strong> antes de persistirse en base de datos. La clave de cifrado se gestiona de forma aislada en variables de entorno seguras de producción. Nunca se transmiten en texto plano por ningún canal.</p>
         <p>El acceso a los datos de producción está <strong>restringido a un número mínimo de personas</strong> con necesidad operativa justificada y está sujeto a autenticación multifactor. Cualquier acceso a datos sensibles queda registrado en logs de auditoría internos.</p>
       </div>
     </div>
