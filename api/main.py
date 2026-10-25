@@ -523,6 +523,25 @@ if frontend_dist.exists():
     landing_dir = frontend_dist / "landing"
     landing_index = landing_dir / "index.html" if landing_dir.exists() else None
 
+    if landing_dir and landing_dir.exists():
+        app.mount("/landing", StaticFiles(directory=str(landing_dir)), name="landing")
+
+        @app.get("/og-preview.png", include_in_schema=False)
+        @app.get("/og-image.png", include_in_schema=False)
+        async def serve_og_image():
+            og_file = landing_dir / "og-preview.png"
+            if og_file.exists():
+                return FileResponse(str(og_file), media_type="image/png")
+            return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+        @app.get("/favicon.svg", include_in_schema=False)
+        @app.get("/favicon.ico", include_in_schema=False)
+        async def serve_favicon():
+            fav_file = landing_dir / "favicon.svg"
+            if fav_file.exists():
+                return FileResponse(str(fav_file), media_type="image/svg+xml")
+            return JSONResponse({"detail": "Not Found"}, status_code=404)
+
     @app.get("/", include_in_schema=False)
     async def root():
         if landing_index and landing_index.exists():
